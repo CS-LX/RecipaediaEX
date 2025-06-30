@@ -80,4 +80,7 @@
     <Content Include="References\EntitySystem.dll" />
     <Content Include="References\Survivalcraft.dll" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="ZLinq" Version="1.4.12" />
+  </ItemGroup>
 </Project>
