@@ -8,6 +8,7 @@ using System.Xml.Linq;
 using Engine;
 using Engine.Serialization;
 using Game;
+using ZLinq;
 
 namespace RecipaediaEX
 {
@@ -33,6 +34,7 @@ namespace RecipaediaEX
             LoadRecipesData(source);
         }
 
+        #region 内部方法
         /// <summary>
         /// 获取配方解析器
         /// </summary>
@@ -87,5 +89,25 @@ namespace RecipaediaEX
             type = ModsManager.HasAttribute(item, (name) => name == "Reader", out XAttribute xAttribute) == false ? typeof(OriginalCraftingRecipe).FullName : xAttribute.Value;
             return m_readers[type].LoadRecipe(item);
         }
+        #endregion
+
+        #region 对外方法
+        /// <summary>
+        /// 寻找完整的配方以获得产物
+        /// </summary>
+        /// <param name="actual">玩家实际放置在生产方块中的配方</param>
+        /// <returns>符合条件的第一个配方</returns>
+        public static IRecipe FindMatchingRecipe(IRecipe actual) {
+            return m_recipes.AsValueEnumerable().First(x => x.Match(actual));
+        }
+        /// <summary>
+        /// 寻找一系列完整的配方以获得产物
+        /// </summary>
+        /// <param name="actual">玩家实际放置在生产方块中的配方</param>
+        /// <returns>符合条件的所有配方</returns>
+        public static IRecipe[] FindMatchingRecipes(IRecipe actual) {
+            return m_recipes.AsValueEnumerable().Where(x => x.Match(actual)).ToArray();
+        }
+        #endregion
     }
 }
