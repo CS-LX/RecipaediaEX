@@ -59,9 +59,11 @@
     <Compile Include="RecipaediaEXManager.cs" />
     <Compile Include="RecipesExtra\IRecipe.cs" />
     <Compile Include="RecipesExtra\IRecipeReader.cs" />
-    <Compile Include="RecipesExtra\Readers\CraftingRecipeReader.cs" />
+    <Compile Include="RecipesExtra\Readers\FormattedRecipeReader.cs" />
     <Compile Include="RecipesExtra\RecipeReaderAttribute.cs" />
-    <Compile Include="RecipesExtra\Recipes\CraftingRecipe.cs" />
+    <Compile Include="RecipesExtra\Recipes\OriginalCraftingRecipe.cs" />
+    <Compile Include="RecipesExtra\Recipes\FormattedRecipe.cs" />
+    <Compile Include="RecipesExtra\Recipes\OriginalSmeltingRecipe.cs" />
     <Compile Include="UasbleSlotWidget.cs" />
   </ItemGroup>
   <ItemGroup>

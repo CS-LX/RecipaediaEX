@@ -1,7 +1,7 @@
 ﻿using Game;
 
 namespace RecipaediaEX {
-    public class CraftingRecipe : IRecipe {
+    public abstract class FormattedRecipe : IRecipe {
         public const int MaxSize = 3;
 
         public int ResultValue;
@@ -31,9 +31,8 @@ namespace RecipaediaEX {
         string IRecipe.Message => Message;
         int IRecipe.DisplayOrder => DisplayOrder;
 
-        public bool Match(IRecipe other) {
-            if (other == null || other is not CraftingRecipe craftingRecipe) return false;
-            // TODO 要改
+        public virtual bool Match(IRecipe actual) {
+            if (actual == null || actual is not OriginalCraftingRecipe craftingRecipe) return false;
             return CraftingRecipesManager.MatchRecipe(Ingredients, craftingRecipe.Ingredients);
         }
     }

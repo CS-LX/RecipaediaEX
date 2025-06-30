@@ -21,8 +21,8 @@
         /// <summary>
         /// 是否与其他配方匹配
         /// </summary>
-        /// <param name="other"></param>
+        /// <param name="actual">实际上的配方(玩家放入的)</param>
         /// <returns></returns>
-        public bool Match(IRecipe other);
+        public bool Match(IRecipe actual);
     }
 }

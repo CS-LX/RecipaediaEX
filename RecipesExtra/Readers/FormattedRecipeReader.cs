@@ -6,10 +6,11 @@ using Game;
 using XmlUtilities;
 
 namespace RecipaediaEX {
-    [RecipeReader(typeof(CraftingRecipe))]
-    public class CraftingRecipeReader : IRecipeReader {
+    [RecipeReader([typeof(OriginalCraftingRecipe), typeof(SmeltingRecipeWidget)])]
+    public class FormattedRecipeReader : IRecipeReader {
         public IRecipe LoadRecipe(XElement item) {
-            var craftingRecipe = new CraftingRecipe();
+            float requiredHeatLevel = XmlUtils.GetAttributeValue<float>(item, "RequiredHeatLevel");
+            FormattedRecipe craftingRecipe = requiredHeatLevel > 0 ? new OriginalSmeltingRecipe() : new OriginalCraftingRecipe();
 			string attributeValue = XmlUtils.GetAttributeValue<string>(item, "Result");
             string desc = XmlUtils.GetAttributeValue<string>(item, "Description");
             if (desc.StartsWith("[")
@@ -23,7 +24,7 @@ namespace RecipaediaEX {
                 craftingRecipe.RemainsValue = CraftingRecipesManager.DecodeResult(attributeValue2);
                 craftingRecipe.RemainsCount = XmlUtils.GetAttributeValue<int>(item, "RemainsCount");
             }
-            craftingRecipe.RequiredHeatLevel = XmlUtils.GetAttributeValue<float>(item, "RequiredHeatLevel");
+            craftingRecipe.RequiredHeatLevel = requiredHeatLevel;
             craftingRecipe.RequiredPlayerLevel = XmlUtils.GetAttributeValue(item, "RequiredPlayerLevel", 1f);
             craftingRecipe.Description = desc;
             craftingRecipe.Message = XmlUtils.GetAttributeValue<string>(item, "Message", null);

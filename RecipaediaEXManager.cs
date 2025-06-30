@@ -42,8 +42,10 @@ namespace RecipaediaEX
                     foreach (TypeInfo definedType in item.DefinedTypes) {
                         RecipeReaderAttribute customAttribute = definedType.GetCustomAttribute<RecipeReaderAttribute>();
                         if (customAttribute != null) {
-                            Type type = customAttribute.Type;
-                            m_readers[type.FullName] = (IRecipeReader)Activator.CreateInstance(definedType.AsType());
+                            Type[] types = customAttribute.Types;
+                            foreach (var type in types) {
+                                m_readers[type.FullName] = (IRecipeReader)Activator.CreateInstance(definedType.AsType());
+                            }
                         }
                     }
                     m_scannedAssemblies.Add(item);
@@ -82,7 +84,7 @@ namespace RecipaediaEX
 
         static IRecipe ReadRecipeItem(XElement item) {
             string type = string.Empty;
-            type = ModsManager.HasAttribute(item, (name) => name == "Reader", out XAttribute xAttribute) == false ? typeof(CraftingRecipe).FullName : xAttribute.Value;
+            type = ModsManager.HasAttribute(item, (name) => name == "Reader", out XAttribute xAttribute) == false ? typeof(OriginalCraftingRecipe).FullName : xAttribute.Value;
             return m_readers[type].LoadRecipe(item);
         }
     }

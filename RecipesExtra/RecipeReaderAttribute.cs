@@ -6,11 +6,11 @@ namespace RecipaediaEX {
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class RecipeReaderAttribute : Attribute {
-        public Type m_type;
-        public Type Type => m_type;
+        public Type[] m_types;
+        public Type[] Types => m_types;
 
-        public RecipeReaderAttribute(Type type) {
-            m_type = type;
+        public RecipeReaderAttribute(Type[] types) {
+            m_types = types;
         }
     }
 }
