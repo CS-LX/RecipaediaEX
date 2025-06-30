@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Xml.Linq;
 using Game;
 using XmlUtilities;
+using ZLinq;
 
 namespace RecipaediaEX {
     [RecipeReader([typeof(OriginalCraftingRecipe), typeof(SmeltingRecipeWidget)])]
@@ -30,7 +30,7 @@ namespace RecipaediaEX {
             craftingRecipe.Message = XmlUtils.GetAttributeValue<string>(item, "Message", null);
             craftingRecipe.DisplayOrder = XmlUtils.GetAttributeValue<int>(item, "DisplayOrder", 0);
             var dictionary = new Dictionary<char, string>();
-            foreach (XAttribute item2 in from a in item.Attributes() where a.Name.LocalName.Length == 1 && char.IsLower(a.Name.LocalName[0]) select a) {
+            foreach (XAttribute item2 in from a in item.Attributes().AsValueEnumerable() where a.Name.LocalName.Length == 1 && char.IsLower(a.Name.LocalName[0]) select a) {
                 CraftingRecipesManager.DecodeIngredient(item2.Value, out string craftingId, out int? data);
                 if (BlocksManager.FindBlocksByCraftingId(craftingId).Length == 0) {
                     throw new InvalidOperationException($"Block with craftingId \"{item2.Value}\" not found.");

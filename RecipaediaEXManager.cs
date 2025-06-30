@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,7 +38,7 @@ namespace RecipaediaEX
         /// 获取配方解析器
         /// </summary>
         static void GetRecipeReaders() {
-            foreach (Assembly item in TypeCache.LoadedAssemblies.Where((Assembly a) => !TypeCache.IsKnownSystemAssembly(a))) {
+            foreach (Assembly item in TypeCache.LoadedAssemblies.AsValueEnumerable().Where(a => !TypeCache.IsKnownSystemAssembly(a))) {
                 if (!m_scannedAssemblies.Contains(item)) {
                     foreach (TypeInfo definedType in item.DefinedTypes) {
                         RecipeReaderAttribute customAttribute = definedType.GetCustomAttribute<RecipeReaderAttribute>();
