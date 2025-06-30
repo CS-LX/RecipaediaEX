@@ -1,0 +1,12 @@
+{
+  "Name": "RecipaediaEX",
+  "Logo": "icon.png",
+  "Version": "2.0.0",
+  "ApiVersion": "1.8",
+  "Description": "全新的配方系统",
+  "ScVersion": "2.4",
+  "Link": "https://space.bilibili.com/312642275",
+  "Author": "LX..",
+  "PackageName": "com.recipaediaex",
+  "Dependencies": []
+}
