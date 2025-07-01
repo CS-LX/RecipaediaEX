@@ -77,11 +77,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="References\Engine.dll" />
-    <Content Include="References\EntitySystem.dll" />
-    <Content Include="References\Survivalcraft.dll" />
-  </ItemGroup>
-  <ItemGroup>
+    <PackageReference Include="SurvivalcraftAPI.Engine" Version="1.8.1.2" />
+    <PackageReference Include="SurvivalcraftAPI.EntitySystem" Version="1.8.1.2" />
+    <PackageReference Include="SurvivalcraftAPI.Survivalcraft" Version="1.8.1.2" />
     <PackageReference Include="ZLinq" Version="1.4.12" GeneratePathProperty="true" />
   </ItemGroup>
 	<ItemGroup>
