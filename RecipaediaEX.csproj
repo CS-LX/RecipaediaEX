@@ -53,7 +53,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActionWidget.cs" />
     <Compile Include="Demo.cs" />
     <Compile Include="InteractableWidget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -65,7 +64,6 @@
     <Compile Include="RecipesExtra\Recipes\OriginalCraftingRecipe.cs" />
     <Compile Include="RecipesExtra\Recipes\FormattedRecipe.cs" />
     <Compile Include="RecipesExtra\Recipes\OriginalSmeltingRecipe.cs" />
-    <Compile Include="UasbleSlotWidget.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

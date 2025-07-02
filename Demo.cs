@@ -7,7 +7,7 @@ using Game;
 
 namespace RecipaediaEX
 {
-    public class Demo : ModLoader
+    public class RecipaediaEXLoader : ModLoader
     {
         public override void __ModInitialize()
         {
@@ -20,11 +20,6 @@ namespace RecipaediaEX
         {
             base.OnLoadingFinished(actions);
             RecipaediaEXManager.Initialize();
-        }
-
-        public override void SubsystemUpdate(float dt)
-        {
-            base.SubsystemUpdate(dt);
         }
     }
 }
