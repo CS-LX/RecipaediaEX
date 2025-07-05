@@ -53,6 +53,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CrafterExtra\ICrafter.cs" />
+    <Compile Include="CrafterExtra\CrafterAttribute.cs" />
     <Compile Include="Demo.cs" />
     <Compile Include="InteractableWidget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -64,6 +66,8 @@
     <Compile Include="RecipesExtra\Recipes\OriginalCraftingRecipe.cs" />
     <Compile Include="RecipesExtra\Recipes\FormattedRecipe.cs" />
     <Compile Include="RecipesExtra\Recipes\OriginalSmeltingRecipe.cs" />
+    <Compile Include="Test\TestRecipe.cs" />
+    <Compile Include="Test\TestRecipeReader.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -71,6 +75,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="icon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Test.cr">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
