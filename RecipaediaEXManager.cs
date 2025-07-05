@@ -34,12 +34,9 @@ namespace RecipaediaEX
             //获取所有配方解析器
             GetRecipeReaders();
             //读取所有mod中的.cr文件
-            XElement source = null;
-            foreach (ModEntity modEntity in ModsManager.ModList) {
-                modEntity.LoadCr(ref source);
-            }
+            List<XElement> recipesItems = RecipesLoadManager.RecipesItems;
             //解析配方
-            LoadRecipesData(source);
+            LoadRecipesData(recipesItems);
 
             //获取所有配方的Crafter
             GetRecipeCrafters();
@@ -67,31 +64,26 @@ namespace RecipaediaEX
         }
 
         /// <summary>
-        /// 解析整个配方系列xml
+        /// 解析配方条目xml
         /// </summary>
-        /// <param name="item"></param>
-        static void LoadRecipesData(XElement item) {
-            try {
-                if (ModsManager.HasAttribute(item, (name) => { return name == "Result"; }, out XAttribute xAttribute) == false) {
-                    foreach (XElement xElement in item.Elements()) {
-                        LoadRecipesData(xElement);
+        /// <param name="items"></param>
+        static void LoadRecipesData(List<XElement> items) {
+            foreach (var item in items) {
+                try {
+                    bool flag = false;
+                    //ModsManager.HookAction("OnCraftingRecipeDecode", modLoader =>
+                    //{
+                    //    modLoader.OnCraftingRecipeDecode(m_recipes, item, out flag);
+                    //    return flag;
+                    //});
+                    if (flag == false) {
+                        IRecipe craftingRecipe = ReadRecipeItem(item);
+                        m_recipes.Add(craftingRecipe);
                     }
-                    return;
                 }
-
-                bool flag = false;
-                //ModsManager.HookAction("OnCraftingRecipeDecode", modLoader =>
-                //{
-                //    modLoader.OnCraftingRecipeDecode(m_recipes, item, out flag);
-                //    return flag;
-                //});
-                if (flag == false) {
-                    IRecipe craftingRecipe = ReadRecipeItem(item);
-                    m_recipes.Add(craftingRecipe);
+                catch (Exception e) {
+                    Log.Error(e);
                 }
-            }
-            catch (Exception e) {
-                Log.Error(e);
             }
         }
 
@@ -117,8 +109,8 @@ namespace RecipaediaEX
                         if (crafterAttribute != null) {
                             var types = crafterAttribute.Types.AsValueEnumerable().Select(x => x.FullName);
                             foreach (var typeString in types) {
-                                if (!m_crafters.ContainsKey(typeString)) m_crafters[typeString] = [definedType];
-                                else m_crafters[typeString].Add(definedType);
+                                if (!m_crafters.ContainsKey(typeString)) m_crafters[typeString] = [definedType.AsType()];
+                                else m_crafters[typeString].Add(definedType.AsType());
                             }
                         }
                     }

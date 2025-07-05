@@ -57,6 +57,12 @@
     <Compile Include="CrafterExtra\CrafterAttribute.cs" />
     <Compile Include="Demo.cs" />
     <Compile Include="InteractableWidget.cs" />
+    <Compile Include="LoaderExtra\IRecipeFileLoader.cs" />
+    <Compile Include="LoaderExtra\Loaders\DefaultRecipeFileLoader.cs" />
+    <Compile Include="LoaderExtra\Loaders\FastDebugRecipeFileLoader.cs" />
+    <Compile Include="LoaderExtra\Loaders\SurvivalcraftRecipeFileLoader.cs" />
+    <Compile Include="LoaderExtra\RecipeFileLoaderAttribute.cs" />
+    <Compile Include="RecipesLoadManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RecipaediaEXManager.cs" />
     <Compile Include="RecipesExtra\IRecipe.cs" />

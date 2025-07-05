@@ -19,6 +19,7 @@ namespace RecipaediaEX
         public override void OnLoadingFinished(List<Action> actions)
         {
             base.OnLoadingFinished(actions);
+            RecipesLoadManager.Initialize();
             RecipaediaEXManager.Initialize();
         }
     }
