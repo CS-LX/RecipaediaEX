@@ -76,6 +76,7 @@ namespace RecipaediaEX {
         /// 读取配方xml中Recipe开头的条目
         /// </summary>
         static void LoadRecipeItems(XElement recipesXml) {
+            if (recipesXml == null) return;
             foreach (XElement element in recipesXml.Elements()) {
                 if (element.Name.LocalName == "Recipe") {
                     RecipesItems.Add(element);

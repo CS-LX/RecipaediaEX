@@ -1,0 +1,11 @@
+{
+  "Name": "RTest",
+  "Version": "1.0.0",
+  "ApiVersion": "1.8",
+  "Description": "RecipaediaEX配方系统的模板模组兼测试模组",
+  "ScVersion": "2.4",
+  "Link": "https://space.bilibili.com/312642275",
+  "Author": "LX..",
+  "PackageName": "com.rtest",
+  "Dependencies": []
+}

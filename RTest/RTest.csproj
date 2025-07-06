@@ -5,6 +5,13 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\RecipaediaEX.csproj" />
+	  <ProjectReference Include="..\RecipaediaEX.csproj">
+		  <Private>false</Private> <!-- 禁止复制 DLL -->
+	  </ProjectReference>
+	</ItemGroup>
+	<ItemGroup>
+	  <None Update="modinfo.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 </Project>
