@@ -6,12 +6,14 @@ using RecipaediaEX;
 using TemplatesDatabase;
 
 namespace RTest {
-    public class BestiaryCategory : IRecipaediaCategory {
+    public class BestiaryCategory : IAdvancedCategory {
         public List<BestiaryItem> m_animals;
         public string Id => "Animals";
         public string DisplayName => "动物";
         public IEnumerable<IRecipaediaItem> GetItems() => m_animals;
         public Func<IRecipaediaItem, Widget> ItemWidgetFactory => CreateItemWidget;
+        public float ListItemSize => 120;
+        public LayoutDirection ListDirection => LayoutDirection.Vertical;
 
         public BestiaryCategory() {
             m_animals = new List<BestiaryItem>();

@@ -73,6 +73,7 @@
     <Compile Include="RecipesExtra\Recipes\FormattedRecipe.cs" />
     <Compile Include="RecipesExtra\Recipes\OriginalSmeltingRecipe.cs" />
     <Compile Include="ScreenExtra\Categories\BlocksCategory.cs" />
+    <Compile Include="ScreenExtra\IAdvancedCategory.cs" />
     <Compile Include="ScreenExtra\IRecipaediaCategory.cs" />
     <Compile Include="ScreenExtra\IRecipaediaCategoryProvider.cs" />
     <Compile Include="ScreenExtra\IRecipaediaItem.cs" />

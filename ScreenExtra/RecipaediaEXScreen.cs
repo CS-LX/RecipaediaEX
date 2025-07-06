@@ -17,8 +17,7 @@ namespace RecipaediaEX {
         public Dictionary<string, IRecipaediaCategory> m_categories = [];//所有分类配置器（易失）
         public string m_selectedCategory;
         public string m_listCategory = string.Empty;
-
-        //类别
+        public Func<object, Widget> m_currentItemWidgetFactory;
 
         //界面
         public LabelWidget m_categoryLabel;
@@ -39,7 +38,6 @@ namespace RecipaediaEX {
             m_detailsButton = Children.Find<ButtonWidget>("DetailsButton");
             m_recipesButton = Children.Find<ButtonWidget>("RecipesButton");
             m_blocksList = Children.Find<ListPanelWidget>("BlocksList");
-            m_blocksList.ItemWidgetFactory = WrappedItemWidgetFactory;
             m_blocksList.ItemClicked = OnBlocksListItemClicked;
 
             GetProviders();//获取类别提供器
@@ -144,14 +142,14 @@ namespace RecipaediaEX {
             m_blocksList.ClearItems();
 
             IRecipaediaCategory selectedCategory = m_categories[m_selectedCategory];
+            m_blocksList.Direction = selectedCategory is IAdvancedCategory adv ? adv.ListDirection : LayoutDirection.Vertical;
+            m_blocksList.ItemSize = selectedCategory is IAdvancedCategory adv2 ? adv2.ListItemSize : 70;
+            Widget CurrentFunc(object o) => selectedCategory.ItemWidgetFactory(o as IRecipaediaItem);
+            m_blocksList.ItemWidgetFactory = CurrentFunc;
+
             foreach (var item in selectedCategory.GetItems()) {
                 m_blocksList.AddItem(item);
             }
-        }
-
-        public Widget WrappedItemWidgetFactory(object item) {//封装好的，给BlocksList使用的界面工厂
-            IRecipaediaCategory selectedCategory = m_categories[m_selectedCategory];
-            return selectedCategory.ItemWidgetFactory(item as IRecipaediaItem);
         }
 
         public void OnBlocksListItemClicked(object item) {//实现条目双击跳转详情页逻辑
