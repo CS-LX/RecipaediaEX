@@ -55,7 +55,7 @@
   <ItemGroup>
     <Compile Include="CrafterExtra\ICrafter.cs" />
     <Compile Include="CrafterExtra\CrafterAttribute.cs" />
-    <Compile Include="Demo.cs" />
+    <Compile Include="RecipaediaEXLoader.cs" />
     <Compile Include="InteractableWidget.cs" />
     <Compile Include="LoaderExtra\IRecipeFileLoader.cs" />
     <Compile Include="LoaderExtra\Loaders\DefaultRecipeFileLoader.cs" />
@@ -72,6 +72,10 @@
     <Compile Include="RecipesExtra\Recipes\OriginalCraftingRecipe.cs" />
     <Compile Include="RecipesExtra\Recipes\FormattedRecipe.cs" />
     <Compile Include="RecipesExtra\Recipes\OriginalSmeltingRecipe.cs" />
+    <Compile Include="ScreenExtra\IRecipaediaCategory.cs" />
+    <Compile Include="ScreenExtra\IRecipaediaCategoryProvider.cs" />
+    <Compile Include="ScreenExtra\IRecipaediaItem.cs" />
+    <Compile Include="ScreenExtra\RecipaediaEXScreen.cs" />
     <Compile Include="Test\TestRecipe.cs" />
     <Compile Include="Test\TestRecipeReader.cs" />
   </ItemGroup>
@@ -86,6 +90,9 @@
     <None Update="Test.cr">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Assets\Screens\RecipaediaEXScreen.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="SurvivalcraftAPI.Engine" Version="1.8.1.2" />
@@ -97,5 +104,10 @@
 		<None Include="$(PkgZLinq)\lib\net9.0\ZLinq.dll">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="ScreenExtra\Lists\" />
+	  <Folder Include="ScreenExtra\Providers\" />
+	  <Folder Include="WidgetExtra\" />
 	</ItemGroup>
 </Project>

@@ -13,7 +13,6 @@ namespace RecipaediaEX
         {
             base.__ModInitialize();
             ModsManager.RegisterHook("OnLoadingFinished", this);
-            ModsManager.RegisterHook("SubsystemUpdate", this);
         }
 
         public override void OnLoadingFinished(List<Action> actions)
@@ -21,6 +20,7 @@ namespace RecipaediaEX
             base.OnLoadingFinished(actions);
             RecipesLoadManager.Initialize();
             RecipaediaEXManager.Initialize();
+            ScreensManager.m_screens["Recipaedia"] = new RecipaediaEXScreen();
         }
     }
 }
