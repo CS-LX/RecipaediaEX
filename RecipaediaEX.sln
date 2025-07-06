@@ -5,6 +5,8 @@ VisualStudioVersion = 17.7.34024.191
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecipaediaEX", "RecipaediaEX.csproj", "{6F0EBCCC-587F-40D5-A2E1-ECEF16EF34E6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTest", "RTest\RTest.csproj", "{324A5EB6-9053-4D48-9DB9-2E375AF445ED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{6F0EBCCC-587F-40D5-A2E1-ECEF16EF34E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F0EBCCC-587F-40D5-A2E1-ECEF16EF34E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F0EBCCC-587F-40D5-A2E1-ECEF16EF34E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{324A5EB6-9053-4D48-9DB9-2E375AF445ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{324A5EB6-9053-4D48-9DB9-2E375AF445ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{324A5EB6-9053-4D48-9DB9-2E375AF445ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{324A5EB6-9053-4D48-9DB9-2E375AF445ED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

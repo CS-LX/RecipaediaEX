@@ -79,8 +79,6 @@
     <Compile Include="ScreenExtra\Items\BlockItem.cs" />
     <Compile Include="ScreenExtra\Providers\BlocksCategoryProvider.cs" />
     <Compile Include="ScreenExtra\RecipaediaEXScreen.cs" />
-    <Compile Include="Test\TestRecipe.cs" />
-    <Compile Include="Test\TestRecipeReader.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -90,12 +88,10 @@
     <None Update="icon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Test.cr">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="Assets\Screens\RecipaediaEXScreen.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Remove="RTest\**" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="SurvivalcraftAPI.Engine" Version="1.8.1.2" />
@@ -110,5 +106,8 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="WidgetExtra\" />
+	</ItemGroup>
+	<ItemGroup>
+	  <EmbeddedResource Remove="RTest\**" />
 	</ItemGroup>
 </Project>
