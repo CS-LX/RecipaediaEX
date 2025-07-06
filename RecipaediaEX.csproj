@@ -72,9 +72,12 @@
     <Compile Include="RecipesExtra\Recipes\OriginalCraftingRecipe.cs" />
     <Compile Include="RecipesExtra\Recipes\FormattedRecipe.cs" />
     <Compile Include="RecipesExtra\Recipes\OriginalSmeltingRecipe.cs" />
+    <Compile Include="ScreenExtra\Categories\BlocksCategory.cs" />
     <Compile Include="ScreenExtra\IRecipaediaCategory.cs" />
     <Compile Include="ScreenExtra\IRecipaediaCategoryProvider.cs" />
     <Compile Include="ScreenExtra\IRecipaediaItem.cs" />
+    <Compile Include="ScreenExtra\Items\BlockItem.cs" />
+    <Compile Include="ScreenExtra\Providers\BlocksCategoryProvider.cs" />
     <Compile Include="ScreenExtra\RecipaediaEXScreen.cs" />
     <Compile Include="Test\TestRecipe.cs" />
     <Compile Include="Test\TestRecipeReader.cs" />
@@ -106,8 +109,6 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-	  <Folder Include="ScreenExtra\Lists\" />
-	  <Folder Include="ScreenExtra\Providers\" />
 	  <Folder Include="WidgetExtra\" />
 	</ItemGroup>
 </Project>
