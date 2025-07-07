@@ -24,5 +24,12 @@
         /// <param name="actual">实际上的配方(玩家放入的)</param>
         /// <returns></returns>
         public bool Match(IRecipe actual);
+
+        /// <summary>
+        /// 是否是某图鉴项的配方
+        /// </summary>
+        /// <param name="receipaediaItem"></param>
+        /// <returns></returns>
+        public bool Match(IRecipaediaItem receipaediaItem);
     }
 }

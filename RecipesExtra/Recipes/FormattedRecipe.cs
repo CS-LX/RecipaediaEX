@@ -35,5 +35,10 @@ namespace RecipaediaEX {
             if (actual == null || actual is not OriginalCraftingRecipe craftingRecipe) return false;
             return CraftingRecipesManager.MatchRecipe(Ingredients, craftingRecipe.Ingredients);
         }
+
+        public bool Match(IRecipaediaItem receipaediaItem) {
+            if (receipaediaItem is not BlockItem block) return false;
+            return ResultValue == block.m_blockValue;
+        }
     }
 }

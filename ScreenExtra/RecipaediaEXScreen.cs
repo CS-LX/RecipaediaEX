@@ -7,6 +7,7 @@ using Engine;
 using Engine.Serialization;
 using Game;
 using ZLinq;
+using ZLinq.Linq;
 
 namespace RecipaediaEX {
     public class RecipaediaEXScreen : Screen {
@@ -54,6 +55,7 @@ namespace RecipaediaEX {
 
         public override void Update() {
             base.Update();
+            var recipes = RecipaediaEXManager.Recipes.AsValueEnumerable();
             //类别有改变，刷新列表
             if (m_selectedCategory != m_listCategory) {
                 m_listCategory = m_selectedCategory;
@@ -79,7 +81,7 @@ namespace RecipaediaEX {
             int recipesCount = 0;
             if (m_blocksList.SelectedItem is IRecipaediaItem item) {
                 selectedItem = item;
-                //TODO recipesCount = XXX;
+                recipesCount = recipes.Count(x => x.Match(item));
             }
             //配方按钮逻辑
             if (recipesCount > 0) {
