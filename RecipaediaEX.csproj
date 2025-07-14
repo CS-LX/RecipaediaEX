@@ -76,9 +76,11 @@
     <Compile Include="ScreenExtra\IAdvancedCategory.cs" />
     <Compile Include="ScreenExtra\IRecipaediaCategory.cs" />
     <Compile Include="ScreenExtra\IRecipaediaCategoryProvider.cs" />
+    <Compile Include="ScreenExtra\IRecipaediaDescriptionItem.cs" />
     <Compile Include="ScreenExtra\IRecipaediaItem.cs" />
     <Compile Include="ScreenExtra\Items\BlockItem.cs" />
     <Compile Include="ScreenExtra\Providers\BlocksCategoryProvider.cs" />
+    <Compile Include="ScreenExtra\RecipaediaEXDescriptionScreen.cs" />
     <Compile Include="ScreenExtra\RecipaediaEXScreen.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -93,6 +95,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Remove="RTest\**" />
+    <None Update="Assets\Screens\RecipaediaEXDescriptionScreen.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="SurvivalcraftAPI.Engine" Version="1.8.1.2" />
@@ -106,6 +111,7 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
+	  <Folder Include="ScreenExtra\Descriptions\" />
 	  <Folder Include="WidgetExtra\" />
 	</ItemGroup>
 	<ItemGroup>

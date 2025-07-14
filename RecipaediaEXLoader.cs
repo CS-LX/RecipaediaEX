@@ -21,6 +21,7 @@ namespace RecipaediaEX
             RecipesLoadManager.Initialize();
             RecipaediaEXManager.Initialize();
             ScreensManager.m_screens["Recipaedia"] = new RecipaediaEXScreen();
+            ScreensManager.m_screens["RecipaediaDescription"] = new RecipaediaEXDescriptionScreen();
         }
     }
 }
