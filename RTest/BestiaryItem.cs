@@ -56,5 +56,12 @@ namespace RTest {
 
             return props;
         }
+        public bool DetailsButtonEnabled => true;
+
+        public string DetailsButtonText => LanguageControl.Get("ContentWidgets", nameof(RecipaediaScreen), "1");
+
+        public bool RecipesButtonEnabled => false;
+
+        public string RecipesButtonText => LanguageControl.Get(nameof(RecipaediaScreen), 3);
     }
 }

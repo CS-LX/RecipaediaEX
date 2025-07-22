@@ -77,14 +77,14 @@ namespace RecipaediaEX.UI {
             }
 
             //选中后
-            IRecipaediaItem selectedItem = null;
+            IRecipaediaItem selectedItem = m_blocksList.SelectedItem as IRecipaediaItem;
             if (m_blocksList.SelectedItem is IRecipaediaItem item) {
                 selectedItem = item;
             }
             //配方按钮逻辑
-            if (selectedItem is IRecipaediaRecipeItem recipeItem) {
-                m_recipesButton.Text = recipeItem.RecipesButtonText;
-                m_recipesButton.IsEnabled = recipeItem.RecipesButtonEnabled;
+            if (selectedItem != null) {
+                m_recipesButton.IsEnabled = selectedItem.RecipesButtonEnabled;
+                m_recipesButton.Text = selectedItem.RecipesButtonText;
             }
             else {
                 m_recipesButton.Text = LanguageControl.Get(nameof(RecipaediaScreen), 3);
@@ -94,7 +94,14 @@ namespace RecipaediaEX.UI {
                 ScreensManager.SwitchScreen(selectedItem.RecipeScreenName, selectedItem);
             }
             //描述按钮逻辑
-            m_detailsButton.IsEnabled = selectedItem != null;
+            if (selectedItem != null) {
+                m_detailsButton.IsEnabled = selectedItem.DetailsButtonEnabled;
+                m_detailsButton.Text = selectedItem.DetailsButtonText;
+            }
+            else {
+                m_detailsButton.IsEnabled = false;
+                m_detailsButton.Text = LanguageControl.Get("ContentWidgets", nameof(RecipaediaScreen), "1");
+            }
             if (selectedItem != null && m_detailsButton.IsClicked) {
                 ScreensManager.SwitchScreen(selectedItem.DetailScreenName, selectedItem, m_blocksList.Items.Cast<IRecipaediaItem>().ToList());
             }

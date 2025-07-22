@@ -21,5 +21,25 @@
         /// <para>【例】对于原版，此属性为 RecipaediaRecipes</para>
         /// </summary>
         public string RecipeScreenName { get; }
+
+        /// <summary>
+        /// 查看配方按钮是否可按下
+        /// </summary>
+        public bool RecipesButtonEnabled { get; }
+
+        /// <summary>
+        /// 查看配方按钮显示的文本
+        /// </summary>
+        public string RecipesButtonText { get; }
+
+        /// <summary>
+        /// 查看详细信息按钮是否可按下
+        /// </summary>
+        public bool DetailsButtonEnabled { get; }
+
+        /// <summary>
+        /// 查看详细信息按钮显示的文本
+        /// </summary>
+        public string DetailsButtonText { get; }
     }
 }

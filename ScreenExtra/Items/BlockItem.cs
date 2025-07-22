@@ -110,10 +110,12 @@ namespace RecipaediaEX.Implementation {
             Dictionary<string, string> translatedTexts = dictionary.AsValueEnumerable().Select(pair => new KeyValuePair<string, string>(LanguageControl.Get(RecipaediaDescriptionScreen.fName, pair.Key), pair.Value)).ToDictionary();
             return translatedTexts;
         }
-
-
         public bool RecipesButtonEnabled => m_recipesCount > 0;
         public string RecipesButtonText => m_recipesCount > 0 ? $"{m_recipesCount} {((m_recipesCount == 1) ? LanguageControl.Get(nameof(RecipaediaScreen), 1) : LanguageControl.Get(nameof(RecipaediaScreen), 2))}" : LanguageControl.Get(nameof(RecipaediaScreen), 3);
+        public bool DetailsButtonEnabled => true;
+        public string DetailsButtonText => LanguageControl.Get("ContentWidgets", nameof(RecipaediaScreen), "1");
+
+
         public bool Match(IRecipe recipe) {
             if (recipe is not FormattedRecipe formattedRecipe) return false;
             return m_blockValue == formattedRecipe.ResultValue;
