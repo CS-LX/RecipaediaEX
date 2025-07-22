@@ -35,7 +35,7 @@ namespace RecipaediaEX {
 
 		public RecipaediaEXDescriptionScreen()
 		{
-			XElement node = ContentManager.Get<XElement>("Screens/RecipaediaEXDescriptionScreen");
+			XElement node = RecipaediaEXLoader.RequestScreenFile("RecipaediaEXDescriptionScreen");
 			LoadContents(this, node);
 			m_iconDisplayerWidget = Children.Find<CanvasWidget>("IconDisplayer");
 			m_nameWidget = Children.Find<LabelWidget>("Name");

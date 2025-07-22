@@ -31,7 +31,7 @@ namespace RecipaediaEX {
 
 
         public RecipaediaEXScreen() {
-            XElement node = ContentManager.Get<XElement>("Screens/RecipaediaEXScreen");
+            XElement node = RecipaediaEXLoader.RequestScreenFile("RecipaediaEXScreen");
             LoadContents(this, node);
             m_categoryLabel = Children.Find<LabelWidget>("Category");
             m_prevCategoryButton = Children.Find<ButtonWidget>("PreviousCategory");
