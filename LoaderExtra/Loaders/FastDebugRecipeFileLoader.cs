@@ -2,7 +2,7 @@
 using Engine;
 using Game;
 
-namespace RecipaediaEX {
+namespace RecipaediaEX.Implementation {
     [RecipeFileLoader("com.fastdebug")]
     public class FastDebugRecipeFileLoader : IRecipeFileLoader {
         public XElement GetRecipesXml(ModEntity modEntity) {

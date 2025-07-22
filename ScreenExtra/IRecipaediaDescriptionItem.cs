@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Game;
 
-namespace RecipaediaEX {
+namespace RecipaediaEX.UI {
     /// <summary>
     /// 用RecipaediaEXDescriptionScreen展示的IRecipaediaItem就要接上这个接口
     /// </summary>

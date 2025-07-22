@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using Game;
+using RecipaediaEX.UI;
 using ZLinq;
 
-namespace RecipaediaEX {
+namespace RecipaediaEX.Implementation {
     public class BlockItem : IRecipaediaItem, IRecipaediaDescriptionItem, IRecipaediaRecipeItem {
         public int m_blockValue;
         public int m_order;

@@ -6,7 +6,7 @@ using Engine;
 using Game;
 using ZLinq;
 
-namespace RecipaediaEX {
+namespace RecipaediaEX.UI {
     public class RecipaediaEXDescriptionScreen : Screen
 	{
 		public CanvasWidget m_iconDisplayerWidget;

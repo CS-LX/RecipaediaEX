@@ -1,7 +1,7 @@
 ﻿using System.Xml.Linq;
 using Game;
 
-namespace RecipaediaEX {
+namespace RecipaediaEX.Implementation {
     [RecipeFileLoader("survivalcraft")]
     public class SurvivalcraftRecipeFileLoader : IRecipeFileLoader {
 

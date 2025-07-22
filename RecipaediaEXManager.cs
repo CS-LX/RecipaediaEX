@@ -7,6 +7,7 @@ using System.Xml.Linq;
 using Engine;
 using Engine.Serialization;
 using Game;
+using RecipaediaEX.Implementation;
 using ZLinq;
 
 namespace RecipaediaEX

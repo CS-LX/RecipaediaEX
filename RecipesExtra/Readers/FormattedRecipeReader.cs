@@ -5,7 +5,7 @@ using Game;
 using XmlUtilities;
 using ZLinq;
 
-namespace RecipaediaEX {
+namespace RecipaediaEX.Implementation {
     [RecipeReader([typeof(OriginalCraftingRecipe), typeof(SmeltingRecipeWidget)])]
     public class FormattedRecipeReader : IRecipeReader {
         public IRecipe LoadRecipe(XElement item) {

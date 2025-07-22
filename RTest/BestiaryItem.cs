@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using Engine;
 using Game;
-using RecipaediaEX;
+using RecipaediaEX.UI;
 
 namespace RTest {
     public class BestiaryItem : IRecipaediaItem, IRecipaediaDescriptionItem {

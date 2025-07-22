@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Game;
 
-namespace RecipaediaEX {
+namespace RecipaediaEX.UI {
     /// <summary>
     /// 表示一个分类的配置体
     /// </summary>

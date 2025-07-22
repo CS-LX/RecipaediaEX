@@ -9,7 +9,7 @@ using Game;
 using ZLinq;
 using ZLinq.Linq;
 
-namespace RecipaediaEX {
+namespace RecipaediaEX.UI {
     public class RecipaediaEXScreen : Screen {
         //功能
         public List<Assembly> m_scannedAssemblies = [];

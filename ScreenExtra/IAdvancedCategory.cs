@@ -1,7 +1,7 @@
 ﻿using Engine;
 using Game;
 
-namespace RecipaediaEX {
+namespace RecipaediaEX.UI {
     /// <summary>
     /// 更高级的分类配置体
     /// <para>它本质上是IRecipaediaCategory，不过你可以自定义更多属性</para>

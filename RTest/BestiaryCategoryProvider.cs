@@ -1,4 +1,4 @@
-﻿using RecipaediaEX;
+﻿using RecipaediaEX.UI;
 
 namespace RTest {
     public class BestiaryCategoryProvider : IRecipaediaCategoryProvider {

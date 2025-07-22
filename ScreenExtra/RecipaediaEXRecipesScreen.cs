@@ -4,7 +4,7 @@ using System.Xml.Linq;
 using Engine;
 using Game;
 
-namespace RecipaediaEX {
+namespace RecipaediaEX.UI {
     public class RecipaediaEXRecipesScreen : Screen
 	{
 		public ButtonWidget m_prevRecipeButton;

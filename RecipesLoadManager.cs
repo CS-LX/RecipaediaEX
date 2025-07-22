@@ -6,6 +6,7 @@ using System.Text;
 using System.Xml.Linq;
 using Engine.Serialization;
 using Game;
+using RecipaediaEX.Implementation;
 using XmlUtilities;
 using ZLinq;
 

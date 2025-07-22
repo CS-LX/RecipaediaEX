@@ -2,7 +2,7 @@
 using Engine;
 using Engine.Graphics;
 using Game;
-using RecipaediaEX;
+using RecipaediaEX.UI;
 using TemplatesDatabase;
 
 namespace RTest {

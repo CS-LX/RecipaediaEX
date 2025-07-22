@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using Game;
+using RecipaediaEX.UI;
 using ZLinq;
 
-namespace RecipaediaEX {
+namespace RecipaediaEX.Implementation {
     public class BlocksCategory : IRecipaediaCategory {
         public string m_id;
         public string m_displayName;

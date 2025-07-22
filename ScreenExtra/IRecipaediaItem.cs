@@ -1,4 +1,4 @@
-﻿namespace RecipaediaEX {
+﻿namespace RecipaediaEX.UI {
     /// <summary>
     /// 在方块图鉴中展示的条目。模组可以通过实现这个接口自定义列表条目内容，也就可以突破“只能展示方块”的限制。
     /// <para>【例】原版展示的是方块，条目内部展示的也就是int</para>

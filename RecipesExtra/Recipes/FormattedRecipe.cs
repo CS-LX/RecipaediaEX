@@ -1,6 +1,6 @@
 ﻿using Game;
 
-namespace RecipaediaEX {
+namespace RecipaediaEX.Implementation {
     public abstract class FormattedRecipe : IRecipe {
         public const int MaxSize = 3;
 

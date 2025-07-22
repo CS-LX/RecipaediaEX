@@ -1,4 +1,4 @@
-﻿namespace RecipaediaEX {
+﻿namespace RecipaediaEX.UI {
     /// <summary>
     /// 用RecipaediaEXRecipesScreen展示的IRecipaediaItem就要接上这个接口
     /// </summary>
