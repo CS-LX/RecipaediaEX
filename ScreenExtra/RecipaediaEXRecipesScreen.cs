@@ -13,6 +13,7 @@ namespace RecipaediaEX.UI {
         //功能
         public List<Assembly> m_scannedAssemblies = [];
         public Dictionary<Type, (Type type, int order)> m_descriptorTypes = [];//所有配方类型-所有呈现界面类型
+        public Dictionary<Type, RecipeDescriptor> m_descriptorsCache = [];//配方解析器类型-配方解析器实例的缓存
         public List<IRecipe> m_recipes = new();//当前展示的配方系列
         public int m_index = 0;//当前展示的配方Index
         public Stack<RecipesPresentation> m_presentations = new();//配方呈现的一级级的栈
@@ -22,6 +23,7 @@ namespace RecipaediaEX.UI {
         public ButtonWidget m_prevInStackButton;
         public ButtonWidget m_nextRecipeButton;
         public CanvasWidget m_recipeDescriptorsCanvas;
+        public RecipeDescriptor m_currentRecipeDescriptor;
 
         public RecipaediaEXRecipesScreen() {
             XElement node = RecipaediaEXLoader.RequestScreenFile("RecipaediaEXRecipesScreen");
@@ -39,14 +41,18 @@ namespace RecipaediaEX.UI {
         }
 
         public override void Update() {
+            IRecipe currentRecipe = m_recipes[m_index];
+            if (m_currentRecipeDescriptor == null) ShowCurrentDescriptor(m_descriptorTypes[currentRecipe.GetType()].type, currentRecipe);
             //切换配方序号逻辑
             m_prevRecipeButton.IsEnabled = m_index > 0;
             m_nextRecipeButton.IsEnabled = m_index < m_recipes.Count - 1;
             if (m_prevRecipeButton.IsClicked) {
                 m_index = MathUtils.Max(m_index - 1, 0);
+                HideCurrentDescriptor();
             }
             if (m_nextRecipeButton.IsClicked) {
                 m_index = MathUtils.Min(m_index + 1, m_recipes.Count - 1);
+                HideCurrentDescriptor();
             }
 
             //切换上个配方/退出逻辑
@@ -105,19 +111,41 @@ namespace RecipaediaEX.UI {
             m_index = previousPresentation.m_index;
         }
 
+        public void ShowCurrentDescriptor(Type descriptorType, IRecipe recipe) {
+            if (m_currentRecipeDescriptor != null) HideCurrentDescriptor();
+
+            if (!m_descriptorsCache.TryGetValue(descriptorType, out RecipeDescriptor recipeDescriptor)) {
+                recipeDescriptor = CreateDescriptor(descriptorType, this);
+                m_descriptorsCache[descriptorType] = recipeDescriptor;
+                m_recipeDescriptorsCanvas.Children.Add(recipeDescriptor);
+            }
+
+            recipeDescriptor.Show(recipe);
+            recipeDescriptor.IsVisible = true;
+            m_currentRecipeDescriptor = recipeDescriptor;
+        }
+
+        public void HideCurrentDescriptor() {
+            if (m_currentRecipeDescriptor == null) return;
+
+            m_currentRecipeDescriptor.Hide();
+            m_currentRecipeDescriptor.IsVisible = false;
+            m_currentRecipeDescriptor = null;
+        }
+
         /// <summary>
         /// 运用工厂方法创建配方呈现界面，规范构造函数
         /// </summary>
-        /// <param name="recipe">构造配方呈现界面传入的配方</param>
-        /// <typeparam name="T"></typeparam>
+        /// <param name="descriptorType">配方展示界面的类型</param>
+        /// <param name="belongingScreen">配方展示界面所在的Screen</param>
         /// <returns></returns>
-        /// <exception cref="InvalidOperationException">写的配方呈现界面没有/不只有一个 IRecipe 参数的构造函数</exception>
-        public RecipeDescriptor CreateDescriptor<T>(IRecipe recipe) where T : RecipeDescriptor{
-            ConstructorInfo ctor = typeof(T).GetConstructor([typeof(IRecipe)]);
+        /// <exception cref="InvalidOperationException">写的配方呈现界面没有/不只有一个 RecipaediaEXRecipesScreen 参数的构造函数</exception>
+        public RecipeDescriptor CreateDescriptor(Type descriptorType, RecipaediaEXRecipesScreen belongingScreen){
+            ConstructorInfo ctor = descriptorType.GetConstructor([typeof(RecipaediaEXRecipesScreen)]);
             if (ctor == null)
-                throw new InvalidOperationException($"类型 {typeof(T).Name} 必须只有一个 IRecipe 参数的构造函数");
+                throw new InvalidOperationException($"类型 {descriptorType.Name} 必须只有一个 RecipaediaEXRecipesScreen 参数的构造函数");
 
-            return (T)ctor.Invoke([recipe]);
+            return (RecipeDescriptor)ctor.Invoke([belongingScreen]);
         }
 
         public void Exit() {
@@ -125,6 +153,7 @@ namespace RecipaediaEX.UI {
             m_recipes.Clear();
             m_descriptorTypes.Clear();
             m_index = 0;
+            HideCurrentDescriptor();
             ScreensManager.SwitchScreen(ScreensManager.PreviousScreen);
         }
 
