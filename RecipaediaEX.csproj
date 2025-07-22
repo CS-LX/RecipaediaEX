@@ -73,6 +73,8 @@
     <Compile Include="RecipesExtra\Recipes\FormattedRecipe.cs" />
     <Compile Include="RecipesExtra\Recipes\OriginalSmeltingRecipe.cs" />
     <Compile Include="ScreenExtra\Categories\BlocksCategory.cs" />
+    <Compile Include="ScreenExtra\Descriptors\CraftingRecipeDescriptor.cs" />
+    <Compile Include="ScreenExtra\Descriptors\SmeltingRecipeDescriptor.cs" />
     <Compile Include="ScreenExtra\IAdvancedCategory.cs" />
     <Compile Include="ScreenExtra\IRecipaediaCategory.cs" />
     <Compile Include="ScreenExtra\IRecipaediaCategoryProvider.cs" />
@@ -117,6 +119,12 @@
     <None Update="Assets\RecipaediaEX\Screens\RecipaediaEXScreen.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Assets\RecipaediaEX\Widgets\Descriptors\SmeltingRecipeDescriptor.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\RecipaediaEX\Widgets\Descriptors\CraftingRecipeDescriptor.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="SurvivalcraftAPI.Engine" Version="1.8.1.2" />
@@ -130,7 +138,6 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-	  <Folder Include="ScreenExtra\Descriptors\" />
 	  <Folder Include="WidgetExtra\" />
 	</ItemGroup>
 	<ItemGroup>

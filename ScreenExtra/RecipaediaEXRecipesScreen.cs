@@ -42,7 +42,10 @@ namespace RecipaediaEX.UI {
 
         public override void Update() {
             IRecipe currentRecipe = m_recipes[m_index];
-            if (m_currentRecipeDescriptor == null) ShowCurrentDescriptor(m_descriptorTypes[currentRecipe.GetType()].type, currentRecipe);
+            string nameSuffix = string.Format(LanguageControl.GetContentWidgets(nameof(RecipaediaRecipesScreen), 1), m_index + 1);
+            //显示配方逻辑
+            if (m_currentRecipeDescriptor == null) ShowCurrentDescriptor(m_descriptorTypes[currentRecipe.GetType()].type, currentRecipe, nameSuffix);
+
             //切换配方序号逻辑
             m_prevRecipeButton.IsEnabled = m_index > 0;
             m_nextRecipeButton.IsEnabled = m_index < m_recipes.Count - 1;
@@ -111,7 +114,7 @@ namespace RecipaediaEX.UI {
             m_index = previousPresentation.m_index;
         }
 
-        public void ShowCurrentDescriptor(Type descriptorType, IRecipe recipe) {
+        public void ShowCurrentDescriptor(Type descriptorType, IRecipe recipe, string nameSuffix = null) {
             if (m_currentRecipeDescriptor != null) HideCurrentDescriptor();
 
             if (!m_descriptorsCache.TryGetValue(descriptorType, out RecipeDescriptor recipeDescriptor)) {
@@ -120,8 +123,10 @@ namespace RecipaediaEX.UI {
                 m_recipeDescriptorsCanvas.Children.Add(recipeDescriptor);
             }
 
-            recipeDescriptor.Show(recipe);
+            recipeDescriptor.Show(recipe, nameSuffix);
             recipeDescriptor.IsVisible = true;
+            recipeDescriptor.HorizontalAlignment = WidgetAlignment.Center;
+            recipeDescriptor.VerticalAlignment = WidgetAlignment.Center;
             m_currentRecipeDescriptor = recipeDescriptor;
         }
 
@@ -151,7 +156,6 @@ namespace RecipaediaEX.UI {
         public void Exit() {
             m_presentations.Clear();
             m_recipes.Clear();
-            m_descriptorTypes.Clear();
             m_index = 0;
             HideCurrentDescriptor();
             ScreensManager.SwitchScreen(ScreensManager.PreviousScreen);
