@@ -78,15 +78,13 @@ namespace RecipaediaEX {
 
             //选中后
             IRecipaediaItem selectedItem = null;
-            int recipesCount = 0;
             if (m_blocksList.SelectedItem is IRecipaediaItem item) {
                 selectedItem = item;
-                recipesCount = recipes.Count(x => x.Match(item));
             }
             //配方按钮逻辑
-            if (recipesCount > 0) {
-                m_recipesButton.Text = $"{recipesCount} {((recipesCount == 1) ? LanguageControl.Get(nameof(RecipaediaScreen), 1) : LanguageControl.Get(nameof(RecipaediaScreen), 2))}";
-                m_recipesButton.IsEnabled = true;
+            if (selectedItem is IRecipaediaRecipeItem recipeItem) {
+                m_recipesButton.Text = recipeItem.RecipesButtonText;
+                m_recipesButton.IsEnabled = recipeItem.RecipesButtonEnabled;
             }
             else {
                 m_recipesButton.Text = LanguageControl.Get(nameof(RecipaediaScreen), 3);

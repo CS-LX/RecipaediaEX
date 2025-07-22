@@ -3,15 +3,17 @@ using Game;
 using ZLinq;
 
 namespace RecipaediaEX {
-    public class BlockItem : IRecipaediaItem, IRecipaediaDescriptionItem {
+    public class BlockItem : IRecipaediaItem, IRecipaediaDescriptionItem, IRecipaediaRecipeItem {
         public int m_blockValue;
         public int m_order;
         public Block m_block;
+        public int m_recipesCount;
 
         public BlockItem(Block block, int order, int blockValue) {
             m_block = block;
             m_blockValue = blockValue;
             m_order = order;
+            m_recipesCount = RecipaediaEXManager.Recipes.AsValueEnumerable().Count(Match);
         }
 
         public object Value => m_blockValue;
@@ -22,7 +24,6 @@ namespace RecipaediaEX {
         public string Name => m_block.GetDisplayName(null, m_blockValue);
         public Widget Icon => new BlockIconWidget { Value = m_blockValue, HorizontalAlignment = WidgetAlignment.Center, VerticalAlignment = WidgetAlignment.Center, };
         public string Description => m_block.GetDescription(m_blockValue);
-
         public Dictionary<string, string> GetProperties() {
             int value = m_blockValue;
             var dictionary = new Dictionary<string, string>();
@@ -107,6 +108,14 @@ namespace RecipaediaEX {
             );
             Dictionary<string, string> translatedTexts = dictionary.AsValueEnumerable().Select(pair => new KeyValuePair<string, string>(LanguageControl.Get(RecipaediaDescriptionScreen.fName, pair.Key), pair.Value)).ToDictionary();
             return translatedTexts;
+        }
+
+
+        public bool RecipesButtonEnabled => m_recipesCount > 0;
+        public string RecipesButtonText => m_recipesCount > 0 ? $"{m_recipesCount} {((m_recipesCount == 1) ? LanguageControl.Get(nameof(RecipaediaScreen), 1) : LanguageControl.Get(nameof(RecipaediaScreen), 2))}" : LanguageControl.Get(nameof(RecipaediaScreen), 3);
+        public bool Match(IRecipe recipe) {
+            if (recipe is not FormattedRecipe formattedRecipe) return false;
+            return m_blockValue == formattedRecipe.ResultValue;
         }
     }
 }

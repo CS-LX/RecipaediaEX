@@ -78,9 +78,11 @@
     <Compile Include="ScreenExtra\IRecipaediaCategoryProvider.cs" />
     <Compile Include="ScreenExtra\IRecipaediaDescriptionItem.cs" />
     <Compile Include="ScreenExtra\IRecipaediaItem.cs" />
+    <Compile Include="ScreenExtra\IRecipaediaRecipeItem.cs" />
     <Compile Include="ScreenExtra\Items\BlockItem.cs" />
     <Compile Include="ScreenExtra\Providers\BlocksCategoryProvider.cs" />
     <Compile Include="ScreenExtra\RecipaediaEXDescriptionScreen.cs" />
+    <Compile Include="ScreenExtra\RecipaediaEXRecipesScreen.cs" />
     <Compile Include="ScreenExtra\RecipaediaEXScreen.cs" />
   </ItemGroup>
   <ItemGroup>
