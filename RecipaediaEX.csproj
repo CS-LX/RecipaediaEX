@@ -84,6 +84,8 @@
     <Compile Include="ScreenExtra\RecipaediaEXDescriptionScreen.cs" />
     <Compile Include="ScreenExtra\RecipaediaEXRecipesScreen.cs" />
     <Compile Include="ScreenExtra\RecipaediaEXScreen.cs" />
+    <Compile Include="ScreenExtra\RecipeDescriptor.cs" />
+    <Compile Include="ScreenExtra\RecipeDescriptorAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -128,7 +130,7 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-	  <Folder Include="ScreenExtra\Descriptions\" />
+	  <Folder Include="ScreenExtra\Descriptors\" />
 	  <Folder Include="WidgetExtra\" />
 	</ItemGroup>
 	<ItemGroup>
