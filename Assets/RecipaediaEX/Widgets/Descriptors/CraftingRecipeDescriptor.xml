@@ -7,7 +7,9 @@
 		<CanvasWidget Name="CraftingRecipeDescriptor.Canvas" HorizontalAlignment="Center" Margin="0, 10">
 			<BevelledRectangleWidget Size="400, 280" BevelSize="3" />
 			<GridPanelWidget Name="CraftingRecipeDescriptor.Ingredients" CanvasWidget.Position="24, 32" ColumnsCount="3" RowsCount="3" Margin="20, 0"/>
-			<CraftingRecipeSlotWidget Name="CraftingRecipeDescriptor.Result" CanvasWidget.Position="303, 104"/>
+			<CanvasWidget Size="72, 72" CanvasWidget.Position="303, 104">
+				<BlockRecipeSlotWidget xmlns="runtime-namespace:RecipaediaEX.Implementation" Name="CraftingRecipeDescriptor.Result"/>
+			</CanvasWidget>
 			<ArrowLineWidget Color="0, 0, 0, 96" Width="8" ArrowWidth="24" PointsString="250, 140; 283, 140" AbsoluteCoordinates="true"/>
 		</CanvasWidget>
 	</StackPanelWidget>

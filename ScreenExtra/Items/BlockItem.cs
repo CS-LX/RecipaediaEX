@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using Game;
 using RecipaediaEX.UI;
 using ZLinq;
@@ -119,6 +121,16 @@ namespace RecipaediaEX.Implementation {
         public bool Match(IRecipe recipe) {
             if (recipe is not FormattedRecipe formattedRecipe) return false;
             return m_blockValue == formattedRecipe.ResultValue;
+        }
+        public bool IsIngredient(IRecipe recipe) {
+            if (recipe is not FormattedRecipe formattedRecipe) return false;
+
+            int data = Terrain.ExtractData(m_blockValue);
+            string actualIngredient = m_block.GetCraftingId(m_blockValue) + ":" + data.ToString(CultureInfo.InvariantCulture);
+            foreach (var ingredient in formattedRecipe.Ingredients) {
+                if (CraftingRecipesManager.CompareIngredients(ingredient, actualIngredient)) return true;
+            }
+            return false;
         }
     }
 }

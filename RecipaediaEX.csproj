@@ -56,7 +56,6 @@
     <Compile Include="CrafterExtra\ICrafter.cs" />
     <Compile Include="CrafterExtra\CrafterAttribute.cs" />
     <Compile Include="RecipaediaEXLoader.cs" />
-    <Compile Include="InteractableWidget.cs" />
     <Compile Include="LoaderExtra\IRecipeFileLoader.cs" />
     <Compile Include="LoaderExtra\Loaders\DefaultRecipeFileLoader.cs" />
     <Compile Include="LoaderExtra\Loaders\FastDebugRecipeFileLoader.cs" />
@@ -88,6 +87,9 @@
     <Compile Include="ScreenExtra\RecipaediaEXScreen.cs" />
     <Compile Include="ScreenExtra\RecipeDescriptor.cs" />
     <Compile Include="ScreenExtra\RecipeDescriptorAttribute.cs" />
+    <Compile Include="WidgetExtra\InteractableWidget.cs" />
+    <Compile Include="WidgetExtra\RecipeSlots\BlockRecipeSlotWidget.cs" />
+    <Compile Include="WidgetExtra\RecipeSlotWidget.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -125,6 +127,9 @@
     <None Update="Assets\RecipaediaEX\Widgets\Descriptors\CraftingRecipeDescriptor.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Assets\RecipaediaEX\Widgets\CraftingRecipeSlot.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="SurvivalcraftAPI.Engine" Version="1.8.1.2" />
@@ -136,9 +141,6 @@
 		<None Include="$(PkgZLinq)\lib\net9.0\ZLinq.dll">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="WidgetExtra\" />
 	</ItemGroup>
 	<ItemGroup>
 	  <EmbeddedResource Remove="RTest\**" />

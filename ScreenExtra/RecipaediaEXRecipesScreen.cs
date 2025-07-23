@@ -103,12 +103,14 @@ namespace RecipaediaEX.UI {
         }
 
         public void SwitchToNewRecipe(List<IRecipe> recipes, int index) {//切换至新配方，并且向配方堆栈里将旧配方压入
+            if (m_currentRecipeDescriptor != null) HideCurrentDescriptor();
             m_presentations.Push(new RecipesPresentation(m_recipes, m_index));
             m_recipes = recipes;
             m_index = index;
         }
 
         public void SwitchToPreviousRecipe() {//将配方堆栈内的上级配方弹出
+            if (m_currentRecipeDescriptor != null) HideCurrentDescriptor();
             RecipesPresentation previousPresentation = m_presentations.Pop();
             m_recipes = previousPresentation.m_recipes;
             m_index = previousPresentation.m_index;

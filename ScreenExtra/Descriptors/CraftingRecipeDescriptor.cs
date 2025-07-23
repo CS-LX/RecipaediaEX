@@ -2,6 +2,7 @@
 using Engine;
 using Game;
 using RecipaediaEX.UI;
+using ZLinq;
 
 namespace RecipaediaEX.Implementation {
     [RecipeDescriptor([typeof(OriginalCraftingRecipe)])]
@@ -13,7 +14,7 @@ namespace RecipaediaEX.Implementation {
 
 		public GridPanelWidget m_gridWidget;
 
-		public CraftingRecipeSlotWidget m_resultWidget;
+		public BlockRecipeSlotWidget m_resultWidget;
 
 		public  CraftingRecipeDescriptor(RecipaediaEXRecipesScreen belongingScreen) : base(belongingScreen) {
             XElement node = RecipaediaEXLoader.RequestWidgetFile("Descriptors/CraftingRecipeDescriptor");
@@ -21,10 +22,10 @@ namespace RecipaediaEX.Implementation {
             m_nameWidget = Children.Find<LabelWidget>("CraftingRecipeDescriptor.Name");
             m_descriptionWidget = Children.Find<LabelWidget>("CraftingRecipeDescriptor.Description");
             m_gridWidget = Children.Find<GridPanelWidget>("CraftingRecipeDescriptor.Ingredients");
-            m_resultWidget = Children.Find<CraftingRecipeSlotWidget>("CraftingRecipeDescriptor.Result");
+            m_resultWidget = Children.Find<BlockRecipeSlotWidget>("CraftingRecipeDescriptor.Result");
             for (int i = 0; i < m_gridWidget.RowsCount; i++) {
                 for (int j = 0; j < m_gridWidget.ColumnsCount; j++) {
-                    var widget = new CraftingRecipeSlotWidget();
+                    var widget = new BlockRecipeSlotWidget();
                     m_gridWidget.Children.Add(widget);
                     m_gridWidget.SetWidgetCell(widget, new Point2(j, i));
                 }
@@ -40,21 +41,26 @@ namespace RecipaediaEX.Implementation {
             m_nameWidget.IsVisible = true;
             m_descriptionWidget.IsVisible = true;
             foreach (var widget in m_gridWidget.Children) {
-                var child = (CraftingRecipeSlotWidget)widget;
+                var child = (BlockRecipeSlotWidget)widget;
                 Point2 widgetCell = m_gridWidget.GetWidgetCell(child);
-                child.SetIngredient(craftingRecipe.Ingredients[widgetCell.X + (widgetCell.Y * 3)]);
+                string ingredient = craftingRecipe.Ingredients[widgetCell.X + (widgetCell.Y * 3)];
+                if (!string.IsNullOrEmpty(ingredient)) {
+                    CraftingRecipesManager.DecodeIngredient(ingredient, out string craftingId, out int? data);
+                    var blocksByCraftingId = BlocksManager.FindBlocksByCraftingId(craftingId).AsValueEnumerable();
+                    child.SetIngredients(blocksByCraftingId.Select(x => new BlockItem(x, 0, Terrain.MakeBlockValue(x.BlockIndex, 0, data.GetValueOrDefault(0)))).OfType<IRecipaediaItem>().ToArray(), m_belongingScreen);
+                }
             }
-            m_resultWidget.SetResult(craftingRecipe.ResultValue, craftingRecipe.ResultCount);
+            m_resultWidget.SetResult(new BlockItem(BlocksManager.Blocks[Terrain.ExtractContents(craftingRecipe.ResultValue)], 0, craftingRecipe.ResultValue), m_belongingScreen, craftingRecipe.ResultCount);
         }
 
         public override void Hide() {
             m_nameWidget.IsVisible = false;
             m_descriptionWidget.IsVisible = false;
             foreach (var widget in m_gridWidget.Children) {
-                var child2 = (CraftingRecipeSlotWidget)widget;
-                child2.SetIngredient(null);
+                var child2 = (BlockRecipeSlotWidget)widget;
+                child2.ClearContents();
             }
-            m_resultWidget.SetResult(0, 0);
+            m_resultWidget.ClearContents();
         }
     }
 }

@@ -2,6 +2,7 @@
 using Engine;
 using Game;
 using RecipaediaEX.UI;
+using ZLinq;
 
 namespace RecipaediaEX.Implementation {
     [RecipeDescriptor([typeof(OriginalSmeltingRecipe)])]
@@ -14,7 +15,7 @@ namespace RecipaediaEX.Implementation {
 
         public FireWidget m_fireWidget;
 
-        public CraftingRecipeSlotWidget m_resultWidget;
+        public BlockRecipeSlotWidget m_resultWidget;
 
         public SmeltingRecipeDescriptor(RecipaediaEXRecipesScreen belongingScreen) : base(belongingScreen) {
             XElement node = RecipaediaEXLoader.RequestWidgetFile("Descriptors/SmeltingRecipeDescriptor");
@@ -23,10 +24,10 @@ namespace RecipaediaEX.Implementation {
             m_descriptionWidget = Children.Find<LabelWidget>("SmeltingRecipeDescriptor.Description");
             m_gridWidget = Children.Find<GridPanelWidget>("SmeltingRecipeDescriptor.Ingredients");
             m_fireWidget = Children.Find<FireWidget>("SmeltingRecipeDescriptor.Fire");
-            m_resultWidget = Children.Find<CraftingRecipeSlotWidget>("SmeltingRecipeDescriptor.Result");
+            m_resultWidget = Children.Find<BlockRecipeSlotWidget>("SmeltingRecipeDescriptor.Result");
             for (int i = 0; i < m_gridWidget.RowsCount; i++) {
                 for (int j = 0; j < m_gridWidget.ColumnsCount; j++) {
-                    var widget = new CraftingRecipeSlotWidget();
+                    var widget = new BlockRecipeSlotWidget();
                     m_gridWidget.Children.Add(widget);
                     m_gridWidget.SetWidgetCell(widget, new Point2(j, i));
                 }
@@ -41,11 +42,16 @@ namespace RecipaediaEX.Implementation {
             m_nameWidget.IsVisible = true;
             m_descriptionWidget.IsVisible = true;
             foreach (var widget in m_gridWidget.Children) {
-                var child = (CraftingRecipeSlotWidget)widget;
+                var child = (BlockRecipeSlotWidget)widget;
                 Point2 widgetCell = m_gridWidget.GetWidgetCell(child);
-                child.SetIngredient(smeltingRecipe.Ingredients[widgetCell.X + (widgetCell.Y * 3)]);
+                string ingredient = smeltingRecipe.Ingredients[widgetCell.X + (widgetCell.Y * 3)];
+                if (!string.IsNullOrEmpty(ingredient)) {
+                    CraftingRecipesManager.DecodeIngredient(ingredient, out string craftingId, out int? data);
+                    var blocksByCraftingId = BlocksManager.FindBlocksByCraftingId(craftingId).AsValueEnumerable();
+                    child.SetIngredients(blocksByCraftingId.Select(x => new BlockItem(x, 0, Terrain.MakeBlockValue(x.BlockIndex, 0, data.GetValueOrDefault(0)))).OfType<IRecipaediaItem>().ToArray(), m_belongingScreen);
+                }
             }
-            m_resultWidget.SetResult(smeltingRecipe.ResultValue, smeltingRecipe.ResultCount);
+            m_resultWidget.SetResult(new BlockItem(BlocksManager.Blocks[Terrain.ExtractContents(smeltingRecipe.ResultValue)], 0, smeltingRecipe.ResultValue), m_belongingScreen, smeltingRecipe.ResultCount);
             m_fireWidget.ParticlesPerSecond = 40f;
         }
 
@@ -53,10 +59,10 @@ namespace RecipaediaEX.Implementation {
             m_nameWidget.IsVisible = false;
             m_descriptionWidget.IsVisible = false;
             foreach (var widget in m_gridWidget.Children) {
-                var child2 = (CraftingRecipeSlotWidget)widget;
-                child2.SetIngredient(null);
+                var child2 = (BlockRecipeSlotWidget)widget;
+                child2.ClearContents();
             }
-            m_resultWidget.SetResult(0, 0);
+            m_resultWidget.ClearContents();
             m_fireWidget.ParticlesPerSecond = 0f;
         }
     }

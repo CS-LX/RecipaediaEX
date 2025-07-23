@@ -7,7 +7,9 @@
 		<CanvasWidget Name="SmeltingRecipeDescriptor.Canvas" HorizontalAlignment="Center" Margin="0, 10">
 			<BevelledRectangleWidget Size="400, 280" BevelSize="3" />
 			<GridPanelWidget Name="SmeltingRecipeDescriptor.Ingredients" CanvasWidget.Position="65, 104" ColumnsCount="2" RowsCount="1" Margin="20, 0"/>
-			<CraftingRecipeSlotWidget Name="SmeltingRecipeDescriptor.Result" CanvasWidget.Position="265, 104" />
+			<CanvasWidget Size="72, 72" CanvasWidget.Position="303, 104">
+				<BlockRecipeSlotWidget xmlns="runtime-namespace:RecipaediaEX.Implementation" Name="SmeltingRecipeDescriptor.Result" />
+			</CanvasWidget>
 			<CanvasWidget CanvasWidget.Position="102, 183">
 				<FireWidget Name="SmeltingRecipeDescriptor.Fire" Size="68, 40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 				<StackPanelWidget Direction="Horizontal">
