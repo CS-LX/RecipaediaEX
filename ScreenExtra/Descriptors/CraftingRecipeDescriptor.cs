@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using System;
+using System.Xml.Linq;
 using Engine;
 using Game;
 using RecipaediaEX.UI;
@@ -61,6 +62,12 @@ namespace RecipaediaEX.Implementation {
                 child2.ClearContents();
             }
             m_resultWidget.ClearContents();
+        }
+
+        public override CrafterButtonWidget GetCrafterButton(IRecipe recipe) {
+            BlockCrafterButtonWidget blockCrafterButtonWidget = new();
+            blockCrafterButtonWidget.SetCrafters(RecipesCrafterManager.Crafters[recipe].AsValueEnumerable().Select(x => new BlockItem(BlocksManager.Blocks[Terrain.ExtractContents(x)], 0, x)).OfType<IRecipaediaItem>().ToArray(), m_belongingScreen);
+            return blockCrafterButtonWidget;
         }
     }
 }

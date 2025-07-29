@@ -89,6 +89,9 @@
     <Compile Include="ScreenExtra\RecipaediaEXScreen.cs" />
     <Compile Include="ScreenExtra\RecipeDescriptor.cs" />
     <Compile Include="ScreenExtra\RecipeDescriptorAttribute.cs" />
+    <Compile Include="WidgetExtra\AdvancedBevelledButtonWidget.cs" />
+    <Compile Include="WidgetExtra\CrafterButtonWidget.cs" />
+    <Compile Include="WidgetExtra\CrafterSlots\BlockCrafterButtonWidget.cs" />
     <Compile Include="WidgetExtra\InteractableWidget.cs" />
     <Compile Include="WidgetExtra\RecipeSlots\BlockRecipeSlotWidget.cs" />
     <Compile Include="WidgetExtra\RecipeSlotWidget.cs" />
@@ -130,6 +133,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Assets\RecipaediaEX\Widgets\CraftingRecipeSlot.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\RecipaediaEX\Widgets\AdvancedBevelledButtonContents.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

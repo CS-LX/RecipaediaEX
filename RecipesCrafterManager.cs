@@ -18,7 +18,6 @@ namespace RecipaediaEX {
             GetRecipeCrafters();
         }
 
-
         /// <summary>
         /// 获取每个配方对应的Crafter
         /// </summary>

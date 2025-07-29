@@ -52,23 +52,12 @@ namespace RecipaediaEX.UI {
         public override void Update() {
             base.Update();
             if (Index < 0) return;
-            IRecipaediaItem recipaediaItem = RecipaediaItems[Index];
-            if (m_interactableWidget.IsClicked && recipaediaItem is IRecipaediaRecipeItem recipeItem) {
-                if (SlotMode == Mode.Ingredient) {
-                    var newItems = RecipaediaEXManager.Recipes.AsValueEnumerable().Where(x => recipeItem.Match(x));
-                    if (newItems.Count() > 0) {
-                        AudioManager.PlaySound("Audio/UI/ButtonClick", 1, 0, 0);
-                        m_belongingScreen.SwitchToNewRecipe(newItems.ToList(), 0);
-                    }
-                }
+            if (m_interactableWidget.IsClicked) {
+                OnClicked();
             }
 
-            if (m_interactableWidget.IsSpecialClicked && recipaediaItem is IRecipaediaRecipeItem recipeItem2) {
-                var newItems = RecipaediaEXManager.Recipes.AsValueEnumerable().Where(x => recipeItem2.IsIngredient(x));
-                if (newItems.Count() > 0) {
-                    AudioManager.PlaySound("Audio/UI/ButtonClick", 1, 0, 0);
-                    m_belongingScreen.SwitchToNewRecipe(newItems.ToList(), 0);
-                }
+            if (m_interactableWidget.IsSpecialClicked) {
+                OnSpecialClicked();
             }
         }
 
@@ -136,6 +125,36 @@ namespace RecipaediaEX.UI {
         /// </summary>
         public virtual void HideContent() {
 
+        }
+
+        /// <summary>
+        /// 被点击时
+        /// </summary>
+        public virtual void OnClicked() {
+            IRecipaediaItem recipaediaItem = RecipaediaItems[Index];
+            if (recipaediaItem is IRecipaediaRecipeItem recipeItem) {
+                if (SlotMode == Mode.Ingredient) {
+                    var newItems = RecipaediaEXManager.Recipes.AsValueEnumerable().Where(x => recipeItem.Match(x));
+                    if (newItems.Count() > 0) {
+                        AudioManager.PlaySound("Audio/UI/ButtonClick", 1, 0, 0);
+                        m_belongingScreen.SwitchToNewRecipe(newItems.ToList(), 0);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 被长按/右键时执行
+        /// </summary>
+        public virtual void OnSpecialClicked() {
+            IRecipaediaItem recipaediaItem = RecipaediaItems[Index];
+            if (recipaediaItem is IRecipaediaRecipeItem recipeItem2) {
+                var newItems = RecipaediaEXManager.Recipes.AsValueEnumerable().Where(x => recipeItem2.IsIngredient(x));
+                if (newItems.Count() > 0) {
+                    AudioManager.PlaySound("Audio/UI/ButtonClick", 1, 0, 0);
+                    m_belongingScreen.SwitchToNewRecipe(newItems.ToList(), 0);
+                }
+            }
         }
 
         /// <summary>

@@ -15,6 +15,8 @@
 				<BevelledButtonWidget Style="{Styles/ButtonStyle_ArrowLeft}" Name="PreviousRecipe" Margin="0, 0" VerticalAlignment="Center"/>
 				<CanvasWidget Name="RecipeDescriptors" Size="Infinity, Infinity" VerticalAlignment="Center">
 				</CanvasWidget>
+				<CanvasWidget Name="Crafters" Size="70, 60" VerticalAlignment="Center">
+				</CanvasWidget>
 				<BevelledButtonWidget Style="{Styles/ButtonStyle_ArrowRight}" Name="NextRecipe" Margin="20, 0" VerticalAlignment="Center"/>
 			</StackPanelWidget>
 

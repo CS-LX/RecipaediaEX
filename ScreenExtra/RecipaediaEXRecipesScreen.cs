@@ -23,7 +23,9 @@ namespace RecipaediaEX.UI {
         public ButtonWidget m_prevInStackButton;
         public ButtonWidget m_nextRecipeButton;
         public CanvasWidget m_recipeDescriptorsCanvas;
+        public CanvasWidget m_crafterButtonsCanvas;
         public RecipeDescriptor m_currentRecipeDescriptor;
+        public CrafterButtonWidget m_currentCrafterButton;
 
         public RecipaediaEXRecipesScreen() {
             XElement node = RecipaediaEXLoader.RequestScreenFile("RecipaediaEXRecipesScreen");
@@ -32,6 +34,7 @@ namespace RecipaediaEX.UI {
             m_prevInStackButton = Children.Find<ButtonWidget>("PreviousRecipeInStack");
             m_nextRecipeButton = Children.Find<ButtonWidget>("NextRecipe");
             m_recipeDescriptorsCanvas = Children.Find<CanvasWidget>("RecipeDescriptors");
+            m_crafterButtonsCanvas = Children.Find<CanvasWidget>("Crafters");
         }
 
         public override void Enter(object[] parameters) {
@@ -118,7 +121,9 @@ namespace RecipaediaEX.UI {
 
         public void ShowCurrentDescriptor(Type descriptorType, IRecipe recipe, string nameSuffix = null) {
             if (m_currentRecipeDescriptor != null) HideCurrentDescriptor();
+            if (m_currentCrafterButton != null) m_crafterButtonsCanvas.Children.Remove(m_currentCrafterButton);
 
+            //显示Descriptor
             if (!m_descriptorsCache.TryGetValue(descriptorType, out RecipeDescriptor recipeDescriptor)) {
                 recipeDescriptor = CreateDescriptor(descriptorType, this);
                 m_descriptorsCache[descriptorType] = recipeDescriptor;
@@ -130,6 +135,10 @@ namespace RecipaediaEX.UI {
             recipeDescriptor.HorizontalAlignment = WidgetAlignment.Center;
             recipeDescriptor.VerticalAlignment = WidgetAlignment.Center;
             m_currentRecipeDescriptor = recipeDescriptor;
+
+            //显示Crafter
+            m_currentCrafterButton = recipeDescriptor.GetCrafterButton(recipe);
+            m_crafterButtonsCanvas.Children.Add(m_currentCrafterButton);
         }
 
         public void HideCurrentDescriptor() {

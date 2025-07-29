@@ -1,4 +1,5 @@
-﻿using Game;
+﻿using System;
+using Game;
 
 namespace RecipaediaEX.UI {
     public abstract class RecipeDescriptor : CanvasWidget {
@@ -19,5 +20,11 @@ namespace RecipaediaEX.UI {
         /// 当此配方呈现界面被隐藏时调用
         /// </summary>
         public abstract void Hide();
+
+        /// <summary>
+        /// 查看Crafter的按钮的类型
+        /// </summary>
+        /// <returns></returns>
+        public abstract CrafterButtonWidget GetCrafterButton(IRecipe recipe);
     }
 }
