@@ -15,6 +15,7 @@ namespace RecipaediaEX
         {
             base.__ModInitialize();
             ModsManager.RegisterHook("OnLoadingFinished", this);
+            ModsManager.RegisterHook("BlocksInitalized", this);
         }
 
         public override void OnLoadingFinished(List<Action> actions)
@@ -22,9 +23,15 @@ namespace RecipaediaEX
             base.OnLoadingFinished(actions);
             RecipesLoadManager.Initialize();
             RecipaediaEXManager.Initialize();
+            RecipesCrafterManager.Initialize();
             ScreensManager.m_screens["Recipaedia"] = new RecipaediaEXScreen();
             ScreensManager.m_screens["RecipaediaDescription"] = new RecipaediaEXDescriptionScreen();
             ScreensManager.m_screens["RecipaediaRecipes"] = new RecipaediaEXRecipesScreen();
+        }
+
+        public override void BlocksInitalized() {
+            base.BlocksInitalized();
+            RecipesCrafterManager.Initialize();
         }
 
         public static XElement RequestScreenFile(string screenName) => ContentManager.Get<XElement>($"RecipaediaEX/Screens/{screenName}");

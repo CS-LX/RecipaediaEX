@@ -15,19 +15,13 @@ namespace RecipaediaEX
     public static class RecipaediaEXManager
     {
         public static List<IRecipe> m_recipes = [];
-        public static Dictionary<string, List<Type>> m_crafters = [];
         public static Dictionary<string, IRecipeReader> m_readers = [];
         public static List<Assembly> m_scannedAssembliesForReaders = [];
-        public static List<Assembly> m_scannedAssembliesForCrafters = [];
 
         /// <summary>
         /// 所有配方的集合
         /// </summary>
         public static List<IRecipe> Recipes => m_recipes;
-        /// <summary>
-        /// 合成配方所需的Crafter（用于展示，不实现功能）
-        /// </summary>
-        public static Dictionary<string, List<Type>> Crafters => m_crafters;
 
         public static void Initialize() {
             m_recipes.Clear();
@@ -38,9 +32,6 @@ namespace RecipaediaEX
             List<XElement> recipesItems = RecipesLoadManager.RecipesItems;
             //解析配方
             LoadRecipesData(recipesItems);
-
-            //获取所有配方的Crafter
-            GetRecipeCrafters();
         }
 
         #region 内部方法
@@ -97,27 +88,6 @@ namespace RecipaediaEX
             string type = string.Empty;
             type = ModsManager.HasAttribute(item, (name) => name == "Type", out XAttribute xAttribute) == false ? typeof(OriginalCraftingRecipe).FullName : xAttribute.Value;
             return m_readers[type].LoadRecipe(item);
-        }
-
-        /// <summary>
-        /// 获取每个配方对应的Crafter
-        /// </summary>
-        static void GetRecipeCrafters() {
-            foreach (Assembly item in TypeCache.LoadedAssemblies.AsValueEnumerable().Where(a => !TypeCache.IsKnownSystemAssembly(a))) {
-                if (!m_scannedAssembliesForCrafters.Contains(item)) {
-                    foreach (TypeInfo definedType in item.DefinedTypes) {
-                        CrafterAttribute crafterAttribute = definedType.GetCustomAttribute<CrafterAttribute>();
-                        if (crafterAttribute != null) {
-                            var types = crafterAttribute.Types.AsValueEnumerable().Select(x => x.FullName);
-                            foreach (var typeString in types) {
-                                if (!m_crafters.ContainsKey(typeString)) m_crafters[typeString] = [definedType.AsType()];
-                                else m_crafters[typeString].Add(definedType.AsType());
-                            }
-                        }
-                    }
-                    m_scannedAssembliesForCrafters.Add(item);
-                }
-            }
         }
         #endregion
 
