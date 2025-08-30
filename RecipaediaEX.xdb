@@ -1,3 +1,4 @@
 <RecipaediaEX>
 	<Parameter Name="Class" Guid="566663a5-0480-45c8-9266-18c8060a236c" new-Value="RecipaediaEX.ComponentsExtra.Implementation.ComponentEXCraftingTable" Type="string" />
+	<Parameter Name="Class" Guid="f04c23fe-1d3c-467e-81bc-1796f686be51" new-Value="RecipaediaEX.ComponentsExtra.Implementation.ComponentEXFurnace" Type="string" />
 </RecipaediaEX>
