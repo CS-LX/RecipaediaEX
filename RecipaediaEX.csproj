@@ -53,6 +53,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ComponentsExtra\Implementation\ComponentEXCraftingTable.cs" />
+    <Compile Include="ComponentsExtra\Implementation\OriginalComponentsExtensions.cs" />
     <Compile Include="CrafterExtra\Crafters\CraftingTableBlock.cs" />
     <Compile Include="CrafterExtra\Crafters\FurnaceBlock.cs" />
     <Compile Include="CrafterExtra\ICrafter.cs" />
@@ -136,6 +138,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Assets\RecipaediaEX\Widgets\AdvancedBevelledButtonContents.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="RecipaediaEX.xdb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

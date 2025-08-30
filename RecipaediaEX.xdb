@@ -1,0 +1,3 @@
+<RecipaediaEX>
+	<Parameter Name="Class" Guid="566663a5-0480-45c8-9266-18c8060a236c" new-Value="RecipaediaEX.ComponentsExtra.Implementation.ComponentEXCraftingTable" Type="string" />
+</RecipaediaEX>

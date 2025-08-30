@@ -96,9 +96,35 @@ namespace RecipaediaEX
         /// 寻找完整的配方以获得产物
         /// </summary>
         /// <param name="actual">玩家实际放置在生产方块中的配方</param>
-        /// <returns>符合条件的第一个配方</returns>
+        /// <returns>符合条件的第一个配方，如果没有则返回null</returns>
         public static IRecipe FindMatchingRecipe(IRecipe actual) {
-            return m_recipes.AsValueEnumerable().First(x => x.Match(actual));
+            return m_recipes.AsValueEnumerable().FirstOrDefault(x => x.Match(actual));
+        }
+        /// <summary>
+        /// 寻找完整的配方以获得产物
+        /// </summary>
+        /// <param name="actual">玩家实际放置在生产方块中的配方</param>
+        /// <typeparam name="T">配方类型</typeparam>
+        /// <returns>符合条件的第一个配方，如果没有则返回null</returns>
+        public static T FindMatchingRecipe<T>(IRecipe actual) where T : class, IRecipe {
+            IRecipe recipe = FindMatchingRecipe(actual);
+            if (recipe == null) return null;
+            return recipe as T;
+        }
+
+        /// <summary>
+        /// 尝试寻找完整的配方以获得产物
+        /// </summary>
+        /// <param name="actual">玩家实际放置在生产方块中的配方</param>
+        /// <param name="recipe">符合条件的第一个配方，如果没有则返回nul</param>
+        /// <typeparam name="T">配方类型</typeparam>
+        /// <returns>找没找到</returns>
+        public static bool TryFindMatchingRecipe<T>(IRecipe actual, out T recipe) where T : class, IRecipe  {
+            recipe = FindMatchingRecipe<T>(actual);
+            if (recipe == null) {
+                return false;
+            }
+            return true;
         }
         /// <summary>
         /// 寻找一系列完整的配方以获得产物
