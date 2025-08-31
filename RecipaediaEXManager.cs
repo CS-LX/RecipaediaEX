@@ -85,8 +85,9 @@ namespace RecipaediaEX
         /// <param name="item"></param>
         /// <returns></returns>
         static IRecipe ReadRecipeItem(XElement item) {
-            string type = string.Empty;
-            type = ModsManager.HasAttribute(item, (name) => name == "Type", out XAttribute xAttribute) == false ? typeof(OriginalCraftingRecipe).FullName : xAttribute.Value;
+            bool hasAttributes = ModsManager.HasAttribute(item, (name) => name == "Type", out XAttribute xAttribute);
+            bool isSmelting = ModsManager.HasAttribute(item, (name) => name == "RequiredHeatLevel", out XAttribute xAttribute2) && float.Parse(xAttribute2.Value) > 0;
+            string type = !hasAttributes ? (isSmelting ? typeof(OriginalSmeltingRecipe).FullName : typeof(OriginalCraftingRecipe).FullName) : xAttribute.Value;
             return m_readers[type].LoadRecipe(item);
         }
         #endregion

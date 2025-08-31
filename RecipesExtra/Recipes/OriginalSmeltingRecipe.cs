@@ -6,7 +6,7 @@ namespace RecipaediaEX.Implementation {
             if (actual == null || actual is not OriginalSmeltingRecipe craftingRecipe) return false;
             if (craftingRecipe.RequiredHeatLevel < RequiredHeatLevel) return false;
             if (craftingRecipe.RequiredPlayerLevel < RequiredPlayerLevel) return false;
-            return CraftingRecipesManager.MatchRecipe(Ingredients, craftingRecipe.Ingredients);
+            return base.Match(actual);
         }
     }
 }

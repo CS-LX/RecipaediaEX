@@ -10,7 +10,7 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
     public class ComponentEXCraftingTable : ComponentCraftingTable, IUpdateable {
         public new int m_craftingGridSize;
 
-        public new string[] m_matchedIngredients = new string[9];
+        public new string[] m_matchedIngredients = new string[36];
 
         public new OriginalCraftingRecipe m_matchedRecipe;
         public new int RemainsSlotIndex => SlotsCount - 1;
@@ -66,9 +66,9 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                     count = count / m_matchedRecipe.ResultCount * m_matchedRecipe.ResultCount;
                     num = Base_RemoveSlotItems(slotIndex, count);
                     if (num > 0) {
-                        for (int i = 0; i < 9; i++) {
+                        for (int i = 0; i < 36; i++) {
                             if (!string.IsNullOrEmpty(m_matchedIngredients[i])) {
-                                int index = (i % 3) + (m_craftingGridSize * (i / 3));
+                                int index = (i % 6) + (m_craftingGridSize * (i / 6));
                                 m_slots[index].Count = MathUtils.Max(m_slots[index].Count - (num / m_matchedRecipe.ResultCount), 0);
                             }
                         }
@@ -113,7 +113,7 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
             int num = int.MaxValue;
             for (int i = 0; i < m_craftingGridSize; i++) {
                 for (int j = 0; j < m_craftingGridSize; j++) {
-                    int num2 = i + (j * 3);
+                    int num2 = i + (j * 6);
                     int slotIndex = i + (j * m_craftingGridSize);
                     int slotValue = GetSlotValue(slotIndex);
                     int num3 = Terrain.ExtractContents(slotValue);

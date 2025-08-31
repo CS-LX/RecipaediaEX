@@ -1,4 +1,6 @@
-﻿using Game;
+﻿using System.Collections.Generic;
+using RecipaediaEX.ComponentsExtra;
+using ZLinq;
 
 namespace RecipaediaEX.Implementation {
     public abstract class FormattedRecipe : IRecipe {
@@ -16,11 +18,13 @@ namespace RecipaediaEX.Implementation {
 
         public float RequiredPlayerLevel;
 
-        public string[] Ingredients = new string[9];
+        public string[] Ingredients = new string[36];
 
         public string Description;
 
         public string Message;
+        
+        public HashSet<string[]> TransformedIngredients = new();
 
         /// <summary>
         /// 在配方表中的显示顺序，DisplayOrder越小，配方越靠前
@@ -32,8 +36,24 @@ namespace RecipaediaEX.Implementation {
         int IRecipe.DisplayOrder => DisplayOrder;
 
         public virtual bool Match(IRecipe actual) {
-            if (actual == null || actual is not OriginalCraftingRecipe craftingRecipe) return false;
-            return CraftingRecipesManager.MatchRecipe(Ingredients, craftingRecipe.Ingredients);
+            if (actual is not OriginalCraftingRecipe craftingRecipe) return false;
+            return TransformedIngredients.AsValueEnumerable().Any(ingredients => OriginalComponentsExtensions.CompareIngredientsArray(ingredients, craftingRecipe.Ingredients));
+        }
+
+        public void PreTransformIngredients() {
+            TransformedIngredients.Clear();
+            for (int i = 0; i < 2; i++) {
+                for (int j = -6; j <= 6; j++) {
+                    for (int k = -6; k <= 6; k++) {
+                        bool flip = i != 0;
+                        string[] array = new string[36];
+                        if (!OriginalComponentsExtensions.TransformRecipe(array, Ingredients, k, j, flip)) {
+                            continue;
+                        }
+                        TransformedIngredients.Add(array);
+                    }
+                }
+            }
         }
     }
 }

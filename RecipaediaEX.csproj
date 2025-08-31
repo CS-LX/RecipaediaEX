@@ -55,7 +55,7 @@
   <ItemGroup>
     <Compile Include="ComponentsExtra\Implementation\ComponentEXCraftingTable.cs" />
     <Compile Include="ComponentsExtra\Implementation\ComponentEXFurnace.cs" />
-    <Compile Include="ComponentsExtra\Implementation\OriginalComponentsExtensions.cs" />
+    <Compile Include="ComponentsExtra\OriginalComponentsExtensions.cs" />
     <Compile Include="CrafterExtra\Crafters\CraftingTableBlock.cs" />
     <Compile Include="CrafterExtra\Crafters\FurnaceBlock.cs" />
     <Compile Include="CrafterExtra\ICrafter.cs" />

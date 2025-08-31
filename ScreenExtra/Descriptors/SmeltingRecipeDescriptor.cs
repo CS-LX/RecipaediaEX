@@ -45,7 +45,7 @@ namespace RecipaediaEX.Implementation {
             foreach (var widget in m_gridWidget.Children) {
                 var child = (BlockRecipeSlotWidget)widget;
                 Point2 widgetCell = m_gridWidget.GetWidgetCell(child);
-                string ingredient = smeltingRecipe.Ingredients[widgetCell.X + (widgetCell.Y * 3)];
+                string ingredient = smeltingRecipe.Ingredients[widgetCell.X + (widgetCell.Y * 6)];
                 if (!string.IsNullOrEmpty(ingredient)) {
                     CraftingRecipesManager.DecodeIngredient(ingredient, out string craftingId, out int? data);
                     var blocksByCraftingId = BlocksManager.FindBlocksByCraftingId(craftingId).AsValueEnumerable();

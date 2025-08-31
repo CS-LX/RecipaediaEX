@@ -6,7 +6,7 @@ using XmlUtilities;
 using ZLinq;
 
 namespace RecipaediaEX.Implementation {
-    [RecipeReader([typeof(OriginalCraftingRecipe), typeof(SmeltingRecipeWidget)])]
+    [RecipeReader([typeof(OriginalCraftingRecipe), typeof(OriginalSmeltingRecipe)])]
     public class FormattedRecipeReader : IRecipeReader {
         public IRecipe LoadRecipe(XElement item) {
             float requiredHeatLevel = XmlUtils.GetAttributeValue<float>(item, "RequiredHeatLevel");
@@ -55,11 +55,11 @@ namespace RecipaediaEX.Implementation {
                     char c = text[j];
                     if (char.IsLower(c)) {
                         string text2 = dictionary[c];
-                        craftingRecipe.Ingredients[j + (i * 3)] = text2;
+                        craftingRecipe.Ingredients[j + (i * 6)] = text2;
                     }
                 }
             }
-
+            craftingRecipe.PreTransformIngredients();
 			return craftingRecipe;
         }
     }
