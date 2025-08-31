@@ -4,8 +4,6 @@ using ZLinq;
 
 namespace RecipaediaEX.Implementation {
     public abstract class FormattedRecipe : IRecipe {
-        public const int MaxSize = 3;
-
         public int ResultValue;
 
         public int ResultCount;
