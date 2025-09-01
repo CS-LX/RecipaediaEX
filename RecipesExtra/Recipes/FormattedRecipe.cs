@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using RecipaediaEX.ComponentsExtra;
+using TemplatesDatabase;
 using ZLinq;
 
 namespace RecipaediaEX.Implementation {
@@ -23,6 +24,8 @@ namespace RecipaediaEX.Implementation {
         public string Message;
         
         public HashSet<string[]> TransformedIngredients = new();
+        
+        public ValuesDictionary ExtraValues = new();
 
         /// <summary>
         /// 在配方表中的显示顺序，DisplayOrder越小，配方越靠前
@@ -37,6 +40,10 @@ namespace RecipaediaEX.Implementation {
             if (actual is not OriginalCraftingRecipe craftingRecipe) return false;
             return TransformedIngredients.AsValueEnumerable().Any(ingredients => OriginalComponentsExtensions.CompareIngredientsArray(ingredients, craftingRecipe.Ingredients));
         }
+
+        public virtual T GetExtraValue<T>(string key, T defaultValue) => ExtraValues.GetValue(key, defaultValue);
+
+        public void SetExtraValue<T>(string key, T value) => ExtraValues.SetValue(key, value);
 
         public void PreTransformIngredients() {
             TransformedIngredients.Clear();

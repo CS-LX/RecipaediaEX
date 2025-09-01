@@ -134,6 +134,8 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
             OriginalCraftingRecipe craftingRecipe;
             if (recipeRefindNeeded) {
                 OriginalCraftingRecipe actualCraftingRecipe = new() { Ingredients = m_matchedIngredients, RequiredHeatLevel = 0f, RequiredPlayerLevel = playerLevel };
+                actualCraftingRecipe.SetExtraValue("Project", Project);
+                actualCraftingRecipe.SetExtraValue<IInventory>("Inventory", this);
                 craftingRecipe = OriginalComponentsExtensions.FindCraftingRecipe(Project.FindSubsystem<SubsystemTerrain>(), actualCraftingRecipe);
             }
             else {

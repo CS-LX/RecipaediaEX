@@ -236,7 +236,9 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                 }
                 ComponentPlayer componentPlayer = FindInteractingPlayer();
                 float playerLevel = componentPlayer?.PlayerData.Level ?? 1f;
-                OriginalSmeltingRecipe actualSmeltingRecipe = new OriginalSmeltingRecipe { Ingredients = m_matchedIngredients, RequiredHeatLevel = heatLevel, RequiredPlayerLevel = playerLevel, };
+                OriginalSmeltingRecipe actualSmeltingRecipe = new OriginalSmeltingRecipe { Ingredients = m_matchedIngredients, RequiredHeatLevel = heatLevel, RequiredPlayerLevel = playerLevel };
+                actualSmeltingRecipe.SetExtraValue("Project", Project);
+                actualSmeltingRecipe.SetExtraValue<IInventory>("Inventory", this);
                 OriginalSmeltingRecipe craftingRecipe = OriginalComponentsExtensions.FindCraftingRecipe(m_subsystemTerrain, actualSmeltingRecipe);
                 if (craftingRecipe != null
                     && craftingRecipe.ResultValue != 0) {

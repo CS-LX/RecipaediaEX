@@ -75,6 +75,7 @@ public class CustomRecipe : IRecipe
     public string Description { get; set; }
     public string Message { get; set; }
     public int DisplayOrder { get; set; }
+    public ValuesDictionary ExtraValues = new();
     
     // 自定义属性
     public int CustomProperty { get; set; }
@@ -88,6 +89,10 @@ public class CustomRecipe : IRecipe
         }
         return false;
     }
+    
+    public virtual T GetExtraValue<T>(string key, T defaultValue) => ExtraValues.GetValue(key, defaultValue);
+
+    public void SetExtraValue<T>(string key, T value) => ExtraValues.SetValue(key, value);
 }
 ```
 
