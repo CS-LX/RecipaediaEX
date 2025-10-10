@@ -120,11 +120,11 @@ namespace RecipaediaEX.Implementation {
 
         public bool Match(IRecipe recipe) {
             try {
-                int recipeResultValue = recipe.GetExtraValue("ResultBlockValue", 0);
-                return recipeResultValue != 0 && m_blockValue == recipeResultValue;
+                int[] recipeResultValue = recipe.GetExtraValue("MatchedResultBlockValues", new int[0]);
+                return recipeResultValue.Contains(m_blockValue);
             }
             catch (Exception ex) {
-                Engine.Log.Error("BlockItem.Match error, probably becauce the problem of IRecipe.GetExtraValue(\"ResultBlockValue\"): " + ex);
+                Engine.Log.Error("BlockItem.Match error, probably becauce the problem of IRecipe.GetExtraValue(\"MatchedResultBlockValues\"): " + ex);
                 return false;
             }
         }

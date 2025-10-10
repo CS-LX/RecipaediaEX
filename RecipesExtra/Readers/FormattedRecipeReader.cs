@@ -18,7 +18,7 @@ namespace RecipaediaEX.Implementation {
                 && LanguageControl.TryGetBlock(attributeValue, "CRDescription:" + desc.Substring(1, desc.Length - 2), out var r))
                 desc = r;
             craftingRecipe.ResultValue = CraftingRecipesManager.DecodeResult(attributeValue);
-            craftingRecipe.SetExtraValue("ResultBlockValue", craftingRecipe.ResultValue);
+            craftingRecipe.SetExtraValue("MatchedResultBlockValues", new int[] { craftingRecipe.ResultValue });
             craftingRecipe.ResultCount = XmlUtils.GetAttributeValue<int>(item, "ResultCount");
             string attributeValue2 = XmlUtils.GetAttributeValue(item, "Remains", string.Empty);
             if (!string.IsNullOrEmpty(attributeValue2)) {

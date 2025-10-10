@@ -10,7 +10,10 @@ namespace RecipaediaEX.Implementation {
         public LabelWidget m_countLabel;
         public LabelWidget m_blockNameLabel;
         public int m_count;
-
+        public Func<BlockRecipeSlotWidget, bool> IsCountVisible = DefaultIsCountVisible;
+        public static bool DefaultIsCountVisible(BlockRecipeSlotWidget blockRecipeSlotWidget) {
+            return blockRecipeSlotWidget.m_count != 0;
+        }
         public BlockRecipeSlotWidget() : base() {
             m_iconWidget = new BlockIconWidget { Size = new Vector2(64, 64), HorizontalAlignment = WidgetAlignment.Center, VerticalAlignment = WidgetAlignment.Center };
             Children.Add(m_iconWidget);
@@ -23,6 +26,7 @@ namespace RecipaediaEX.Implementation {
         public override void MeasureOverride(Vector2 parentAvailableSize) {
             base.MeasureOverride(parentAvailableSize);
             m_blockNameLabel.IsVisible = m_interactableWidget.IsMouseHover;
+            m_countLabel.IsVisible = IsCountVisible(this);
         }
 
         public override void SetResult(IRecipaediaItem result, RecipaediaEXRecipesScreen belongingScreen, params object[] additionalData) {
