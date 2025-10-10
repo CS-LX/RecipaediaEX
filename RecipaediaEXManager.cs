@@ -32,6 +32,7 @@ namespace RecipaediaEX
             List<XElement> recipesItems = RecipesLoadManager.RecipesItems;
             //解析配方
             LoadRecipesData(recipesItems);
+            RecipaediaEXManager.Recipes.RemoveAll(r => r == null);
         }
 
         #region 内部方法
