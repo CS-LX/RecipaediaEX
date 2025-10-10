@@ -7,6 +7,6 @@ namespace RecipaediaEX.Implementation {
 
         public XElement GetRecipesXml(ModEntity modEntity) => ContentManager.Get<XElement>("CraftingRecipes");
 
-        public int Order => 0;
+        public int Order => int.MinValue + 11;
     }
 }

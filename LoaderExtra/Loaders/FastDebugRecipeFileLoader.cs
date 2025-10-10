@@ -12,6 +12,6 @@ namespace RecipaediaEX.Implementation {
             }
             return xElement;
         }
-        public int Order => 0;
+        public int Order => int.MinValue + 20;
     }
 }

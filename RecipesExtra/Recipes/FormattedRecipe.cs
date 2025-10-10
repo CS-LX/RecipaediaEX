@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Game;
 using RecipaediaEX.ComponentsExtra;
+using System.Collections.Generic;
 using TemplatesDatabase;
 using ZLinq;
 
@@ -22,7 +23,6 @@ namespace RecipaediaEX.Implementation {
         public string Description;
 
         public string Message;
-        
         public HashSet<string[]> TransformedIngredients = new();
         
         public ValuesDictionary ExtraValues = new();
@@ -31,14 +31,32 @@ namespace RecipaediaEX.Implementation {
         /// 在配方表中的显示顺序，DisplayOrder越小，配方越靠前
         /// </summary>
         public int DisplayOrder = 0;
-
-        string IRecipe.Description => Description;
-        string IRecipe.Message => Message;
         int IRecipe.DisplayOrder => DisplayOrder;
 
         public virtual bool Match(IRecipe actual) {
-            if (actual is not OriginalCraftingRecipe craftingRecipe) return false;
-            return TransformedIngredients.AsValueEnumerable().Any(ingredients => OriginalComponentsExtensions.CompareIngredientsArray(ingredients, craftingRecipe.Ingredients));
+            if (actual is not FormattedRecipe formattedRecipe) return false;
+            return TransformedIngredients.AsValueEnumerable().Any(
+                ingredients => CompareIngredientsArray(ingredients, formattedRecipe.Ingredients)
+            );
+        }
+        public virtual bool CompareIngredientsArray(string[]? requiredIngredient, string[]? actualIngredient) {
+            if (requiredIngredient == null || actualIngredient == null)
+                return requiredIngredient == actualIngredient;
+
+            // 如果长度不同，则直接返回 false
+            if (requiredIngredient.Length != actualIngredient.Length)
+                return false;
+
+            // 使用 CompareIngredients 比较每个元素
+            for (int i = 0; i < requiredIngredient.Length; i++) {
+                if (!CompareIngredient(requiredIngredient[i], actualIngredient[i]))
+                    return false;
+            }
+
+            return true;
+        }
+        public virtual bool CompareIngredient(string requiredIngredient, string actualIngredient) {
+            return CraftingRecipesManager.CompareIngredients(requiredIngredient, actualIngredient);
         }
 
         public virtual T GetExtraValue<T>(string key, T defaultValue) => ExtraValues.GetValue(key, defaultValue);

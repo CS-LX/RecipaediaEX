@@ -15,8 +15,8 @@ namespace RecipaediaEX {
         public static Dictionary<ModEntity, IRecipeFileLoader> m_modToRecipeFileLoaders = new();
         static Dictionary<string, IRecipeFileLoader> m_modPackageNameToFileLoader = new();//mod包名对应读取器，一般作为中间结构使用
         static DefaultRecipeFileLoader m_defaultRecipeFileLoader;//默认的读取器
+        public static bool DebugLogModToRecipeFileLoaders;
         public static List<Assembly> m_scannedAssemblies = new();
-
         public static List<XElement> RecipesItems;
 
         public static void Initialize() {
@@ -60,6 +60,13 @@ namespace RecipaediaEX {
                 }
                 else {
                     m_modToRecipeFileLoaders[modEntity] = m_defaultRecipeFileLoader;
+                }
+            }
+            if(DebugLogModToRecipeFileLoaders) {
+                foreach (var kv in m_modToRecipeFileLoaders) {
+                    ModEntity modEntity = kv.Key;
+                    IRecipeFileLoader loader = kv.Value;
+                    Engine.Log.Information($"[RecipaediaEX] RecipeFileLoader {loader.GetType().FullName} Controls Mod {modEntity.modInfo.PackageName}");
                 }
             }
         }

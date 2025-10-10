@@ -27,31 +27,31 @@ namespace RecipaediaEX.ComponentsExtra {
             recipe.PreTransformIngredients();
             return recipe;
         }
-        
+
         /// <summary>
-        /// 将3*3配方缩放到6*6的
+        /// 将小于6*6的配方缩放到6*6的
+        /// 使用时需要注意缩放的配方大小必须是不大于36的完全平方数，以确认配方宽度
         /// </summary>
-        /// <param name="recipes"></param>
+        /// <param name="ingredientsBeforeScaling"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public static string[] ScalingIngredients(string[] recipes) {
-            switch (recipes.Length) {
-                case 36: return recipes;
-                case 9: {
-                    var ingredients2 = new string[36];
-                    ingredients2[0] = recipes[0];
-                    ingredients2[1] = recipes[1];
-                    ingredients2[2] = recipes[2];
-                    ingredients2[6] = recipes[3];
-                    ingredients2[7] = recipes[4];
-                    ingredients2[8] = recipes[5];
-                    ingredients2[12] = recipes[6];
-                    ingredients2[13] = recipes[7];
-                    ingredients2[14] = recipes[8];
-                    return ingredients2;
+        public static string[] ScalingIngredients(string[] ingredientsBeforeScaling) {
+            if (ingredientsBeforeScaling.Length == 36) return ingredientsBeforeScaling;
+            int width = ingredientsBeforeScaling.Length switch {
+                9 => 3,
+                16 => 4,
+                25 => 5,
+                4 => 2,
+                1 => 1,
+                _ => throw new ArgumentOutOfRangeException(nameof(ingredientsBeforeScaling))
+            };
+            var ingredientsAfterScaling = new string[36];
+            for (int i = 0; i < width; i++) {
+                for(int j = 0; j < width; j++) {
+                    ingredientsAfterScaling[i * 6 + j] = ingredientsBeforeScaling[i * width + j];
                 }
-                default: throw new ArgumentOutOfRangeException(nameof(recipes));
             }
+            return ingredientsAfterScaling;
         }
         
         /// <summary>
@@ -97,33 +97,7 @@ namespace RecipaediaEX.ComponentsExtra {
             }
             return true;
         }
-        
-        /// <summary>
-        /// 匹配原料序列
-        /// </summary>
-        /// <param name="requiredIngredient"></param>
-        /// <param name="actualIngredient"></param>
-        /// <returns></returns>
-        public static bool CompareIngredientsArray(string[]? requiredIngredient, string[]? actualIngredient)
-        {
-            // 如果 x 和 y 其中一个为 null，只有在两个都为 null 时才返回 true
-            if (requiredIngredient == null || actualIngredient == null)
-                return requiredIngredient == actualIngredient;
 
-            // 如果长度不同，则直接返回 false
-            if (requiredIngredient.Length != actualIngredient.Length)
-                return false;
-
-            // 使用 CompareIngredients 比较每个元素
-            for (int i = 0; i < requiredIngredient.Length; i++)
-            {
-                if (!CraftingRecipesManager.CompareIngredients(requiredIngredient[i], actualIngredient[i]))
-                    return false;
-            }
-
-            return true;
-        }
-        
         /// <summary>
         /// 对原版工作方块寻找配方的简单封装，允许寻找零时配方
         /// </summary>

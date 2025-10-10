@@ -119,8 +119,14 @@ namespace RecipaediaEX.Implementation {
 
 
         public bool Match(IRecipe recipe) {
-            if (recipe is not FormattedRecipe formattedRecipe) return false;
-            return m_blockValue == formattedRecipe.ResultValue;
+            try {
+                int recipeResultValue = recipe.GetExtraValue("ResultBlockValue", 0);
+                return recipeResultValue != 0 && m_blockValue == recipeResultValue;
+            }
+            catch (Exception ex) {
+                Engine.Log.Error("BlockItem.Match error, probably becauce the problem of IRecipe.GetExtraValue(\"ResultBlockValue\"): " + ex);
+                return false;
+            }
         }
         public bool IsIngredient(IRecipe recipe) {
             if (recipe is not FormattedRecipe formattedRecipe) return false;
