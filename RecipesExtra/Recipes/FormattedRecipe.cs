@@ -3,6 +3,7 @@ using RecipaediaEX.ComponentsExtra;
 using System.Collections.Generic;
 using TemplatesDatabase;
 using ZLinq;
+using System;
 
 namespace RecipaediaEX.Implementation {
     public abstract class FormattedRecipe : IRecipe {
@@ -23,6 +24,7 @@ namespace RecipaediaEX.Implementation {
         public string Description;
 
         public string Message;
+        public bool LogErrorOnMatchFail = false;
         public HashSet<string[]> TransformedIngredients = new();
         
         public ValuesDictionary ExtraValues = new();
@@ -34,10 +36,18 @@ namespace RecipaediaEX.Implementation {
         int IRecipe.DisplayOrder => DisplayOrder;
 
         public virtual bool Match(IRecipe actual) {
-            if (actual is not FormattedRecipe formattedRecipe) return false;
-            return TransformedIngredients.AsValueEnumerable().Any(
-                ingredients => CompareIngredientsArray(ingredients, formattedRecipe.Ingredients)
-            );
+            try {
+                if (actual is not FormattedRecipe formattedRecipe) return false;
+                return TransformedIngredients.AsValueEnumerable().Any(
+                    ingredients => CompareIngredientsArray(ingredients, formattedRecipe.Ingredients)
+                );
+            }
+            catch(Exception e) {
+                if (LogErrorOnMatchFail) {
+                    Engine.Log.Error("[RecipaediaEX]Formatted Recipe Match Error: " + e);
+                }
+                return false;
+            }
         }
         public virtual bool CompareIngredientsArray(string[]? requiredIngredient, string[]? actualIngredient) {
             if (requiredIngredient == null || actualIngredient == null)

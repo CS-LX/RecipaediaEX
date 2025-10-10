@@ -50,7 +50,7 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
 
         public new int m_furnaceSize;
 
-        public new string[] m_matchedIngredients = new string[9];
+        public new string[] m_matchedIngredients = new string[36];
 
         public override float m_fireTimeRemaining { get; set; }
 
