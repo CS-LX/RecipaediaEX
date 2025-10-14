@@ -1,17 +1,66 @@
-﻿using System;
+﻿using Game;
+using System;
 using System.Collections.Generic;
+using System.Security.Principal;
+using System.Text;
 using System.Xml.Linq;
-using Game;
 using XmlUtilities;
 using ZLinq;
 
 namespace RecipaediaEX.Implementation {
-    [RecipeReader([typeof(OriginalCraftingRecipe), typeof(OriginalSmeltingRecipe)])]
-    public class FormattedRecipeReader : IRecipeReader {
-        public IRecipe LoadRecipe(XElement item) {
+    /// <summary>
+    /// <para>默认的配方文件读取器，读取所有的.cr文件</para>
+    /// <para>模组如果建立新的配方文件，尽可能避免.cr后缀名，避免配方意外地被其他模组交叉读取</para>
+    /// <para>此读取器优先级是0</para>
+    /// </summary>
+    public abstract class XmlRecipesLoader : IRecipesLoader {
+        public List<XElement> XElements { get; set; } = new();
+        public string ControlledFileExtensionName;
+        public List<IRecipe> RecipeListFromLoader = new();
+        public virtual void Initialize() {
+            if (string.IsNullOrEmpty(ControlledFileExtensionName)) return;
+            foreach (ModEntity modEntity in ModsManager.ModList) {
+                modEntity.GetFiles(ControlledFileExtensionName, (_, stream) => {
+                    XElement xElement = XmlUtils.LoadXmlFromStream(stream, Encoding.UTF8, true);
+                    if ((xElement != null)) {
+                        XElements.Add(xElement);
+                    }
+                });
+            }
+        }
+        public virtual IEnumerable<IRecipe> GetRecipes() {
+            RecipeListFromLoader.Clear();
+            foreach (var xElement in XElements) {
+                try {
+                    LoadRecipeItems(xElement);
+                }
+                catch(Exception e) {
+                    Engine.Log.Error($"[RecipaediaEX.XmlRecipesLoader]Error loading Recipe Item{xElement.ToString()}");
+                    Engine.Log.Error(e);
+                }
+            }
+            return RecipeListFromLoader;
+        }
+        public virtual int Order => 0;
+
+        /// <summary>
+        /// 读取配方xml中Recipe开头的条目
+        /// </summary>
+        protected virtual void LoadRecipeItems(XElement recipesXml) {
+            if (recipesXml == null) return;
+            foreach (XElement element in recipesXml.Elements()) {
+                if (element.Name.LocalName == "Recipe") {
+                    RecipeListFromLoader.Add(ReadFormattedRecipe(element));
+                }
+                else {
+                    LoadRecipeItems(element);
+                }
+            }
+        }
+        protected virtual IRecipe ReadFormattedRecipe(XElement item) {
             float requiredHeatLevel = XmlUtils.GetAttributeValue<float>(item, "RequiredHeatLevel");
             FormattedRecipe craftingRecipe = requiredHeatLevel > 0 ? new OriginalSmeltingRecipe() : new OriginalCraftingRecipe();
-			string attributeValue = XmlUtils.GetAttributeValue<string>(item, "Result");
+            string attributeValue = XmlUtils.GetAttributeValue<string>(item, "Result");
             string desc = XmlUtils.GetAttributeValue<string>(item, "Description");
             if (desc.StartsWith("[")
                 && desc.EndsWith("]")
@@ -61,7 +110,7 @@ namespace RecipaediaEX.Implementation {
                 }
             }
             craftingRecipe.PreTransformIngredients();
-			return craftingRecipe;
+            return craftingRecipe;
         }
     }
 }

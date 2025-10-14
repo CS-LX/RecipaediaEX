@@ -15,8 +15,6 @@ namespace RecipaediaEX
     public static class RecipaediaEXManager
     {
         public static List<IRecipe> m_recipes = [];
-        public static Dictionary<string, IRecipeReader> m_readers = [];
-        public static List<Assembly> m_scannedAssembliesForReaders = [];
 
         /// <summary>
         /// 所有配方的集合
@@ -24,73 +22,38 @@ namespace RecipaediaEX
         public static List<IRecipe> Recipes => m_recipes;
 
         public static void Initialize() {
-            m_recipes.Clear();
-            m_readers.Clear();
-            //获取所有配方解析器
-            GetRecipeReaders();
-            //读取所有mod中的.cr文件
-            List<XElement> recipesItems = RecipesLoadManager.RecipesItems;
-            //解析配方
-            LoadRecipesData(recipesItems);
-            RecipaediaEXManager.Recipes.RemoveAll(r => r == null);
-        }
-
-        #region 内部方法
-        /// <summary>
-        /// 获取配方解析器
-        /// </summary>
-        static void GetRecipeReaders() {
-            foreach (Assembly item in TypeCache.LoadedAssemblies.AsValueEnumerable().Where(a => !TypeCache.IsKnownSystemAssembly(a))) {
-                if (!m_scannedAssembliesForReaders.Contains(item)) {
-                    foreach (TypeInfo definedType in item.DefinedTypes) {
-                        RecipeReaderAttribute customAttribute = definedType.GetCustomAttribute<RecipeReaderAttribute>();
-                        if (customAttribute != null) {
-                            Type[] types = customAttribute.Types;
-                            foreach (var type in types) {
-                                m_readers[type.FullName] = (IRecipeReader)Activator.CreateInstance(definedType.AsType());
-                            }
-                        }
-                    }
-                    m_scannedAssembliesForReaders.Add(item);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 解析配方条目xml
-        /// </summary>
-        /// <param name="items"></param>
-        static void LoadRecipesData(List<XElement> items) {
-            foreach (var item in items) {
+            Recipes.Clear();
+            foreach (IRecipesLoader loader in RecipesLoadManager.RecipesLoaders) {
                 try {
-                    bool flag = false;
-                    //ModsManager.HookAction("OnCraftingRecipeDecode", modLoader =>
-                    //{
-                    //    modLoader.OnCraftingRecipeDecode(m_recipes, item, out flag);
-                    //    return flag;
-                    //});
-                    if (flag == false) {
-                        IRecipe craftingRecipe = ReadRecipeItem(item);
-                        m_recipes.Add(craftingRecipe);
-                    }
+                    loader.Initialize();
                 }
-                catch (Exception e) {
+                catch(Exception e){
+                    Log.Error($"[RecipaediaEX] {loader.GetType().FullName} initialize failed!");
                     Log.Error(e);
                 }
             }
+            ResetRecipes();
         }
 
         /// <summary>
-        /// 解析单个配方xml至IRecipe
+        /// 进入存档后，由于方块ID变动，因此需要提醒所有mod重置配方表
         /// </summary>
-        /// <param name="item"></param>
-        /// <returns></returns>
-        static IRecipe ReadRecipeItem(XElement item) {
-            bool hasAttributes = ModsManager.HasAttribute(item, (name) => name == "Type", out XAttribute xAttribute);
-            bool isSmelting = ModsManager.HasAttribute(item, (name) => name == "RequiredHeatLevel", out XAttribute xAttribute2) && float.Parse(xAttribute2.Value) > 0;
-            string type = !hasAttributes ? (isSmelting ? typeof(OriginalSmeltingRecipe).FullName : typeof(OriginalCraftingRecipe).FullName) : xAttribute.Value;
-            return m_readers[type].LoadRecipe(item);
+        public static void ResetRecipes() {
+            Recipes.Clear();
+            foreach (IRecipesLoader loader in RecipesLoadManager.RecipesLoaders) {
+                try {
+                    var recipesInLoader = loader.GetRecipes();
+                    m_recipes.AddRange(recipesInLoader);
+                }
+                catch (Exception e) {
+                    Log.Error($"[RecipaediaEX] {loader.GetType().FullName} GetRecipes failed!");
+                    Log.Error(e);
+                }
+            }
+            Recipes.RemoveAll(r => r == null);
         }
+
+        #region 内部方法
         #endregion
 
         #region 对外方法
