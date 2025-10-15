@@ -138,7 +138,8 @@ namespace RecipaediaEX.UI {
 
             //显示Crafter
             m_currentCrafterButton = recipeDescriptor.GetCrafterButton(recipe);
-            m_crafterButtonsCanvas.Children.Add(m_currentCrafterButton);
+            if(m_currentCrafterButton != null)
+                m_crafterButtonsCanvas.Children.Add(m_currentCrafterButton);
         }
 
         public void HideCurrentDescriptor() {
