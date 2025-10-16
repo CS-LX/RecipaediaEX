@@ -120,8 +120,8 @@ namespace RecipaediaEX.Implementation {
 
         public bool Match(IRecipe recipe) {
             try {
-                int[] recipeResultValue = recipe.GetExtraValue("MatchedResultBlockValues", new int[0]);
-                return recipeResultValue.Contains(m_blockValue);
+                int[] recipeResultValue = recipe.GetExtraValue("MatchedResultBlockValues", Array.Empty<int>());
+                return recipeResultValue.AsValueEnumerable().Contains(m_blockValue);
             }
             catch (Exception ex) {
                 Engine.Log.Error("BlockItem.Match error, probably becauce the problem of IRecipe.GetExtraValue(\"MatchedResultBlockValues\"): " + ex);

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 using Engine;
@@ -103,7 +102,7 @@ namespace RecipaediaEX.UI {
                 m_detailsButton.Text = LanguageControl.Get("ContentWidgets", nameof(RecipaediaScreen), "1");
             }
             if (selectedItem != null && m_detailsButton.IsClicked) {
-                ScreensManager.SwitchScreen(selectedItem.DetailScreenName, selectedItem, m_blocksList.Items.Cast<IRecipaediaItem>().ToList());
+                ScreensManager.SwitchScreen(selectedItem.DetailScreenName, selectedItem, m_blocksList.Items.AsValueEnumerable().Cast<IRecipaediaItem>().ToList());
             }
 
             //退出逻辑
@@ -161,7 +160,7 @@ namespace RecipaediaEX.UI {
 
         public void OnBlocksListItemClicked(object item) {//实现条目双击跳转详情页逻辑
             if (m_blocksList.SelectedItem == item && item is IRecipaediaItem selectedItem) {
-                ScreensManager.SwitchScreen(selectedItem.DetailScreenName, selectedItem, m_blocksList.Items.Cast<IRecipaediaItem>().ToList());
+                ScreensManager.SwitchScreen(selectedItem.DetailScreenName, selectedItem, m_blocksList.Items.AsValueEnumerable().Cast<IRecipaediaItem>().ToList());
             }
         }
     }
