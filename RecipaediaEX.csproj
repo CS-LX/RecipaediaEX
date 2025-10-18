@@ -15,11 +15,6 @@
 	  <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 	  <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
-		<DebugType>none</DebugType>
-		<DebugSymbols>false</DebugSymbols>
-		<GenerateDependencyFile>false</GenerateDependencyFile>
-	</PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
@@ -30,8 +25,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
+    <DebugType>none</DebugType>
     <Optimize>true</Optimize>
+	  <DebugSymbols>false</DebugSymbols>
+	  <GenerateDependencyFile>false</GenerateDependencyFile>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
