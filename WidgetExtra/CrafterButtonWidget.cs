@@ -1,5 +1,7 @@
 ﻿using Engine;
 using Game;
+using RecipaediaEX.Implementation;
+using System.Collections.Generic;
 using ZLinq;
 
 namespace RecipaediaEX.UI {
@@ -121,6 +123,15 @@ namespace RecipaediaEX.UI {
                     m_belongingScreen.SwitchToNewRecipe(newItems.ToList(), 0);
                 }
             }
+        }
+
+        public static CrafterButtonWidget GetDefaultWidget(IRecipe recipe, RecipaediaEXRecipesScreen belongingScreen) {
+            if (RecipesCrafterManager.Crafters.TryGetValue(recipe, out List<int> crafterIDs) && crafterIDs.Count > 0) {
+                BlockCrafterButtonWidget blockCrafterButtonWidget = new();
+                blockCrafterButtonWidget.SetCrafters(crafterIDs.AsValueEnumerable().Select(x => new BlockItem(BlocksManager.Blocks[Terrain.ExtractContents(x)], 0, x)).OfType<IRecipaediaItem>().ToArray(), belongingScreen);
+                return blockCrafterButtonWidget;
+            }
+            return null;
         }
     }
 }

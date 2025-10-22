@@ -66,12 +66,7 @@ namespace RecipaediaEX.Implementation {
         }
 
         public override CrafterButtonWidget GetCrafterButton(IRecipe recipe) {
-            if (RecipesCrafterManager.Crafters.TryGetValue(recipe, out List<int> crafterIDs) && crafterIDs.Count > 0) {
-                BlockCrafterButtonWidget blockCrafterButtonWidget = new();
-                blockCrafterButtonWidget.SetCrafters(crafterIDs.AsValueEnumerable().Select(x => new BlockItem(BlocksManager.Blocks[Terrain.ExtractContents(x)], 0, x)).OfType<IRecipaediaItem>().ToArray(), m_belongingScreen);
-                return blockCrafterButtonWidget;
-            }
-            return null;
+           return CrafterButtonWidget.GetDefaultWidget(recipe, m_belongingScreen);
         }
     }
 }

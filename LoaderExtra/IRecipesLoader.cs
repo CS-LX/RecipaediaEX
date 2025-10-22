@@ -5,7 +5,7 @@ using Game;
 
 namespace RecipaediaEX {
     /// <summary>
-    /// 为Mod提供自定义读取配方xml文件的好东西
+    /// 为Mod提供自定义读取配方xml文件的东西
     /// </summary>
     public interface IRecipesLoader {
         /// <summary>
