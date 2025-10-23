@@ -11,6 +11,6 @@ namespace RecipaediaEX {
         /// <param name="blockValue">这个方块的特殊值方块的完整值</param>
         /// <param name="recipeType">配方类型</param>
         /// <returns></returns>
-        public bool IsCrafter(int blockValue, Type recipeType);
+        bool IsCrafter(int blockValue, Type recipeType);
     }
 }

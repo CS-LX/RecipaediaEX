@@ -9,19 +9,19 @@ namespace RecipaediaEX.UI {
         /// <summary>
         /// RecipaediaEXDescriptionScreen展示的名称
         /// </summary>
-        public string Name { get; }
+        string Name { get; }
         /// <summary>
         /// RecipaediaEXDescriptionScreen展示的图标
         /// </summary>
-        public Widget Icon { get; }
+        Widget Icon { get; }
         /// <summary>
         /// RecipaediaEXDescriptionScreen展示的详细信息
         /// </summary>
-        public string Description { get; }
+        string Description { get; }
         /// <summary>
         /// RecipaediaEXDescriptionScreen展示的属性
         /// </summary>
         /// <returns></returns>
-        public Dictionary<string, string> GetProperties();
+        Dictionary<string, string> GetProperties();
     }
 }

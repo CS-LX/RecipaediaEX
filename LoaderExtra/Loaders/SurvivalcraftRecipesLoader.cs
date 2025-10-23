@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace RecipaediaEX.LoaderExtra.Loaders {
+namespace RecipaediaEX.Implementation {
     public class SurvivalcraftRecipesLoader : XmlRecipesLoader {
         public override void Initialize() {
             XElement survivalcraftRecipesElement = ContentManager.Get<XElement>("CraftingRecipes");

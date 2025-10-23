@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace RecipaediaEX.LoaderExtra.Loaders {
+namespace RecipaediaEX.Implementation {
     /// <summary>
     /// 读取所有以.cr为后缀名的文件配方
     /// </summary>

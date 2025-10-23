@@ -10,11 +10,11 @@ namespace RecipaediaEX.UI {
         /// <summary>
         /// 列表的条目大小
         /// </summary>
-        public float ListItemSize { get; }
+        float ListItemSize { get; }
 
         /// <summary>
         /// 列表的平铺方向
         /// </summary>
-        public LayoutDirection ListDirection { get; }
+        LayoutDirection ListDirection { get; }
     }
 }
