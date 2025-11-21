@@ -161,7 +161,4 @@
 	<ItemGroup>
 	  <EmbeddedResource Remove="RTest\**" />
 	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="RecipesExtra\Readers\" />
-	</ItemGroup>
 </Project>

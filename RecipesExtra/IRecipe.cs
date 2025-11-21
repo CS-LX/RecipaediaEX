@@ -9,6 +9,11 @@
         int DisplayOrder { get; }
 
         /// <summary>
+        /// 匹配的优先级，越高越先被匹配上
+        /// </summary>
+        int MatchPriority { get; }
+
+        /// <summary>
         /// 是否与其他配方匹配
         /// </summary>
         /// <param name="actual">实际上的配方(玩家放入的)</param>

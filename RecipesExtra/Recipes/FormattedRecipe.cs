@@ -24,7 +24,11 @@ namespace RecipaediaEX.Implementation {
         public string Description;
 
         public string Message;
+
         public bool LogErrorOnMatchFail = false;
+
+        public virtual int MatchPriority => 0;
+
         public HashSet<string[]> TransformedIngredients = new();
         
         public ValuesDictionary ExtraValues = new();

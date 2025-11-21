@@ -63,7 +63,7 @@ namespace RecipaediaEX
         /// <param name="actual">玩家实际放置在生产方块中的配方</param>
         /// <returns>符合条件的第一个配方，如果没有则返回null</returns>
         public static IRecipe FindMatchingRecipe(IRecipe actual) {
-            return m_recipes.AsValueEnumerable().FirstOrDefault(x => x.Match(actual));
+            return m_recipes.AsValueEnumerable().Where(x => x.Match(actual)).OrderBy(x => x.MatchPriority).FirstOrDefault();
         }
         /// <summary>
         /// 寻找完整的配方以获得产物
@@ -97,7 +97,7 @@ namespace RecipaediaEX
         /// <param name="actual">玩家实际放置在生产方块中的配方</param>
         /// <returns>符合条件的所有配方</returns>
         public static IRecipe[] FindMatchingRecipes(IRecipe actual) {
-            return m_recipes.AsValueEnumerable().Where(x => x.Match(actual)).ToArray();
+            return m_recipes.AsValueEnumerable().Where(x => x.Match(actual)).OrderBy(x => x.MatchPriority).ToArray();
         }
         #endregion
     }
