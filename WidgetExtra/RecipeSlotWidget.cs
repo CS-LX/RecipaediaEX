@@ -2,6 +2,7 @@
 using Engine;
 using Game;
 using ZLinq;
+using ZLinq.Linq;
 
 namespace RecipaediaEX.UI {
     /// <summary>
@@ -134,7 +135,7 @@ namespace RecipaediaEX.UI {
             IRecipaediaItem recipaediaItem = RecipaediaItems[Index];
             if (recipaediaItem is IRecipaediaRecipeItem recipeItem) {
                 if (SlotMode == Mode.Ingredient) {
-                    var newItems = RecipaediaEXManager.Recipes.AsValueEnumerable().Where(x => recipeItem.Match(x));
+                    ValueEnumerable<ListWhere<IRecipe>, IRecipe> newItems = RecipaediaEXManager.Recipes.AsValueEnumerable().Where(x => recipeItem.Match(x));
                     if (newItems.Count() > 0) {
                         AudioManager.PlaySound("Audio/UI/ButtonClick", 1, 0, 0);
                         m_belongingScreen.SwitchToNewRecipe(newItems.ToList(), 0);
@@ -149,7 +150,7 @@ namespace RecipaediaEX.UI {
         public virtual void OnSpecialClicked() {
             IRecipaediaItem recipaediaItem = RecipaediaItems[Index];
             if (recipaediaItem is IRecipaediaRecipeItem recipeItem2) {
-                var newItems = RecipaediaEXManager.Recipes.AsValueEnumerable().Where(x => recipeItem2.IsIngredient(x));
+                ValueEnumerable<ListWhere<IRecipe>, IRecipe> newItems = RecipaediaEXManager.Recipes.AsValueEnumerable().Where(x => recipeItem2.IsIngredient(x));
                 if (newItems.Count() > 0) {
                     AudioManager.PlaySound("Audio/UI/ButtonClick", 1, 0, 0);
                     m_belongingScreen.SwitchToNewRecipe(newItems.ToList(), 0);

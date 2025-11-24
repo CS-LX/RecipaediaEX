@@ -36,7 +36,7 @@ namespace RecipaediaEX.Implementation {
             int num = Terrain.ExtractContents(value);
             Block block = BlocksManager.Blocks[num];
             XElement node2 = ContentManager.Get<XElement>("Widgets/RecipaediaItem");
-            var obj = (ContainerWidget)Widget.LoadWidget(this, node2, null);
+            ContainerWidget obj = (ContainerWidget)Widget.LoadWidget(this, node2, null);
             obj.Children.Find<BlockIconWidget>("RecipaediaItem.Icon").Value = value;
             obj.Children.Find<LabelWidget>("RecipaediaItem.Text").Text = block.GetDisplayName(null, value);
             string description = block.GetDescription(value);

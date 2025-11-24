@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using Engine;
 using Game;
 using ZLinq;
+using ZLinq.Linq;
 
 namespace RecipaediaEX.UI {
     public class RecipaediaEXDescriptionScreen : Screen
@@ -51,7 +52,7 @@ namespace RecipaediaEX.UI {
 		public override void Enter(object[] parameters)
 		{
 			IRecipaediaItem item = (IRecipaediaItem)parameters[0];
-            var valueList = ((IList<IRecipaediaItem>)parameters[1]).AsValueEnumerable();
+            ValueEnumerable<FromEnumerable<IRecipaediaItem>, IRecipaediaItem> valueList = ((IList<IRecipaediaItem>)parameters[1]).AsValueEnumerable();
             if (valueList.Any(x => x is not IRecipaediaDescriptionItem)) {
                 throw new ArgumentException("All element in the list must be IRecipaediaDescriptionItem");
             }

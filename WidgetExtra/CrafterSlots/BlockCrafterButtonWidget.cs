@@ -53,7 +53,7 @@ namespace RecipaediaEX.Implementation {
         public static string GetDisplayName(Block block, int value) {
             int data = Terrain.ExtractData(value);
             string bn = $"{block.GetType().Name}:{data}";
-            if (LanguageControl.TryGetBlock(bn, "DisplayName", out var result)) {
+            if (LanguageControl.TryGetBlock(bn, "DisplayName", out string result)) {
                 return result;
             }
             return "";

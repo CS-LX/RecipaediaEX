@@ -29,7 +29,7 @@ namespace RecipaediaEX.Implementation {
         public string Description => m_block.GetDescription(m_blockValue);
         public Dictionary<string, string> GetProperties() {
             int value = m_blockValue;
-            var dictionary = new Dictionary<string, string>();
+            Dictionary<string, string> dictionary = new Dictionary<string, string>();
             int num = Terrain.ExtractContents(value);
             Block block = BlocksManager.Blocks[num];
             if (block.GetEmittedLightAmount(value) > 0) {
@@ -133,7 +133,7 @@ namespace RecipaediaEX.Implementation {
 
             int data = Terrain.ExtractData(m_blockValue);
             string actualIngredient = m_block.GetCraftingId(m_blockValue) + ":" + data.ToString(CultureInfo.InvariantCulture);
-            foreach (var ingredient in formattedRecipe.Ingredients) {
+            foreach (string ingredient in formattedRecipe.Ingredients) {
                 if (CraftingRecipesManager.CompareIngredients(ingredient, actualIngredient)) return true;
             }
             return false;

@@ -39,7 +39,7 @@ namespace RecipaediaEX.UI {
 
         public override void Enter(object[] parameters) {
             IRecipaediaRecipeItem recipeItem = (IRecipaediaRecipeItem)parameters[0];
-            m_recipes.AddRange(RecipaediaEXManager.Recipes.AsValueEnumerable().Where(x => recipeItem.Match(x)).ToArray());
+            m_recipes.AddRange(RecipaediaEXManager.Recipes.AsValueEnumerable().Where(x => recipeItem.Match(x)).OrderBy(x => x.DisplayOrder).ToArray());
             GetDescriptors();
         }
 
@@ -82,13 +82,13 @@ namespace RecipaediaEX.UI {
                     foreach (TypeInfo definedType in item.DefinedTypes) {
                         Type descriptorType = definedType.AsType();
                         if (!descriptorType.IsAssignableTo(typeof(RecipeDescriptor))) continue;//跳过不是继承RecipeDescriptor的
-                        var recipeDescriptorAttribute = definedType.GetCustomAttribute<RecipeDescriptorAttribute>();
+                        RecipeDescriptorAttribute recipeDescriptorAttribute = definedType.GetCustomAttribute<RecipeDescriptorAttribute>();
                         if (recipeDescriptorAttribute == null) continue;
 
-                        foreach (var recipeType in recipeDescriptorAttribute.RecipeTypes) {
+                        foreach (Type recipeType in recipeDescriptorAttribute.RecipeTypes) {
                             int newOrder = recipeDescriptorAttribute.Order;
                             string newName = descriptorType.Name;
-                            if (!m_descriptorTypes.TryGetValue(recipeType, out var existing)) {
+                            if (!m_descriptorTypes.TryGetValue(recipeType, out (Type type, int order) existing)) {
                                 m_descriptorTypes[recipeType] = (descriptorType, newOrder);
                                 continue;
                             }

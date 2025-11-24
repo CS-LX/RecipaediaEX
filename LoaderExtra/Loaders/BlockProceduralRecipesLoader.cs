@@ -17,7 +17,7 @@ namespace RecipaediaEX.Implementation {
             List<IRecipe> recipes = new();
             for (int i = 0; i < BlocksManager.Blocks.Count(); i++) {
                 Block block = BlocksManager.Blocks[i];
-                var originalRecipes = block.GetProceduralCraftingRecipes();
+                IEnumerable<CraftingRecipe> originalRecipes = block.GetProceduralCraftingRecipes();
                 foreach (CraftingRecipe originalRecipe in originalRecipes) {
                     float requiredHeatLevel = originalRecipe.RequiredHeatLevel;
 

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Game;
 using ZLinq;
+using ZLinq.Linq;
 
 namespace RecipaediaEX {
     public static class RecipesCrafterManager {
@@ -23,17 +24,17 @@ namespace RecipaediaEX {
         /// </summary>
         static void GetRecipeCrafters() {
             m_crafters.Clear();
-            var recipes = RecipaediaEXManager.Recipes.AsValueEnumerable();
+            ValueEnumerable<FromList<IRecipe>, IRecipe> recipes = RecipaediaEXManager.Recipes.AsValueEnumerable();
             if (recipes.Count() == 0) return;
-            var blocks = BlocksManager.Blocks.AsValueEnumerable();
+            ValueEnumerable<FromArray<Block>, Block> blocks = BlocksManager.Blocks.AsValueEnumerable();
 
-            foreach (var recipe in recipes) {
-                foreach (var block in blocks) {
+            foreach (IRecipe recipe in recipes) {
+                foreach (Block block in blocks) {
                     if (block is not ICrafter crafter) continue;
                     IEnumerable<int> blockValues = block.GetCreativeValues();
-                    foreach (var blockValue in blockValues) {
+                    foreach (int blockValue in blockValues) {
                         if (!crafter.IsCrafter(blockValue, recipe.GetType())) continue;
-                        if (!m_crafters.TryGetValue(recipe, out var crafters)) {
+                        if (!m_crafters.TryGetValue(recipe, out List<int> crafters)) {
                             crafters = new List<int>();
                             m_crafters[recipe] = crafters;
                         }

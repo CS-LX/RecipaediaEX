@@ -42,7 +42,7 @@ namespace RecipaediaEX
             Recipes.Clear();
             foreach (IRecipesLoader loader in RecipesLoadManager.RecipesLoaders) {
                 try {
-                    var recipesInLoader = loader.GetRecipes();
+                    IEnumerable<IRecipe> recipesInLoader = loader.GetRecipes();
                     m_recipes.AddRange(recipesInLoader);
                 }
                 catch (Exception e) {

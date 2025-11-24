@@ -30,7 +30,7 @@ namespace RecipaediaEX.Implementation {
         }
         public virtual IEnumerable<IRecipe> GetRecipes() {
             RecipeListFromLoader.Clear();
-            foreach (var xElement in XElements) {
+            foreach (XElement xElement in XElements) {
                 try {
                     LoadRecipeItems(xElement);
                 }
@@ -64,7 +64,7 @@ namespace RecipaediaEX.Implementation {
             string desc = XmlUtils.GetAttributeValue<string>(item, "Description");
             if (desc.StartsWith("[")
                 && desc.EndsWith("]")
-                && LanguageControl.TryGetBlock(attributeValue, "CRDescription:" + desc.Substring(1, desc.Length - 2), out var r))
+                && LanguageControl.TryGetBlock(attributeValue, "CRDescription:" + desc.Substring(1, desc.Length - 2), out string r))
                 desc = r;
             craftingRecipe.ResultValue = CraftingRecipesManager.DecodeResult(attributeValue);
             craftingRecipe.SetExtraValue("MatchedResultBlockValues", new int[] { craftingRecipe.ResultValue });
@@ -79,7 +79,7 @@ namespace RecipaediaEX.Implementation {
             craftingRecipe.Description = desc;
             craftingRecipe.Message = XmlUtils.GetAttributeValue<string>(item, "Message", null);
             craftingRecipe.DisplayOrder = XmlUtils.GetAttributeValue<int>(item, "DisplayOrder", 0);
-            var dictionary = new Dictionary<char, string>();
+            Dictionary<char, string> dictionary = new Dictionary<char, string>();
             foreach (XAttribute item2 in from a in item.Attributes().AsValueEnumerable() where a.Name.LocalName.Length == 1 && char.IsLower(a.Name.LocalName[0]) select a) {
                 CraftingRecipesManager.DecodeIngredient(item2.Value, out string craftingId, out int? data);
                 if (BlocksManager.FindBlocksByCraftingId(craftingId).Length == 0) {

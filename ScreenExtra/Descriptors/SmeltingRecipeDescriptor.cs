@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using ZLinq;
+using ZLinq.Linq;
 
 namespace RecipaediaEX.Implementation {
     [RecipeDescriptor([typeof(OriginalSmeltingRecipe)])]
@@ -29,7 +30,7 @@ namespace RecipaediaEX.Implementation {
             m_resultWidget = Children.Find<BlockRecipeSlotWidget>("SmeltingRecipeDescriptor.Result");
             for (int i = 0; i < m_gridWidget.RowsCount; i++) {
                 for (int j = 0; j < m_gridWidget.ColumnsCount; j++) {
-                    var widget = new BlockRecipeSlotWidget();
+                    BlockRecipeSlotWidget widget = new BlockRecipeSlotWidget();
                     m_gridWidget.Children.Add(widget);
                     m_gridWidget.SetWidgetCell(widget, new Point2(j, i));
                 }
@@ -43,13 +44,13 @@ namespace RecipaediaEX.Implementation {
             m_descriptionWidget.Text = smeltingRecipe.Description;
             m_nameWidget.IsVisible = true;
             m_descriptionWidget.IsVisible = true;
-            foreach (var widget in m_gridWidget.Children) {
-                var child = (BlockRecipeSlotWidget)widget;
+            foreach (Widget widget in m_gridWidget.Children) {
+                BlockRecipeSlotWidget child = (BlockRecipeSlotWidget)widget;
                 Point2 widgetCell = m_gridWidget.GetWidgetCell(child);
                 string ingredient = smeltingRecipe.Ingredients[widgetCell.X + (widgetCell.Y * 6)];
                 if (!string.IsNullOrEmpty(ingredient)) {
                     CraftingRecipesManager.DecodeIngredient(ingredient, out string craftingId, out int? data);
-                    var blocksByCraftingId = BlocksManager.FindBlocksByCraftingId(craftingId).AsValueEnumerable();
+                    ValueEnumerable<FromArray<Block>, Block> blocksByCraftingId = BlocksManager.FindBlocksByCraftingId(craftingId).AsValueEnumerable();
                     child.SetIngredients(blocksByCraftingId.Select(x => new BlockItem(x, 0, Terrain.MakeBlockValue(x.BlockIndex, 0, data.GetValueOrDefault(0)))).OfType<IRecipaediaItem>().ToArray(), m_belongingScreen);
                 }
             }
@@ -60,8 +61,8 @@ namespace RecipaediaEX.Implementation {
         public override void Hide() {
             m_nameWidget.IsVisible = false;
             m_descriptionWidget.IsVisible = false;
-            foreach (var widget in m_gridWidget.Children) {
-                var child2 = (BlockRecipeSlotWidget)widget;
+            foreach (Widget widget in m_gridWidget.Children) {
+                BlockRecipeSlotWidget child2 = (BlockRecipeSlotWidget)widget;
                 child2.ClearContents();
             }
             m_resultWidget.ClearContents();

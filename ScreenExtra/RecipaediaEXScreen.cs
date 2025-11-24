@@ -54,7 +54,7 @@ namespace RecipaediaEX.UI {
 
         public override void Update() {
             base.Update();
-            var recipes = RecipaediaEXManager.Recipes.AsValueEnumerable();
+            ValueEnumerable<FromList<IRecipe>, IRecipe> recipes = RecipaediaEXManager.Recipes.AsValueEnumerable();
             //类别有改变，刷新列表
             if (m_selectedCategory != m_listCategory) {
                 m_listCategory = m_selectedCategory;
@@ -123,7 +123,7 @@ namespace RecipaediaEX.UI {
                         if (typeof(IRecipaediaCategoryProvider).IsAssignableFrom(type) && !type.IsAbstract && !type.IsInterface) {
                             // 确保类型没有被实例化过
                             if (!m_categoryProviderCache.ContainsKey(type)) {
-                                var instance = (IRecipaediaCategoryProvider)Activator.CreateInstance(type);
+                                IRecipaediaCategoryProvider instance = (IRecipaediaCategoryProvider)Activator.CreateInstance(type);
                                 m_categoryProviderCache.Add(type, instance);
                             }
                         }
@@ -134,8 +134,8 @@ namespace RecipaediaEX.UI {
         }
 
         public void GetCategories() {//获取类别
-            foreach (var provider in m_categoryProviderCache.Values) {
-                foreach (var category in provider.GetCategories()) {
+            foreach (IRecipaediaCategoryProvider provider in m_categoryProviderCache.Values) {
+                foreach (IRecipaediaCategory category in provider.GetCategories()) {
                     m_categories[category.Id] = category;
                     m_categoriesName.Add(category.Id);
                 }
@@ -153,7 +153,7 @@ namespace RecipaediaEX.UI {
             Widget CurrentFunc(object o) => selectedCategory.ItemWidgetFactory(o as IRecipaediaItem);
             m_blocksList.ItemWidgetFactory = CurrentFunc;
 
-            foreach (var item in selectedCategory.GetItems()) {
+            foreach (IRecipaediaItem item in selectedCategory.GetItems()) {
                 m_blocksList.AddItem(item);
             }
         }

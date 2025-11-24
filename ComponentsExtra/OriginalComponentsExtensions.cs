@@ -45,7 +45,7 @@ namespace RecipaediaEX.ComponentsExtra {
                 1 => 1,
                 _ => throw new ArgumentOutOfRangeException(nameof(ingredientsBeforeScaling))
             };
-            var ingredientsAfterScaling = new string[36];
+            string[] ingredientsAfterScaling = new string[36];
             for (int i = 0; i < width; i++) {
                 for(int j = 0; j < width; j++) {
                     ingredientsAfterScaling[i * 6 + j] = ingredientsBeforeScaling[i * width + j];
@@ -106,7 +106,7 @@ namespace RecipaediaEX.ComponentsExtra {
         /// <typeparam name="T">配方的类型</typeparam>
         /// <returns>配方实例</returns>
         public static T FindCraftingRecipe<T>(SubsystemTerrain subsystemTerrain, T actual) where T : FormattedRecipe, new() {
-            foreach (var block in BlocksManager.Blocks) {
+            foreach (Block block in BlocksManager.Blocks) {
                 CraftingRecipe adHocCraftingRecipe = block.GetAdHocCraftingRecipe(subsystemTerrain, actual.Ingredients, actual.RequiredHeatLevel, actual.RequiredPlayerLevel);
                 if (adHocCraftingRecipe != null) {
                     T formattedRecipe = adHocCraftingRecipe.ToFormattedRecipe<T>();
