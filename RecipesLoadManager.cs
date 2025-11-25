@@ -47,7 +47,7 @@ namespace RecipaediaEX {
             }
             RecipesLoaders.Sort((a, b) => a.Order.CompareTo(b.Order));
             if(DebugLogModToRecipeFileLoaders) {
-                Engine.Log.Information($"[RecipaediaEX]读取到{RecipesLoaders.Count}个RecipesLoader");
+                Engine.Log.Information($"[RecipaediaEX] {RecipesLoaders.Count} loaders loaded");
                 foreach (IRecipesLoader loader in RecipesLoaders) {
                     Engine.Log.Information($"[RecipaediaEX] RecipeFileLoader {loader.GetType().FullName}");
                 }

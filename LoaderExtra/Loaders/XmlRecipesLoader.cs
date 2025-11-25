@@ -15,12 +15,12 @@ namespace RecipaediaEX.Implementation {
     /// </summary>
     public abstract class XmlRecipesLoader : IRecipesLoader {
         public List<XElement> XElements { get; set; } = new();
-        public string ControlledFileExtensionName;
+        public string ControlledFileExtension { get; protected set; }
         public List<IRecipe> RecipeListFromLoader = new();
         public virtual void Initialize() {
-            if (string.IsNullOrEmpty(ControlledFileExtensionName)) return;
+            if (string.IsNullOrEmpty(ControlledFileExtension)) return;
             foreach (ModEntity modEntity in ModsManager.ModList) {
-                modEntity.GetFiles(ControlledFileExtensionName, (_, stream) => {
+                modEntity.GetFiles(ControlledFileExtension, (_, stream) => {
                     XElement xElement = XmlUtils.LoadXmlFromStream(stream, Encoding.UTF8, true);
                     if ((xElement != null)) {
                         XElements.Add(xElement);
@@ -91,7 +91,7 @@ namespace RecipaediaEX.Implementation {
                 }
                 dictionary.Add(item2.Name.LocalName[0], item2.Value);
             }
-            string[] array = item.Value.Trim().Split(new string[] { "\n" }, StringSplitOptions.None);
+            string[] array = item.Value.Trim().Split(["\n"], StringSplitOptions.None);
             for (int i = 0; i < array.Length; i++) {
                 int num = array[i].IndexOf('"');
                 int num2 = array[i].LastIndexOf('"');
