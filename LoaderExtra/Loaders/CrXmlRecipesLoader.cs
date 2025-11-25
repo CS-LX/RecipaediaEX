@@ -13,9 +13,6 @@ namespace RecipaediaEX.Implementation {
     /// </summary>
     class CrXmlRecipesLoader : XmlRecipesLoader, IRecipesLoader {
         public override int Order => -10;
-        public override void Initialize() {
-            ControlledFileExtension = ".cr";
-            base.Initialize();
-        }
+        public override string ControlledFileExtension => ".cr";
     }
 }

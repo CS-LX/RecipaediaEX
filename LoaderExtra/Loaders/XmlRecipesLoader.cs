@@ -15,7 +15,7 @@ namespace RecipaediaEX.Implementation {
     /// </summary>
     public abstract class XmlRecipesLoader : IRecipesLoader {
         public List<XElement> XElements { get; set; } = new();
-        public string ControlledFileExtension { get; protected set; }
+        public virtual string ControlledFileExtension => ".cr";
         public List<IRecipe> RecipeListFromLoader = new();
         public virtual void Initialize() {
             if (string.IsNullOrEmpty(ControlledFileExtension)) return;
