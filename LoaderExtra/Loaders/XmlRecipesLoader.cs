@@ -14,9 +14,14 @@ namespace RecipaediaEX.Implementation {
     /// <para>此读取器优先级是0</para>
     /// </summary>
     public abstract class XmlRecipesLoader : IRecipesLoader {
-        public List<XElement> XElements { get; set; } = new();
+        public List<XElement> XElements { get; } = new();
+
         public virtual string ControlledFileExtension => ".cr";
+
+        public virtual int Order => 0;
+
         public List<IRecipe> RecipeListFromLoader = new();
+
         public virtual void Initialize() {
             if (string.IsNullOrEmpty(ControlledFileExtension)) return;
             foreach (ModEntity modEntity in ModsManager.ModList) {
@@ -28,6 +33,7 @@ namespace RecipaediaEX.Implementation {
                 });
             }
         }
+
         public virtual IEnumerable<IRecipe> GetRecipes() {
             RecipeListFromLoader.Clear();
             foreach (XElement xElement in XElements) {
@@ -41,7 +47,6 @@ namespace RecipaediaEX.Implementation {
             }
             return RecipeListFromLoader;
         }
-        public virtual int Order => 0;
 
         /// <summary>
         /// 读取配方xml中Recipe开头的条目
@@ -57,7 +62,8 @@ namespace RecipaediaEX.Implementation {
                 }
             }
         }
-        protected virtual IRecipe ReadFormattedRecipe(XElement item) {
+
+        public virtual IRecipe ReadFormattedRecipe(XElement item) {
             float requiredHeatLevel = XmlUtils.GetAttributeValue<float>(item, "RequiredHeatLevel");
             FormattedRecipe craftingRecipe = requiredHeatLevel > 0 ? new OriginalSmeltingRecipe() : new OriginalCraftingRecipe();
             string attributeValue = XmlUtils.GetAttributeValue<string>(item, "Result");
