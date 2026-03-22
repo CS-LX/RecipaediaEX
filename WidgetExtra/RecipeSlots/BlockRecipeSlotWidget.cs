@@ -11,9 +11,12 @@ namespace RecipaediaEX.Implementation {
         public LabelWidget m_blockNameLabel;
         public int m_count;
         public Func<BlockRecipeSlotWidget, bool> IsCountVisible = DefaultIsCountVisible;
-        public static bool DefaultIsCountVisible(BlockRecipeSlotWidget blockRecipeSlotWidget) {
-            return blockRecipeSlotWidget.m_count != 0;
-        }
+        public Func<int, string> CountTextProcesser = DefaultCountTextProcesser;
+
+        public static bool DefaultIsCountVisible(BlockRecipeSlotWidget blockRecipeSlotWidget) => blockRecipeSlotWidget.m_count != 0 && blockRecipeSlotWidget.SlotMode == Mode.Result;
+
+        public static string DefaultCountTextProcesser(int count) => count.ToString();
+
         public BlockRecipeSlotWidget() : base() {
             m_iconWidget = new BlockIconWidget { Size = new Vector2(64, 64), HorizontalAlignment = WidgetAlignment.Center, VerticalAlignment = WidgetAlignment.Center };
             Children.Add(m_iconWidget);
@@ -41,8 +44,8 @@ namespace RecipaediaEX.Implementation {
             m_iconWidget.Light = 15;
             m_iconWidget.IsVisible = true;
 
-            m_countLabel.IsVisible = SlotMode == Mode.Result;
-            m_countLabel.Text = m_count.ToString();
+            m_countLabel.IsVisible = IsCountVisible(this);
+            m_countLabel.Text = CountTextProcesser(m_count);
 
             if (blockItem.m_block is AirBlock) {
                 m_blockNameLabel.Text = "";
