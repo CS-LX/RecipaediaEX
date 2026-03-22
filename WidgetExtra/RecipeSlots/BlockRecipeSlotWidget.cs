@@ -29,7 +29,7 @@ namespace RecipaediaEX.Implementation {
         public override void MeasureOverride(Vector2 parentAvailableSize) {
             base.MeasureOverride(parentAvailableSize);
             m_blockNameLabel.IsVisible = m_interactableWidget.IsMouseHover;
-            m_countLabel.IsVisible = IsCountVisible(this);
+            if (IsCountVisible != null) m_countLabel.IsVisible = IsCountVisible(this);
         }
 
         public override void SetResult(IRecipaediaItem result, RecipaediaEXRecipesScreen belongingScreen, params object[] additionalData) {
@@ -44,8 +44,8 @@ namespace RecipaediaEX.Implementation {
             m_iconWidget.Light = 15;
             m_iconWidget.IsVisible = true;
 
-            m_countLabel.IsVisible = IsCountVisible(this);
-            m_countLabel.Text = CountTextProcesser(m_count);
+            if (IsCountVisible != null) m_countLabel.IsVisible = IsCountVisible(this);
+            if (CountTextProcesser != null) m_countLabel.Text = CountTextProcesser(m_count);
 
             if (blockItem.m_block is AirBlock) {
                 m_blockNameLabel.Text = "";
