@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Xml.Linq;
@@ -18,6 +18,7 @@ namespace RecipaediaEX.UI {
         public string m_selectedCategory;
         public string m_listCategory = string.Empty;
         public Func<object, Widget> m_currentItemWidgetFactory;
+        public bool m_categoriesInitialized;
 
         //界面
         public LabelWidget m_categoryLabel;
@@ -48,7 +49,10 @@ namespace RecipaediaEX.UI {
             if (ScreensManager.PreviousScreen != ScreensManager.FindScreen<Screen>("RecipaediaRecipes") && ScreensManager.PreviousScreen != ScreensManager.FindScreen<Screen>("RecipaediaDescription")) {
                 m_previousScreen = ScreensManager.PreviousScreen;
             }
-            GetCategories();
+            if (!m_categoriesInitialized || m_categories.Count == 0 || m_categoriesName.Count == 0) {
+                GetCategories();
+                m_categoriesInitialized = true;
+            }
             m_selectedCategory = m_categoriesName.Contains(m_selectedCategory) ? m_selectedCategory : m_categoriesName[0];
         }
 
@@ -134,13 +138,16 @@ namespace RecipaediaEX.UI {
         }
 
         public void GetCategories() {//获取类别
+            m_categories.Clear();
+            m_categoriesName.Clear();
             foreach (IRecipaediaCategoryProvider provider in m_categoryProviderCache.Values) {
                 foreach (IRecipaediaCategory category in provider.GetCategories()) {
                     m_categories[category.Id] = category;
-                    m_categoriesName.Add(category.Id);
+                    if (!m_categoriesName.Contains(category.Id)) {
+                        m_categoriesName.Add(category.Id);
+                    }
                 }
             }
-            m_categoriesName = m_categoriesName.AsValueEnumerable().Distinct().ToList();
         }
 
         public void PopulateBlocksList() {
