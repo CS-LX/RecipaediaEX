@@ -33,7 +33,7 @@ namespace RecipaediaEX {
                     if (block is not ICrafter crafter) continue;
                     IEnumerable<int> blockValues = block.GetCreativeValues();
                     foreach (int blockValue in blockValues) {
-                        if (!crafter.IsCrafter(blockValue, recipe.GetType())) continue;
+                        if (!crafter.IsCrafter(blockValue, recipe)) continue;
                         if (!m_crafters.TryGetValue(recipe, out List<int> crafters)) {
                             crafters = new List<int>();
                             m_crafters[recipe] = crafters;
