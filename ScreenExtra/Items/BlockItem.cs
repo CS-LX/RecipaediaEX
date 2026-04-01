@@ -124,7 +124,7 @@ namespace RecipaediaEX.Implementation {
                 return recipeResultValue.AsValueEnumerable().Contains(m_blockValue);
             }
             catch (Exception ex) {
-                Engine.Log.Error("BlockItem.Match error, probably becauce the problem of IRecipe.GetExtraValue(\"MatchedResultBlockValues\"): " + ex);
+                Engine.Log.Error("BlockItem.Match error, probably because the problem of IRecipe.GetExtraValue(\"MatchedResultBlockValues\"): " + ex);
                 return false;
             }
         }
