@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("RecipaediaEX")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("HP")]
+[assembly: AssemblyCompany("Linxium")]
 [assembly: AssemblyProduct("RecipaediaEX")]
-[assembly: AssemblyCopyright("Copyright © HP 2023")]
+[assembly: AssemblyCopyright("Copyright © Linxium 2026")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
