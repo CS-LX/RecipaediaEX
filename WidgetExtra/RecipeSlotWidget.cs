@@ -12,6 +12,7 @@ namespace RecipaediaEX.UI {
         public InteractableWidget m_interactableWidget;//可点击界面
         public RectangleWidget m_highlightedRect;
         public RecipaediaEXRecipesScreen m_belongingScreen;
+        public BevelledRectangleWidget m_bevelRect;
 
         /// <summary>
         /// 此格子的模式
@@ -48,6 +49,7 @@ namespace RecipaediaEX.UI {
             Children.Add(m_interactableWidget);
             m_highlightedRect = new RectangleWidget { FillColor = new Engine.Color(30, 30, 30, 100), OutlineColor = new Engine.Color(48, 48, 48), OutlineThickness = 1f };
             Children.Add(m_highlightedRect);
+            m_bevelRect = Children.Find<BevelledRectangleWidget>("BevelRect");
         }
 
         public override void Update() {
