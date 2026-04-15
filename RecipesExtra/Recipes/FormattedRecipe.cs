@@ -70,7 +70,7 @@ namespace RecipaediaEX.Implementation {
             return true;
         }
         public virtual bool CompareIngredient(string requiredIngredient, string actualIngredient, bool throwOnNotSpecified = false) {
-            if (!throwOnNotSpecified) {//如果不想CraftingRecipesManager.CompareIngredients报错，则预先检查报错case，如果符合报错case则直接返回false
+            if (!throwOnNotSpecified && actualIngredient != null) {//如果不想CraftingRecipesManager.CompareIngredients报错，则预先检查报错case，如果符合报错case则直接返回false
                 CraftingRecipesManager.DecodeIngredient(actualIngredient, out string craftingId2, out int? data2);
                 if (!data2.HasValue) return false;
             }
