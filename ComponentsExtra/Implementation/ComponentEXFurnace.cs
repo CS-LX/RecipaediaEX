@@ -221,6 +221,7 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
         }
 
         public new virtual OriginalSmeltingRecipe FindSmeltingRecipe(float heatLevel) {
+            int?[] actualIngredients = new int?[36];
             if (heatLevel > 0f) {
                 for (int i = 0; i < m_furnaceSize; i++) {
                     int slotValue = GetSlotValue(i);
@@ -229,16 +230,19 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                     if (GetSlotCount(i) > 0) {
                         Block block = BlocksManager.Blocks[num];
                         m_matchedIngredients[i] = block.GetCraftingId(slotValue) + ":" + num2.ToString(CultureInfo.InvariantCulture);
+                        actualIngredients[i] = slotValue;
                     }
                     else {
                         m_matchedIngredients[i] = null;
+                        actualIngredients[i] = null;
                     }
                 }
                 ComponentPlayer componentPlayer = FindInteractingPlayer();
                 float playerLevel = componentPlayer?.PlayerData.Level ?? 1f;
-                OriginalSmeltingRecipe actualSmeltingRecipe = new OriginalSmeltingRecipe { Ingredients = m_matchedIngredients, RequiredHeatLevel = heatLevel, RequiredPlayerLevel = playerLevel };
+                OriginalSmeltingRecipe actualSmeltingRecipe = new() { Ingredients = m_matchedIngredients, RequiredHeatLevel = heatLevel, RequiredPlayerLevel = playerLevel };
                 actualSmeltingRecipe.SetExtraValue("Project", Project);
                 actualSmeltingRecipe.SetExtraValue<IInventory>("Inventory", this);
+                actualSmeltingRecipe.SetExtraValue("ActualIngredients", actualIngredients);
                 OriginalSmeltingRecipe craftingRecipe = OriginalComponentsExtensions.FindCraftingRecipe(m_subsystemTerrain, actualSmeltingRecipe);
                 if (craftingRecipe != null
                     && craftingRecipe.ResultValue != 0) {

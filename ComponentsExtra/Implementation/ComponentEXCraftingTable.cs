@@ -111,6 +111,7 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
 
         public override void UpdateCraftingResult(bool recipeRefindNeeded) {
             int num = int.MaxValue;
+            int?[] actualIngredients = new int?[36];
             for (int i = 0; i < m_craftingGridSize; i++) {
                 for (int j = 0; j < m_craftingGridSize; j++) {
                     int num2 = i + (j * 6);
@@ -120,9 +121,11 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                     if (slotCount > 0) {
                         m_matchedIngredients[num2] = ToCraftingID(slotValue);
                         num = MathUtils.Min(num, slotCount);
+                        actualIngredients[num2] = slotValue;
                     }
                     else {
                         m_matchedIngredients[num2] = null;
+                        actualIngredients[num2] = null;
                     }
                 }
             }
@@ -133,6 +136,7 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                 OriginalCraftingRecipe actualCraftingRecipe = new() { Ingredients = m_matchedIngredients, RequiredHeatLevel = 0f, RequiredPlayerLevel = playerLevel };
                 actualCraftingRecipe.SetExtraValue("Project", Project);
                 actualCraftingRecipe.SetExtraValue<IInventory>("Inventory", this);
+                actualCraftingRecipe.SetExtraValue("ActualIngredients", actualIngredients);
                 craftingRecipe = OriginalComponentsExtensions.FindCraftingRecipe(Project.FindSubsystem<SubsystemTerrain>(), actualCraftingRecipe);
             }
             else {
