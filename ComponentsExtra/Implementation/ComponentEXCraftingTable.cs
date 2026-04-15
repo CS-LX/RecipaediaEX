@@ -116,12 +116,9 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                     int num2 = i + (j * 6);
                     int slotIndex = i + (j * m_craftingGridSize);
                     int slotValue = GetSlotValue(slotIndex);
-                    int num3 = Terrain.ExtractContents(slotValue);
-                    int num4 = Terrain.ExtractData(slotValue);
                     int slotCount = GetSlotCount(slotIndex);
                     if (slotCount > 0) {
-                        Block block = BlocksManager.Blocks[num3];
-                        m_matchedIngredients[num2] = block.GetCraftingId(slotValue) + ":" + num4.ToString(CultureInfo.InvariantCulture);
+                        m_matchedIngredients[num2] = ToCraftingID(slotValue);
                         num = MathUtils.Min(num, slotCount);
                     }
                     else {
@@ -213,6 +210,13 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                 slot.Value = value;
                 slot.Count += count;
             }
+        }
+
+        public virtual string ToCraftingID(int slotValue) {
+            int content = Terrain.ExtractContents(slotValue);
+            int data = Terrain.ExtractData(slotValue);
+            Block block = BlocksManager.Blocks[content];
+            return block.GetCraftingId(slotValue) + ":" + data.ToString(CultureInfo.InvariantCulture);
         }
     }
 }
