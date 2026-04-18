@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Engine;
 using Game;
 using GameEntitySystem;
@@ -24,19 +24,19 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
 
         public new SubsystemParticles m_subsystemParticles;
 
-        public new bool StopFuelWhenNoRecipeIsActive = true;
+        public new virtual bool StopFuelWhenNoRecipeIsActive => true;
 
-        public new float SmeltSpeed = 0.15f;
+        public new virtual float SmeltSpeed => 0.15f;
 
         /// <summary>
         /// 没有燃料时，冶炼进度倒退速率
         /// </summary>
-        public new float SmeltProgressReductionSpeed = float.PositiveInfinity;
+        public new virtual float SmeltProgressReductionSpeed => float.PositiveInfinity;
 
         /// <summary>
         /// 使用燃料时，燃料实际补充的时间倍数
         /// </summary>
-        public new float FuelTimeEfficiency = 1f;
+        public new virtual float FuelTimeEfficiency => 1f;
 
         /// <summary>
         /// 燃料耗尽时间
@@ -89,61 +89,88 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
         }
 
         public new void Update(float dt) {
+            OnBeginUpdate(dt);
             m_fuelEndTime = (float)(m_subsystemGameInfo.TotalElapsedGameTime + m_fireTimeRemaining);
+            UpdateFireState(dt);
+            if (m_updateSmeltingRecipe) {
+                UpdateSmeltingRecipe();
+            }
+            HandleNoActiveRecipe();
+            TryAcquireFuelForRecipe();
+            HandleNoFireState(dt);
+            ProcessSmelting(dt);
+            OnBeforeReplaceFurnace(dt);
+            int cellValue = m_componentBlockEntity.BlockValue;
+            ReplaceFurnace(cellValue);
+            OnEndUpdate(dt);
+        }
+
+        protected virtual void OnBeginUpdate(float dt) {
+        }
+
+        protected virtual void UpdateFireState(float dt) {
             if (m_heatLevel > 0f) {
                 m_fireTimeRemaining = MathUtils.Max(0f, m_fireTimeRemaining - dt);
                 if (m_fireTimeRemaining == 0f) {
                     m_heatLevel = 0f;
                 }
             }
-            if (m_updateSmeltingRecipe) {
-                UpdateSmeltingRecipe();
+        }
+
+        protected virtual void HandleNoActiveRecipe() {
+            if (m_smeltingRecipe == null && StopFuelWhenNoRecipeIsActive) {
+                StopSmelting(true);
             }
-            if (m_smeltingRecipe == null) //没有配方，处理空烧
-            {
-                if (StopFuelWhenNoRecipeIsActive) {
-                    StopSmelting(true);
-                }
+        }
+
+        protected virtual void TryAcquireFuelForRecipe() {
+            if (m_smeltingRecipe != null && m_fireTimeRemaining <= 0f) {
+                TryAcquireFuel();
             }
-            if (m_smeltingRecipe != null
-                && m_fireTimeRemaining <= 0f) {
-                UseFuel();
-            }
+        }
+
+        protected virtual bool TryAcquireFuel() {
+            return UseFuel();
+        }
+
+        protected virtual void HandleNoFireState(float dt) {
             if (m_fireTimeRemaining <= 0f) {
                 m_smeltingRecipe = null;
-                m_smeltingProgress = MathUtils.Max(0, m_smeltingProgress - dt * SmeltProgressReductionSpeed);
+                m_smeltingProgress = MathUtils.Max(0f, m_smeltingProgress - dt * SmeltProgressReductionSpeed);
             }
-            if (m_smeltingRecipe != null) {
-                m_smeltingProgress = MathUtils.Min(m_smeltingProgress + (SmeltSpeed * dt), 1f);
-                if (m_smeltingProgress >= 1f) {
-                    for (int i = 0; i < m_furnaceSize; i++) {
-                        if (m_slots[i].Count > 0) {
-                            m_slots[i].Count--;
-                        }
-                    }
-                    m_slots[ResultSlotIndex].Value = m_smeltingRecipe.ResultValue;
-                    m_slots[ResultSlotIndex].Count += m_smeltingRecipe.ResultCount;
-                    if (m_smeltingRecipe.RemainsValue != 0
-                        && m_smeltingRecipe.RemainsCount > 0) {
-                        m_slots[RemainsSlotIndex].Value = m_smeltingRecipe.RemainsValue;
-                        m_slots[RemainsSlotIndex].Count += m_smeltingRecipe.RemainsCount;
-                    }
-                    m_smeltingRecipe = null;
-                    m_smeltingProgress = 0f;
-                    m_updateSmeltingRecipe = true;
+        }
+
+        protected virtual void ProcessSmelting(float dt) {
+            if (m_smeltingRecipe == null) {
+                return;
+            }
+            m_smeltingProgress = MathUtils.Min(m_smeltingProgress + (SmeltSpeed * dt), 1f);
+            if (m_smeltingProgress >= 1f) {
+                ConsumeIngredientsAndCreateResult();
+            }
+        }
+
+        protected virtual void ConsumeIngredientsAndCreateResult() {
+            for (int i = 0; i < m_furnaceSize; i++) {
+                if (m_slots[i].Count > 0) {
+                    m_slots[i].Count--;
                 }
             }
-            //根据熔炉燃烧状态调整方块值
-            int cellValue = m_componentBlockEntity.BlockValue;
-            if (m_heatLevel > 0f) {
-                m_fireParticleSystem.m_position = m_componentBlockEntity.Position + new Vector3(0.5f, 0.2f, 0.5f);
-                if (Terrain.ExtractContents(cellValue) == FurnaceBlock.Index) m_subsystemParticles.AddParticleSystem(m_fireParticleSystem);
-                m_componentBlockEntity.BlockValue = Terrain.ReplaceContents(cellValue, LitFurnaceBlock.Index);
+            m_slots[ResultSlotIndex].Value = m_smeltingRecipe.ResultValue;
+            m_slots[ResultSlotIndex].Count += m_smeltingRecipe.ResultCount;
+            if (m_smeltingRecipe.RemainsValue != 0 && m_smeltingRecipe.RemainsCount > 0) {
+                m_slots[RemainsSlotIndex].Value = m_smeltingRecipe.RemainsValue;
+                m_slots[RemainsSlotIndex].Count += m_smeltingRecipe.RemainsCount;
             }
-            else {
-                if (Terrain.ExtractContents(cellValue) == LitFurnaceBlock.Index) m_subsystemParticles.RemoveParticleSystem(m_fireParticleSystem);
-                m_componentBlockEntity.BlockValue = Terrain.ReplaceContents(cellValue, FurnaceBlock.Index);
-            }
+            m_smeltingRecipe = null;
+            m_smeltingProgress = 0f;
+            m_updateSmeltingRecipe = true;
+        }
+
+        protected virtual void OnBeforeReplaceFurnace(float dt) {
+        }
+
+        protected virtual void OnEndUpdate(float dt) {
         }
 
         /// <summary>
@@ -151,22 +178,24 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
         /// </summary>
         public override void UpdateSmeltingRecipe() {
             m_updateSmeltingRecipe = false;
-            float heatLevel = 0f;
-            if (m_heatLevel > 0f) {
-                heatLevel = m_heatLevel;
-            }
-            else {
-                Slot slot = m_slots[FuelSlotIndex];
-                if (slot.Count > 0) {
-                    int num = Terrain.ExtractContents(slot.Value);
-                    heatLevel = BlocksManager.Blocks[num].GetFuelHeatLevel(slot.Value);
-                }
-            }
+            float heatLevel = GetHeatLevelForRecipeSearch();
             OriginalSmeltingRecipe craftingRecipe = FindSmeltingRecipe(heatLevel);
             if (craftingRecipe != m_smeltingRecipe) {
                 m_smeltingRecipe = (craftingRecipe != null && craftingRecipe.ResultValue != 0) ? craftingRecipe : null;
                 m_smeltingProgress = 0f;
             }
+        }
+
+        protected virtual float GetHeatLevelForRecipeSearch() {
+            if (m_heatLevel > 0f) {
+                return m_heatLevel;
+            }
+            Slot slot = m_slots[FuelSlotIndex];
+            if (slot.Count > 0) {
+                int num = Terrain.ExtractContents(slot.Value);
+                return BlocksManager.Blocks[num].GetFuelHeatLevel(slot.Value);
+            }
+            return 0f;
         }
 
         /// <summary>
@@ -191,6 +220,22 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                 }
             }
             return false;
+        }
+
+        /// <summary>
+        /// 替换熔炉状态
+        /// </summary>
+        /// <param name="cellValue"></param>
+        public virtual void ReplaceFurnace(int cellValue) {
+            if (m_heatLevel > 0f) {
+                m_fireParticleSystem.m_position = m_componentBlockEntity.Position + new Vector3(0.5f, 0.2f, 0.5f);
+                if (Terrain.ExtractContents(cellValue) == FurnaceBlock.Index) m_subsystemParticles.AddParticleSystem(m_fireParticleSystem);
+                m_componentBlockEntity.BlockValue = Terrain.ReplaceContents(cellValue, LitFurnaceBlock.Index);
+            }
+            else {
+                if (Terrain.ExtractContents(cellValue) == LitFurnaceBlock.Index) m_subsystemParticles.RemoveParticleSystem(m_fireParticleSystem);
+                m_componentBlockEntity.BlockValue = Terrain.ReplaceContents(cellValue, FurnaceBlock.Index);
+            }
         }
 
         public override void StopSmelting(bool resetProgress) {
