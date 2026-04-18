@@ -223,17 +223,36 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
         }
 
         /// <summary>
-        /// 替换熔炉状态
+        /// 每帧同步熔炉外观：先更新火焰粒子，再写入方块值（子类通常只覆写 <see cref="ReplaceFurnaceBlock"/>）。
         /// </summary>
-        /// <param name="cellValue"></param>
         public virtual void ReplaceFurnace(int cellValue) {
+            UpdateFurnaceFireParticles(cellValue);
+            ReplaceFurnaceBlock(cellValue);
+        }
+
+        /// <summary>
+        /// 根据当前燃烧状态更新原版熔炉火焰粒子（与方块内容 ID 无关的工业炉可在子类中覆写为空或自定义）。
+        /// </summary>
+        protected virtual void UpdateFurnaceFireParticles(int cellValue) {
             if (m_heatLevel > 0f) {
                 m_fireParticleSystem.m_position = m_componentBlockEntity.Position + new Vector3(0.5f, 0.2f, 0.5f);
-                if (Terrain.ExtractContents(cellValue) == FurnaceBlock.Index) m_subsystemParticles.AddParticleSystem(m_fireParticleSystem);
+                if (Terrain.ExtractContents(cellValue) == FurnaceBlock.Index) {
+                    m_subsystemParticles.AddParticleSystem(m_fireParticleSystem);
+                }
+            }
+            else if (Terrain.ExtractContents(cellValue) == LitFurnaceBlock.Index) {
+                m_subsystemParticles.RemoveParticleSystem(m_fireParticleSystem);
+            }
+        }
+
+        /// <summary>
+        /// 将方块值替换为点燃/未点燃的原版熔炉方块。
+        /// </summary>
+        protected virtual void ReplaceFurnaceBlock(int cellValue) {
+            if (m_heatLevel > 0f) {
                 m_componentBlockEntity.BlockValue = Terrain.ReplaceContents(cellValue, LitFurnaceBlock.Index);
             }
             else {
-                if (Terrain.ExtractContents(cellValue) == LitFurnaceBlock.Index) m_subsystemParticles.RemoveParticleSystem(m_fireParticleSystem);
                 m_componentBlockEntity.BlockValue = Terrain.ReplaceContents(cellValue, FurnaceBlock.Index);
             }
         }
