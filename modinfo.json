@@ -1,12 +1,11 @@
 ﻿{
   "Name": "RecipaediaEX",
-  "Logo": "icon.png",
   "Version": "2.0.0.0-preview2",
-  "ApiVersion": "1.8",
+  "ApiVersion": "1.9.0.2",
   "Description": "全新的配方系统",
   "ScVersion": "2.4",
   "Link": "https://space.bilibili.com/312642275",
   "Author": "LX..,镁生素",
   "PackageName": "com.recipaediaex",
-  "Dependencies": []
+  "Dependencies": {}
 }
