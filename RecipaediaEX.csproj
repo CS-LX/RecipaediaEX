@@ -148,9 +148,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="SurvivalcraftAPI.Engine" Version="1.8.2" />
-    <PackageReference Include="SurvivalcraftAPI.EntitySystem" Version="1.8.2" />
-    <PackageReference Include="SurvivalcraftAPI.Survivalcraft" Version="1.8.2" />
+    <PackageReference Include="SurvivalcraftAPI.Engine" Version="1.9.0.2" />
+    <PackageReference Include="SurvivalcraftAPI.EntitySystem" Version="1.9.0.2" />
+    <PackageReference Include="SurvivalcraftAPI.Survivalcraft" Version="1.9.0.2" />
     <PackageReference Include="ZLinq" Version="1.5.4" GeneratePathProperty="true" />
   </ItemGroup>
 	<ItemGroup>
