@@ -63,8 +63,7 @@
     <Compile Include="CrafterExtra\Crafters\FurnaceBlock.cs" />
     <Compile Include="CrafterExtra\ICrafter.cs" />
     <Compile Include="LoaderExtra\Loaders\BlockProceduralRecipesLoader.cs" />
-    <Compile Include="LoaderExtra\Loaders\CrXmlRecipesLoader.cs" />
-    <Compile Include="LoaderExtra\Loaders\SurvivalcraftRecipesLoader.cs" />
+    <Compile Include="LoaderExtra\Loaders\RegularRecipesLoader.cs" />
     <Compile Include="RecipaediaEXLoader.cs" />
     <Compile Include="LoaderExtra\IRecipesLoader.cs" />
     <Compile Include="LoaderExtra\Loaders\XmlRecipesLoader.cs" />
