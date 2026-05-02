@@ -2,6 +2,7 @@ using System.Globalization;
 using Engine;
 using Game;
 using GameEntitySystem;
+using RecipaediaEX.Events;
 using RecipaediaEX.Implementation;
 using TemplatesDatabase;
 using FurnaceBlock = Game.FurnaceBlock;
@@ -85,7 +86,20 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
 
         public override int RemoveSlotItems(int slotIndex, int count) {
             m_updateSmeltingRecipe = true;
-            return base.RemoveSlotItems(slotIndex, count);
+            int outputBlockValue = 0;
+            if (slotIndex == ResultSlotIndex) {
+                outputBlockValue = GetSlotValue(ResultSlotIndex);
+            }
+            int removed = base.RemoveSlotItems(slotIndex, count);
+            if (removed > 0 && slotIndex == ResultSlotIndex && outputBlockValue != 0) {
+                RecipaediaEventBus.CrafterOutputRemoved.Publish(new CrafterOutputRemovedEvent(
+                    Project,
+                    FindInteractingPlayer(),
+                    outputBlockValue,
+                    removed,
+                    CrafterInventorySurfaceKind.Furnace));
+            }
+            return removed;
         }
 
         public new void Update(float dt) {

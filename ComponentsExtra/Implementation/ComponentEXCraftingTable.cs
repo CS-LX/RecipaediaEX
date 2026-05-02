@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Globalization;
 using Engine;
 using Game;
 using GameEntitySystem;
+using RecipaediaEX.Events;
 using RecipaediaEX.Implementation;
 using TemplatesDatabase;
 
@@ -64,6 +65,7 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                         }
                     }
                     count = count / m_matchedRecipe.ResultCount * m_matchedRecipe.ResultCount;
+                    int outputBlockValue = GetSlotValue(ResultSlotIndex);
                     num = Base_RemoveSlotItems(slotIndex, count);
                     if (num > 0) {
                         for (int i = 0; i < 36; i++) {
@@ -80,6 +82,14 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                         ComponentPlayer componentPlayer = FindInteractingPlayer();
                         if (componentPlayer is { PlayerStats: not null }) {
                             componentPlayer.PlayerStats.ItemsCrafted += num;
+                        }
+                        if (outputBlockValue != 0) {
+                            RecipaediaEventBus.CrafterOutputRemoved.Publish(new CrafterOutputRemovedEvent(
+                                Project,
+                                componentPlayer,
+                                outputBlockValue,
+                                num,
+                                CrafterInventorySurfaceKind.CraftingTable));
                         }
                     }
                 }

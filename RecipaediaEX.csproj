@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.Net.Sdk">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -44,6 +44,9 @@
     <Compile Include="CrafterExtra\ICrafter.cs" />
     <Compile Include="LoaderExtra\Loaders\BlockProceduralRecipesLoader.cs" />
     <Compile Include="LoaderExtra\Loaders\RegularRecipesLoader.cs" />
+    <Compile Include="Events\CrafterOutputRemovedEvent.cs" />
+    <Compile Include="Events\EventChannel.cs" />
+    <Compile Include="Events\RecipaediaEventBus.cs" />
     <Compile Include="RecipaediaEXLoader.cs" />
     <Compile Include="LoaderExtra\IRecipesLoader.cs" />
     <Compile Include="LoaderExtra\Loaders\XmlRecipesLoader.cs" />
