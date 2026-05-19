@@ -147,7 +147,7 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                 actualCraftingRecipe.SetExtraValue("Project", Project);
                 actualCraftingRecipe.SetExtraValue<IInventory>("Inventory", this);
                 actualCraftingRecipe.SetExtraValue("ActualIngredients", actualIngredients);
-                craftingRecipe = OriginalComponentsExtensions.FindCraftingRecipe(Project.FindSubsystem<SubsystemTerrain>(), actualCraftingRecipe);
+                craftingRecipe = RecipaediaEXManager.FindMatchingRecipe<OriginalCraftingRecipe>(actualCraftingRecipe);
             }
             else {
                 craftingRecipe = m_matchedRecipe;

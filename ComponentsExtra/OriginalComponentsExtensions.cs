@@ -97,23 +97,5 @@ namespace RecipaediaEX.ComponentsExtra {
             }
             return true;
         }
-
-        /// <summary>
-        /// 对原版工作方块寻找配方的简单封装，允许寻找零时配方
-        /// </summary>
-        /// <param name="subsystemTerrain"></param>
-        /// <param name="actual">玩家放入的实际配方</param>
-        /// <typeparam name="T">配方的类型</typeparam>
-        /// <returns>配方实例</returns>
-        public static T FindCraftingRecipe<T>(SubsystemTerrain subsystemTerrain, T actual) where T : FormattedRecipe, new() {
-            foreach (Block block in BlocksManager.Blocks) {
-                CraftingRecipe adHocCraftingRecipe = block.GetAdHocCraftingRecipe(subsystemTerrain, actual.Ingredients, actual.RequiredHeatLevel, actual.RequiredPlayerLevel);
-                if (adHocCraftingRecipe != null) {
-                    T formattedRecipe = adHocCraftingRecipe.ToFormattedRecipe<T>();
-                    if (formattedRecipe.Match(actual)) return formattedRecipe;
-                }
-            }
-            return RecipaediaEXManager.FindMatchingRecipe<T>(actual);
-        }
     }
 }

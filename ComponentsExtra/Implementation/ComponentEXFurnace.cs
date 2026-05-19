@@ -321,7 +321,7 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                 actualSmeltingRecipe.SetExtraValue("Project", Project);
                 actualSmeltingRecipe.SetExtraValue<IInventory>("Inventory", this);
                 actualSmeltingRecipe.SetExtraValue("ActualIngredients", actualIngredients);
-                OriginalSmeltingRecipe craftingRecipe = OriginalComponentsExtensions.FindCraftingRecipe(m_subsystemTerrain, actualSmeltingRecipe);
+                OriginalSmeltingRecipe craftingRecipe = RecipaediaEXManager.FindMatchingRecipe<OriginalSmeltingRecipe>(actualSmeltingRecipe);
                 if (craftingRecipe != null
                     && craftingRecipe.ResultValue != 0) {
                     if (craftingRecipe.RequiredHeatLevel <= 0f) {
