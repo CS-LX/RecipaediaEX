@@ -4,6 +4,7 @@ using Game;
 using GameEntitySystem;
 using RecipaediaEX.Events;
 using RecipaediaEX.Implementation;
+using RecipaediaEX;
 using TemplatesDatabase;
 using FurnaceBlock = Game.FurnaceBlock;
 
@@ -318,9 +319,9 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                 ComponentPlayer componentPlayer = FindInteractingPlayer();
                 float playerLevel = componentPlayer?.PlayerData.Level ?? 1f;
                 OriginalSmeltingRecipe actualSmeltingRecipe = new() { Ingredients = m_matchedIngredients, RequiredHeatLevel = heatLevel, RequiredPlayerLevel = playerLevel };
-                actualSmeltingRecipe.SetExtraValue("Project", Project);
-                actualSmeltingRecipe.SetExtraValue<IInventory>("Inventory", this);
-                actualSmeltingRecipe.SetExtraValue("ActualIngredients", actualIngredients);
+                actualSmeltingRecipe.SetExtraValue(RecipeExtraKeys.Project, Project);
+                actualSmeltingRecipe.SetExtraValue<IInventory>(RecipeExtraKeys.Inventory, this);
+                actualSmeltingRecipe.SetExtraValue(RecipeExtraKeys.ActualIngredients, actualIngredients);
                 OriginalSmeltingRecipe craftingRecipe = RecipaediaEXManager.FindMatchingRecipe<OriginalSmeltingRecipe>(actualSmeltingRecipe);
                 if (craftingRecipe != null
                     && craftingRecipe.ResultValue != 0) {

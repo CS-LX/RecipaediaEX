@@ -1,4 +1,4 @@
-﻿using Game;
+using Game;
 using RecipaediaEX.ComponentsExtra;
 using System;
 using System.Collections.Generic;
@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using XmlUtilities;
+
+using RecipaediaEX;
 
 namespace RecipaediaEX.Implementation {
     public class BlockProceduralRecipesLoader: IRecipesLoader {
@@ -28,7 +30,7 @@ namespace RecipaediaEX.Implementation {
                     else {
                         craftingRecipe = originalRecipe.ToFormattedRecipe<OriginalCraftingRecipe>();
                     }
-                    craftingRecipe.SetExtraValue("MatchedResultBlockValues", new int[] { craftingRecipe.ResultValue });
+                    craftingRecipe.SetExtraValue(RecipeExtraKeys.MatchedResultBlockValues, new int[] { craftingRecipe.ResultValue });
                     recipes.Add(craftingRecipe);
                 }
             }

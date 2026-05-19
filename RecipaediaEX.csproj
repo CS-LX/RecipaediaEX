@@ -58,6 +58,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RecipaediaEXManager.cs" />
     <Compile Include="RecipesExtra\IRecipe.cs" />
+    <Compile Include="RecipesExtra\RecipeExtraKeys.cs" />
     <Compile Include="RecipesExtra\RecipeReaderAttribute.cs" />
     <Compile Include="RecipesExtra\Recipes\OriginalCraftingRecipe.cs" />
     <Compile Include="RecipesExtra\Recipes\FormattedRecipe.cs" />

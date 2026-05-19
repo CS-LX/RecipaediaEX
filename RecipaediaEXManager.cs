@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -12,8 +12,7 @@ using GameEntitySystem;
 using RecipaediaEX.Implementation;
 using ZLinq;
 
-namespace RecipaediaEX
-{
+namespace RecipaediaEX {
     public static class RecipaediaEXManager
     {
         public static List<IRecipe> m_recipes = [];
@@ -77,7 +76,7 @@ namespace RecipaediaEX
         /// <typeparam name="T">配方类型</typeparam>
         /// <returns>符合条件的第一个配方，如果没有则返回null</returns>
         public static T FindMatchingRecipe<T>(IRecipe actual) where T : class, IRecipe {
-            Project project = actual.GetExtraValue<Project>("Project", null);
+            Project project = actual.GetExtraValue<Project>(RecipeExtraKeys.Project, null);
             if (project != null) {
                 IRecipe dynamicRecipe = FindDynamicRecipe(actual, project);
                 if (dynamicRecipe != null) return dynamicRecipe as T;

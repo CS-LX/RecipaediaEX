@@ -5,6 +5,7 @@ using Game;
 using GameEntitySystem;
 using RecipaediaEX.Events;
 using RecipaediaEX.Implementation;
+using RecipaediaEX;
 using TemplatesDatabase;
 
 namespace RecipaediaEX.ComponentsExtra.Implementation {
@@ -144,9 +145,9 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
             OriginalCraftingRecipe craftingRecipe;
             if (recipeRefindNeeded) {
                 OriginalCraftingRecipe actualCraftingRecipe = new() { Ingredients = m_matchedIngredients, RequiredHeatLevel = 0f, RequiredPlayerLevel = playerLevel };
-                actualCraftingRecipe.SetExtraValue("Project", Project);
-                actualCraftingRecipe.SetExtraValue<IInventory>("Inventory", this);
-                actualCraftingRecipe.SetExtraValue("ActualIngredients", actualIngredients);
+                actualCraftingRecipe.SetExtraValue(RecipeExtraKeys.Project, Project);
+                actualCraftingRecipe.SetExtraValue<IInventory>(RecipeExtraKeys.Inventory, this);
+                actualCraftingRecipe.SetExtraValue(RecipeExtraKeys.ActualIngredients, actualIngredients);
                 craftingRecipe = RecipaediaEXManager.FindMatchingRecipe<OriginalCraftingRecipe>(actualCraftingRecipe);
             }
             else {

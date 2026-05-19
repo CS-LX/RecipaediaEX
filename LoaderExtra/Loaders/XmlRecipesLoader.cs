@@ -1,4 +1,4 @@
-﻿using Game;
+using Game;
 using System;
 using System.Collections.Generic;
 using System.Security.Principal;
@@ -6,6 +6,8 @@ using System.Text;
 using System.Xml.Linq;
 using XmlUtilities;
 using ZLinq;
+
+using RecipaediaEX;
 
 namespace RecipaediaEX.Implementation {
     /// <summary>
@@ -73,7 +75,7 @@ namespace RecipaediaEX.Implementation {
                 && LanguageControl.TryGetBlock(attributeValue, "CRDescription:" + desc.Substring(1, desc.Length - 2), out string r))
                 desc = r;
             craftingRecipe.ResultValue = CraftingRecipesManager.DecodeResult(attributeValue);
-            craftingRecipe.SetExtraValue("MatchedResultBlockValues", new int[] { craftingRecipe.ResultValue });
+            craftingRecipe.SetExtraValue(RecipeExtraKeys.MatchedResultBlockValues, new int[] { craftingRecipe.ResultValue });
             craftingRecipe.ResultCount = XmlUtils.GetAttributeValue<int>(item, "ResultCount");
             string attributeValue2 = XmlUtils.GetAttributeValue(item, "Remains", string.Empty);
             if (!string.IsNullOrEmpty(attributeValue2)) {

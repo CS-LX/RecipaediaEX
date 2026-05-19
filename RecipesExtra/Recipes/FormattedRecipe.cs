@@ -1,5 +1,6 @@
 using Game;
 using RecipaediaEX.ComponentsExtra;
+using RecipaediaEX;
 using System.Collections.Generic;
 using System.Linq;
 using TemplatesDatabase;
@@ -8,9 +9,6 @@ using System;
 
 namespace RecipaediaEX.Implementation {
     public abstract class FormattedRecipe : IRecipe {
-        public const string MatchedResultBlockValuesKey = "MatchedResultBlockValues";
-        public const string MatchedIngredientBlockValuesKey = "MatchedIngredientBlockValues";
-
         public int ResultValue;
 
         public int ResultCount;
@@ -103,7 +101,7 @@ namespace RecipaediaEX.Implementation {
         }
 
         public void UpdateMatchedIngredientBlockValues() {
-            SetExtraValue(MatchedIngredientBlockValuesKey, ExpandIngredientsToBlockValues(Ingredients));
+            SetExtraValue(RecipeExtraKeys.MatchedIngredientBlockValues, ExpandIngredientsToBlockValues(Ingredients));
         }
 
         public static int[] ExpandIngredientsToBlockValues(IEnumerable<string> ingredients) {

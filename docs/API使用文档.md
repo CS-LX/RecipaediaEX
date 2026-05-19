@@ -5,6 +5,7 @@
 ## 1. 核心概念
 
 - `IRecipe`：运行时配方对象，负责匹配逻辑与扩展数据。
+- `RecipeExtraKeys`：`IRecipe` Extra 约定键名常量集合。
 - `IRecipesLoader`：配方来源提供器，负责初始化与返回静态配方集。
 - `IDynamicRecipeLoader`：运行时动态配方提供器（如原版 AdHoc），不进入静态总表。
 - `RecipaediaEXManager`：配方容器与匹配入口。
@@ -31,8 +32,29 @@
 推荐约定：
 
 - 在配方里维护 `ValuesDictionary`。
-- 设置 `MatchedResultBlockValues`（`int[]`），用于图鉴产物条目 `Match`。
-- 设置 `MatchedIngredientBlockValues`（`int[]`），用于图鉴原料条目 `IsIngredient`；`FormattedRecipe` 在 `PreTransformIngredients()` 末尾会自动写入。
+- 键名使用 **`RecipeExtraKeys`**（`RecipesExtra/RecipeExtraKeys.cs`），勿手写字符串。
+- 图鉴相关：`MatchedResultBlockValues` / `MatchedIngredientBlockValues` / `MatchedResultFluidValues`（见下表）。
+- `FormattedRecipe` 在 `PreTransformIngredients()` 末尾会自动写入 `MatchedIngredientBlockValues`。
+
+#### `RecipeExtraKeys` 约定键一览
+
+| 常量 | 值类型 | 用途 |
+|------|--------|------|
+| `MatchedResultBlockValues` | `int[]` | 图鉴方块产物 `BlockItem.Match` |
+| `MatchedIngredientBlockValues` | `int[]` | 图鉴方块原料 `BlockItem.IsIngredient` |
+| `MatchedResultFluidValues` | `int[]` | 图鉴流体产物 `FluidItem.Match` |
+| `Project` | `Project` | `FindMatchingRecipe<T>` 触发动态配方链 |
+| `ActualIngredients` | `int?[]` | 槽位方块快照；`IECraftingRecipe` / `IESmeltingRecipe` 等匹配 |
+| `Inventory` | `IInventory` | 扩展工作台/熔炉发起匹配时的库存引用 |
+
+示例：
+
+```csharp
+recipe.SetExtraValue(RecipeExtraKeys.MatchedResultBlockValues, new[] { resultBlockValue });
+recipe.SetExtraValue(RecipeExtraKeys.MatchedIngredientBlockValues,
+    FormattedRecipe.ExpandIngredientToBlockValues("iron_ingot"));
+actual.SetExtraValue(RecipeExtraKeys.Project, project);
+```
 
 ### 2.2 `IRecipesLoader`
 
@@ -56,12 +78,12 @@
 
 - `FindMatchingRecipe(IRecipe actual)`：仅在静态配方表 `Recipes` 中查找。
 - `FindDynamicRecipe(IRecipe actual, Project project)`：仅询问 `IDynamicRecipeLoader` 链。
-- `FindMatchingRecipe<T>(IRecipe actual)`：若 `actual` 的 `ExtraValues` 含键 `"Project"`，先 `FindDynamicRecipe`，再查静态表。
+- `FindMatchingRecipe<T>(IRecipe actual)`：若 `actual` 的 `ExtraValues` 含 `RecipeExtraKeys.Project`，先 `FindDynamicRecipe`，再查静态表。
 - `TryFindMatchingRecipe<T>(IRecipe actual, out T recipe)`
 - `FindMatchingRecipes(IRecipe actual)`：仅静态表。
 - `ResetRecipes()`（方块 ID 变化后重建）
 
-扩展工作台/熔炉在构造 `actual` 时会 `SetExtraValue("Project", Project)`，因此经 `FindCraftingRecipe` / `FindMatchingRecipe<T>` 可自动解析 AdHoc。自定义机器需要 AdHoc 时请同样在 `actual` 上写入 `Project`。
+扩展工作台/熔炉在构造 `actual` 时会 `SetExtraValue(RecipeExtraKeys.Project, Project)`，因此经 `FindCraftingRecipe` / `FindMatchingRecipe<T>` 可自动解析 AdHoc。自定义机器需要 AdHoc 时请同样在 `actual` 上写入 `Project`。
 
 ### 2.4 动态配方（`IDynamicRecipeLoader` / `DynamicLoaders`）
 
@@ -79,7 +101,7 @@
 | 配方来源 | `GetRecipes()` 写入 `RecipaediaEXManager.Recipes` | `GetDynamicRecipe(actual, project)` 按次生成 |
 | 进入图鉴总表 | 是 | 否（仅匹配时临时返回） |
 | 典型场景 | XML / 程序生成 / 固定表 | 原版 AdHoc、依赖世界状态的配方 |
-| 图鉴 `Match` / `IsIngredient` | 需在配方对象上设置 Extra | 动态返回的 `IRecipe` 同样应设置 `MatchedResultBlockValues` / `MatchedIngredientBlockValues`（`FormattedRecipe` 经 `PreTransformIngredients` 会写原料 Extra） |
+| 图鉴 `Match` / `IsIngredient` | 需在配方对象上设置 Extra（`RecipeExtraKeys`） | 动态返回的 `IRecipe` 同样应设置产物/原料 Extra（`FormattedRecipe` 经 `PreTransformIngredients` 会写原料 Extra） |
 
 #### 接口
 
@@ -108,14 +130,14 @@ public interface IDynamicRecipeLoader {
 IRecipe dynamic = RecipaediaEXManager.FindDynamicRecipe(actual, project);
 
 // 先动态、再静态（推荐用于工作台/熔炉）
-actual.SetExtraValue("Project", project);
+actual.SetExtraValue(RecipeExtraKeys.Project, project);
 T recipe = RecipaediaEXManager.FindMatchingRecipe<T>(actual);
 
 // 仅静态表（不走 DynamicLoader）
 IRecipe staticOnly = RecipaediaEXManager.FindMatchingRecipe(actual);
 ```
 
-扩展工作台 / 熔炉（`ComponentEXCraftingTable` / `ComponentEXFurnace`）构造 `actual` 时会 `SetExtraValue("Project", Project)`，因此生产逻辑与图鉴侧经 `FindMatchingRecipe<T>` 可解析 AdHoc。自定义机器需要 AdHoc 或自定义动态配方时，请在 `actual` 上同样写入 `Project`。
+扩展工作台 / 熔炉（`ComponentEXCraftingTable` / `ComponentEXFurnace`）构造 `actual` 时会写入 `RecipeExtraKeys.Project`、`ActualIngredients`、`Inventory`，因此生产逻辑与图鉴侧经 `FindMatchingRecipe<T>` 可解析 AdHoc。自定义机器需要 AdHoc 或自定义动态配方时，请在 `actual` 上同样写入 `Project`。
 
 #### 内置 `AdHocRecipeLoader`
 
@@ -127,7 +149,7 @@ IRecipe staticOnly = RecipaediaEXManager.FindMatchingRecipe(actual);
 | 查找 | `project.FindSubsystem<SubsystemTerrain>()`，遍历 `BlocksManager.Blocks` → `block.GetAdHocCraftingRecipe(terrain, ingredients, heatLevel, playerLevel)` |
 | 输出 | `CraftingRecipe.ToFormattedRecipe<OriginalSmeltingRecipe>()`（`RequiredHeatLevel > 0`）或 `OriginalCraftingRecipe` |
 | 校验 | `formattedAdHocRecipe.Match(actual)` 为真才返回；否则继续下一个方块 |
-| 图鉴 Extra | 返回的 `FormattedRecipe` 会执行 `PreTransformIngredients()`（含 `MatchedIngredientBlockValues`）；若需在图鉴按产物检索，可对结果再 `SetExtraValue(MatchedResultBlockValuesKey, …)` |
+| 图鉴 Extra | 返回的 `FormattedRecipe` 会执行 `PreTransformIngredients()`（含 `MatchedIngredientBlockValues`）；若需在图鉴按产物检索，可对结果再 `SetExtraValue(RecipeExtraKeys.MatchedResultBlockValues, …)` |
 
 流程概览：
 
@@ -152,7 +174,7 @@ public class MyDynamicLoader : IDynamicRecipeLoader {
     public IRecipe GetDynamicRecipe(IRecipe actual, Project project) {
         if (actual is not FormattedRecipe snapshot) return null;
         // 读取 project / 方块 / 玩家状态，构造或克隆 IRecipe
-        // 记得设置 MatchedResultBlockValues / MatchedIngredientBlockValues（若需图鉴跳转）
+        // 记得设置 RecipeExtraKeys.MatchedResultBlockValues / MatchedIngredientBlockValues（若需图鉴跳转）
         return null;
     }
 }
@@ -255,7 +277,7 @@ bool IsCrafter(int blockValue, IRecipe recipe);
 
 1. 定义你的 `IRecipe` 类型。
 2. 定义 `IRecipesLoader`，返回该配方集合。
-3. 在配方中写好 `MatchedResultBlockValues`（及按需 `MatchedIngredientBlockValues`）。
+3. 在配方中通过 `RecipeExtraKeys` 写好产物/原料（及流体）Extra。
 4. 为要展示的条目实现 `IRecipaediaRecipeItem`。
 5. 为配方类型实现 `RecipeDescriptor` 并加特性。
 6. （可选）给工作站方块实现 `ICrafter`。
@@ -303,7 +325,7 @@ public class MyRecipesLoader : IRecipesLoader {
 ## 8. 常见问题
 
 - **Q: 为什么图鉴里看不到我的配方？**  
-  A: 先检查该配方是否设置了 `MatchedResultBlockValues`，以及条目的 `IRecipaediaRecipeItem.Match()` 是否命中。
+  A: 先检查该配方是否设置了 `RecipeExtraKeys.MatchedResultBlockValues`（流体配方用 `MatchedResultFluidValues`），以及条目的 `IRecipaediaRecipeItem.Match()` 是否命中。
 
 - **Q: 为什么配方页显示了错误的 UI？**  
   A: 检查该配方类型是否有多个 `RecipeDescriptor`，确认 `order` 规则和构造函数签名。
@@ -312,7 +334,7 @@ public class MyRecipesLoader : IRecipesLoader {
   A: 不必须。你可以实现自己的 `IRecipesLoader` 读取任意格式。
 
 - **Q: AdHoc / 原版动态配方为什么匹配不到？**  
-  A: 确认 `FindMatchingRecipe<T>` 的 `actual` 已 `SetExtraValue("Project", project)`，且 `actual` 为 `FormattedRecipe`（如 `OriginalCraftingRecipe` / `OriginalSmeltingRecipe`）。非泛型 `FindMatchingRecipe` 不会走动态 Loader。
+  A: 确认 `FindMatchingRecipe<T>` 的 `actual` 已 `SetExtraValue(RecipeExtraKeys.Project, project)`，且 `actual` 为 `FormattedRecipe`（如 `OriginalCraftingRecipe` / `OriginalSmeltingRecipe`）。非泛型 `FindMatchingRecipe` 不会走动态 Loader。
 
 ---
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Game;
+using RecipaediaEX;
 using RecipaediaEX.Implementation;
 using RecipaediaEX.UI;
 using ZLinq;
@@ -121,17 +122,17 @@ namespace RecipaediaEX.Implementation {
 
         public bool Match(IRecipe recipe) {
             try {
-                int[] recipeResultValue = recipe.GetExtraValue("MatchedResultBlockValues", Array.Empty<int>());
+                int[] recipeResultValue = recipe.GetExtraValue(RecipeExtraKeys.MatchedResultBlockValues, Array.Empty<int>());
                 return recipeResultValue.AsValueEnumerable().Contains(m_blockValue);
             }
             catch (Exception ex) {
-                Engine.Log.Error("BlockItem.Match error, probably because the problem of IRecipe.GetExtraValue(\"MatchedResultBlockValues\"): " + ex);
+                Engine.Log.Error("BlockItem.Match error, probably because the problem of IRecipe.GetExtraValue(\"" + RecipeExtraKeys.MatchedResultBlockValues + "\"): " + ex);
                 return false;
             }
         }
         public bool IsIngredient(IRecipe recipe) {
             try {
-                int[] matchedIngredientBlockValues = recipe.GetExtraValue(FormattedRecipe.MatchedIngredientBlockValuesKey, Array.Empty<int>());
+                int[] matchedIngredientBlockValues = recipe.GetExtraValue(RecipeExtraKeys.MatchedIngredientBlockValues, Array.Empty<int>());
                 if (matchedIngredientBlockValues.AsValueEnumerable().Contains(m_blockValue)) return true;
 
                 if (recipe is FormattedRecipe formattedRecipe) {
@@ -147,7 +148,7 @@ namespace RecipaediaEX.Implementation {
                 return false;
             }
             catch (Exception ex) {
-                Engine.Log.Error("BlockItem.IsIngredient error, probably because the problem of IRecipe.GetExtraValue(\"" + FormattedRecipe.MatchedIngredientBlockValuesKey + "\"): " + ex);
+                Engine.Log.Error("BlockItem.IsIngredient error, probably because the problem of IRecipe.GetExtraValue(\"" + RecipeExtraKeys.MatchedIngredientBlockValues + "\"): " + ex);
                 return false;
             }
         }

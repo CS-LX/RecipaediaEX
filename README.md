@@ -45,9 +45,10 @@ RecipaediaEX 是一个面向 Survivalcraft 模组开发的配方与图鉴扩展�
 - `Match(IRecipe actual)`
 - `GetExtraValue/SetExtraValue`
 
-建议在配方里维护 `ValuesDictionary`，并至少写入：
+建议在配方里维护 `ValuesDictionary`，键名使用 **`RecipeExtraKeys`**（`RecipesExtra/RecipeExtraKeys.cs`），并至少写入：
 
-- `MatchedResultBlockValues`（`int[]`），供图鉴条目匹配使用。
+- `RecipeExtraKeys.MatchedResultBlockValues`（`int[]`），供图鉴方块产物匹配；
+- 按需 `MatchedIngredientBlockValues` / `MatchedResultFluidValues`。
 
 ### 2. 提供配方加载器
 
@@ -68,11 +69,11 @@ RecipaediaEX 是一个面向 Survivalcraft 模组开发的配方与图鉴扩展�
 在你的组件中构造“实际配方”，再调用：
 
 - `RecipaediaEXManager.FindMatchingRecipe(actual)` — 仅在静态配方总表中查找。
-- `RecipaediaEXManager.FindMatchingRecipe<T>(actual)` — 若 `actual` 的 `ExtraValues` 含 `"Project"`，会先走动态配方（`IDynamicRecipeLoader`），再查静态表。
+- `RecipaediaEXManager.FindMatchingRecipe<T>(actual)` — 若 `actual` 含 `RecipeExtraKeys.Project`，会先走动态配方（`IDynamicRecipeLoader`），再查静态表。
 - `RecipaediaEXManager.FindDynamicRecipe(actual, project)` — 仅查动态配方，不查静态表。
 - `RecipaediaEXManager.FindMatchingRecipes(actual)`
 
-扩展工作台/熔炉在构造 `actual` 时会写入 `SetExtraValue("Project", Project)`，因此 `FindMatchingRecipe<T>` 可自动解析原版 AdHoc 配方。自定义机器若需 AdHoc，请同样在 `actual` 上设置 `Project`。
+扩展工作台/熔炉在构造 `actual` 时会写入 `RecipeExtraKeys.Project` 等 Extra，因此 `FindMatchingRecipe<T>` 可自动解析原版 AdHoc 配方。自定义机器若需 AdHoc，请同样在 `actual` 上设置 `Project`。
 
 ### 3.1 动态配方（AdHoc，可选）
 
