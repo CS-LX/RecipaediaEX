@@ -42,6 +42,8 @@
     <Compile Include="CrafterExtra\Crafters\CraftingTableBlock.cs" />
     <Compile Include="CrafterExtra\Crafters\FurnaceBlock.cs" />
     <Compile Include="CrafterExtra\ICrafter.cs" />
+    <Compile Include="LoaderExtra\DynamicLoaders\AdHocRecipeLoader.cs" />
+    <Compile Include="LoaderExtra\IDynamicRecipeLoader.cs" />
     <Compile Include="LoaderExtra\Loaders\BlockProceduralRecipesLoader.cs" />
     <Compile Include="LoaderExtra\Loaders\RegularRecipesLoader.cs" />
     <Compile Include="Events\CrafterOutputRemovedEvent.cs" />

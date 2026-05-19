@@ -21,8 +21,8 @@ RecipaediaEX 是一个面向 Survivalcraft 模组开发的配方与图鉴扩展�
 
 `RecipaediaEXLoader` 在 `OnLoadingFinished` 阶段执行：
 
-1. `RecipesLoadManager.Initialize()`：扫描并实例化全部 `IRecipesLoader`。
-2. `RecipaediaEXManager.Initialize()`：调用各 Loader 的 `Initialize()` / `GetRecipes()`，建立配方总表。
+1. `RecipesLoadManager.Initialize()`：扫描并实例化全部 `IRecipesLoader` 与 `IDynamicRecipeLoader`（按 `Order` 排序）。
+2. `RecipaediaEXManager.Initialize()`：调用各 `IRecipesLoader` 的 `Initialize()` / `GetRecipes()`，建立静态配方总表。
 3. `RecipesCrafterManager.Initialize()`：扫描方块上的 `ICrafter`，建立“配方 -> 可用工作站”映射。
 4. 注入图鉴页面：
     - `Recipaedia`
@@ -67,9 +67,16 @@ RecipaediaEX 是一个面向 Survivalcraft 模组开发的配方与图鉴扩展�
 
 在你的组件中构造“实际配方”，再调用：
 
-- `RecipaediaEXManager.FindMatchingRecipe(actual)`
-- `RecipaediaEXManager.FindMatchingRecipe<T>(actual)`
+- `RecipaediaEXManager.FindMatchingRecipe(actual)` — 仅在静态配方总表中查找。
+- `RecipaediaEXManager.FindMatchingRecipe<T>(actual)` — 若 `actual` 的 `ExtraValues` 含 `"Project"`，会先走动态配方（`IDynamicRecipeLoader`），再查静态表。
+- `RecipaediaEXManager.FindDynamicRecipe(actual, project)` — 仅查动态配方，不查静态表。
 - `RecipaediaEXManager.FindMatchingRecipes(actual)`
+
+扩展工作台/熔炉在构造 `actual` 时会写入 `SetExtraValue("Project", Project)`，因此 `FindMatchingRecipe<T>` 可自动解析原版 AdHoc 配方。自定义机器若需 AdHoc，请同样在 `actual` 上设置 `Project`。
+
+### 3.1 动态配方（AdHoc，可选）
+
+实现 `IDynamicRecipeLoader` 以对接原版 `Block.GetAdHocCraftingRecipe` 等运行时生成逻辑。框架内置 `AdHocRecipeLoader`（`Order = 0`）。详见 [API 使用文档](docs/API使用文档.md#动态配方idynamicrecipeloader)。
 
 ### 4. 接入图鉴展示（可选）
 

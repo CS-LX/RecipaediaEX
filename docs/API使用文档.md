@@ -5,7 +5,8 @@
 ## 1. 核心概念
 
 - `IRecipe`：运行时配方对象，负责匹配逻辑与扩展数据。
-- `IRecipesLoader`：配方来源提供器，负责初始化与返回配方集。
+- `IRecipesLoader`：配方来源提供器，负责初始化与返回静态配方集。
+- `IDynamicRecipeLoader`：运行时动态配方提供器（如原版 AdHoc），不进入静态总表。
 - `RecipaediaEXManager`：配方容器与匹配入口。
 - `ICrafter` + `RecipesCrafterManager`：配方对应工作站（用于 UI 展示）。
 - `IRecipaedia*`：图鉴条目、分类、详情、配方页接口。
@@ -52,11 +53,66 @@
 
 常用方法：
 
-- `FindMatchingRecipe(IRecipe actual)`
-- `FindMatchingRecipe<T>(IRecipe actual)`
+- `FindMatchingRecipe(IRecipe actual)`：仅在静态配方表 `Recipes` 中查找。
+- `FindDynamicRecipe(IRecipe actual, Project project)`：仅询问 `IDynamicRecipeLoader` 链。
+- `FindMatchingRecipe<T>(IRecipe actual)`：若 `actual` 的 `ExtraValues` 含键 `"Project"`，先 `FindDynamicRecipe`，再查静态表。
 - `TryFindMatchingRecipe<T>(IRecipe actual, out T recipe)`
-- `FindMatchingRecipes(IRecipe actual)`
+- `FindMatchingRecipes(IRecipe actual)`：仅静态表。
 - `ResetRecipes()`（方块 ID 变化后重建）
+
+扩展工作台/熔炉在构造 `actual` 时会 `SetExtraValue("Project", Project)`，因此经 `FindCraftingRecipe` / `FindMatchingRecipe<T>` 可自动解析 AdHoc。自定义机器需要 AdHoc 时请同样在 `actual` 上写入 `Project`。
+
+### 2.4 `IDynamicRecipeLoader`
+
+路径：`LoaderExtra/IDynamicRecipeLoader.cs`
+
+```csharp
+public interface IDynamicRecipeLoader {
+    void Initialize();
+    IRecipe GetDynamicRecipe(IRecipe actual, Project project);
+    int Order { get; }
+}
+```
+
+- **`GetDynamicRecipe`**：`actual` 为当前放入的快照；无匹配返回 `null`。
+- **`Order`**：升序排列后依次询问；先返回非 `null` 的 Loader 生效。
+
+`RecipesLoadManager.Initialize()` 扫描并填充 `RecipesLoadManager.DynamicRecipeLoaders`（与 `IRecipesLoader` 相同反射机制）。
+
+内置 **`AdHocRecipeLoader`**（`RecipaediaEX.Implementation`，`Order = 0`）：
+
+| 项 | 说明 |
+|----|------|
+| 输入 | `actual` 须为 `FormattedRecipe`，否则 `null` |
+| 查找 | 遍历 `BlocksManager.Blocks` → `GetAdHocCraftingRecipe` |
+| 输出类型 | `RequiredHeatLevel > 0` → `OriginalSmeltingRecipe`；否则 → `OriginalCraftingRecipe` |
+| 校验 | `formattedAdHocRecipe.Match(actual)` 失败则尝试下一个方块 |
+
+与 `OriginalComponentsExtensions.FindCraftingRecipe` 中 AdHoc 段一致；该方法在 AdHoc 未命中时还会 fallback 到 `FindMatchingRecipe<T>`。
+
+自定义示例：
+
+```csharp
+public class MyDynamicLoader : IDynamicRecipeLoader {
+    public int Order => 10;
+    public void Initialize() { }
+    public IRecipe GetDynamicRecipe(IRecipe actual, Project project) => null;
+}
+```
+
+> **注意**：`IDynamicRecipeLoader.Initialize()` 目前由接口定义，但 `RecipaediaEXManager.Initialize()` 尚未统一调用；可在 `GetDynamicRecipe` 内做惰性初始化。
+
+### 2.5 `RecipaediaEventBus`
+
+路径：`Events/RecipaediaEventBus.cs`
+
+- `Channel<T>()`：按事件类型懒创建全局 `EventChannel<T>`。
+- `CrafterOutputRemoved`：内置通道，等价于 `Channel<CrafterOutputRemovedEvent>()`；扩展工作台/熔炉从产物格成功取出时发布。
+
+```csharp
+IDisposable sub = RecipaediaEventBus.CrafterOutputRemoved.Subscribe(e => { });
+// 卸载时 sub.Dispose();
+```
 
 ---
 
@@ -145,6 +201,7 @@ bool IsCrafter(int blockValue, IRecipe recipe);
 4. 为要展示的条目实现 `IRecipaediaRecipeItem`。
 5. 为配方类型实现 `RecipeDescriptor` 并加特性。
 6. （可选）给工作站方块实现 `ICrafter`。
+7. （可选）若需运行时 AdHoc 等逻辑，实现 `IDynamicRecipeLoader`；`actual` 匹配时写入 `Project`。
 
 ---
 
@@ -195,6 +252,9 @@ public class MyRecipesLoader : IRecipesLoader {
 
 - **Q: 我是否必须使用 `.cr`？**  
   A: 不必须。你可以实现自己的 `IRecipesLoader` 读取任意格式。
+
+- **Q: AdHoc / 原版动态配方为什么匹配不到？**  
+  A: 确认 `FindMatchingRecipe<T>` 的 `actual` 已 `SetExtraValue("Project", project)`，且 `actual` 为 `FormattedRecipe`（如 `OriginalCraftingRecipe` / `OriginalSmeltingRecipe`）。非泛型 `FindMatchingRecipe` 不会走动态 Loader。
 
 ---
 

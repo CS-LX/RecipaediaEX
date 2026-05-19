@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using System.Xml.Linq;
 using Engine;
 using Engine.Serialization;
 using Game;
+using GameEntitySystem;
 using RecipaediaEX.Implementation;
 using ZLinq;
 
@@ -53,9 +55,6 @@ namespace RecipaediaEX
             Recipes.RemoveAll(r => r == null);
         }
 
-        #region 内部方法
-        #endregion
-
         #region 对外方法
         /// <summary>
         /// 寻找完整的配方以获得产物
@@ -66,12 +65,23 @@ namespace RecipaediaEX
             return m_recipes.AsValueEnumerable().Where(x => x.Match(actual)).OrderBy(x => x.MatchPriority).FirstOrDefault();
         }
         /// <summary>
+        /// 寻找动态配方
+        /// </summary>
+        public static IRecipe FindDynamicRecipe(IRecipe actual, Project project) {
+            return RecipesLoadManager.DynamicRecipeLoaders.AsValueEnumerable().Select(dynamicRecipeLoader => dynamicRecipeLoader.GetDynamicRecipe(actual, project)).FirstOrDefault(dynamicRecipe => dynamicRecipe != null);
+        }
+        /// <summary>
         /// 寻找完整的配方以获得产物
         /// </summary>
         /// <param name="actual">玩家实际放置在生产方块中的配方</param>
         /// <typeparam name="T">配方类型</typeparam>
         /// <returns>符合条件的第一个配方，如果没有则返回null</returns>
         public static T FindMatchingRecipe<T>(IRecipe actual) where T : class, IRecipe {
+            Project project = actual.GetExtraValue<Project>("Project", null);
+            if (project != null) {
+                IRecipe dynamicRecipe = FindDynamicRecipe(actual, project);
+                if (dynamicRecipe != null) return dynamicRecipe as T;
+            }
             IRecipe recipe = FindMatchingRecipe(actual);
             if (recipe == null) return null;
             return recipe as T;
