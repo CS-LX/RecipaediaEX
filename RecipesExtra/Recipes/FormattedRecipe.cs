@@ -1,12 +1,16 @@
-﻿using Game;
+using Game;
 using RecipaediaEX.ComponentsExtra;
 using System.Collections.Generic;
+using System.Linq;
 using TemplatesDatabase;
 using ZLinq;
 using System;
 
 namespace RecipaediaEX.Implementation {
     public abstract class FormattedRecipe : IRecipe {
+        public const string MatchedResultBlockValuesKey = "MatchedResultBlockValues";
+        public const string MatchedIngredientBlockValuesKey = "MatchedIngredientBlockValues";
+
         public int ResultValue;
 
         public int ResultCount;
@@ -94,6 +98,35 @@ namespace RecipaediaEX.Implementation {
                         TransformedIngredients.Add(array);
                     }
                 }
+            }
+            UpdateMatchedIngredientBlockValues();
+        }
+
+        public void UpdateMatchedIngredientBlockValues() {
+            SetExtraValue(MatchedIngredientBlockValuesKey, ExpandIngredientsToBlockValues(Ingredients));
+        }
+
+        public static int[] ExpandIngredientsToBlockValues(IEnumerable<string> ingredients) {
+            HashSet<int> values = new();
+            foreach (string ingredient in ingredients) {
+                if (!string.IsNullOrEmpty(ingredient)) {
+                    AddIngredientBlockValues(values, ingredient);
+                }
+            }
+            return values.ToArray();
+        }
+
+        public static int[] ExpandIngredientToBlockValues(string ingredient) {
+            if (string.IsNullOrEmpty(ingredient)) return Array.Empty<int>();
+            HashSet<int> values = new();
+            AddIngredientBlockValues(values, ingredient);
+            return values.ToArray();
+        }
+
+        static void AddIngredientBlockValues(HashSet<int> values, string ingredient) {
+            CraftingRecipesManager.DecodeIngredient(ingredient, out string craftingId, out int? data);
+            foreach (Block block in BlocksManager.FindBlocksByCraftingId(craftingId)) {
+                values.Add(Terrain.MakeBlockValue(block.BlockIndex, 0, data ?? 0));
             }
         }
     }

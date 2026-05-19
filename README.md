@@ -76,7 +76,7 @@ RecipaediaEX 是一个面向 Survivalcraft 模组开发的配方与图鉴扩展�
 
 ### 3.1 动态配方（AdHoc，可选）
 
-实现 `IDynamicRecipeLoader` 以对接原版 `Block.GetAdHocCraftingRecipe` 等运行时生成逻辑。框架内置 `AdHocRecipeLoader`（`Order = 0`）。详见 [API 使用文档](docs/API使用文档.md#动态配方idynamicrecipeloader)。
+实现 `IDynamicRecipeLoader` 以对接原版 `Block.GetAdHocCraftingRecipe` 等运行时生成逻辑。框架内置 `AdHocRecipeLoader`（`Order = 0`）。详见 [API 使用文档 · 动态配方](docs/API使用文档.md#24-动态配方idynamicrecipeloader--dynamicloaders)。
 
 ### 4. 接入图鉴展示（可选）
 

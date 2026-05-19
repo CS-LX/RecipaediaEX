@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Game;
+using RecipaediaEX.Implementation;
 using RecipaediaEX.UI;
 using ZLinq;
 
@@ -129,14 +130,26 @@ namespace RecipaediaEX.Implementation {
             }
         }
         public bool IsIngredient(IRecipe recipe) {
-            if (recipe is not FormattedRecipe formattedRecipe) return false;
+            try {
+                int[] matchedIngredientBlockValues = recipe.GetExtraValue(FormattedRecipe.MatchedIngredientBlockValuesKey, Array.Empty<int>());
+                if (matchedIngredientBlockValues.AsValueEnumerable().Contains(m_blockValue)) return true;
 
-            int data = Terrain.ExtractData(m_blockValue);
-            string actualIngredient = m_block.GetCraftingId(m_blockValue) + ":" + data.ToString(CultureInfo.InvariantCulture);
-            foreach (string ingredient in formattedRecipe.Ingredients) {
-                if (CraftingRecipesManager.CompareIngredients(ingredient, actualIngredient)) return true;
+                if (recipe is FormattedRecipe formattedRecipe) {
+                    int data = Terrain.ExtractData(m_blockValue);
+                    string actualIngredient = m_block.GetCraftingId(m_blockValue) + ":" + data.ToString(CultureInfo.InvariantCulture);
+                    foreach (string ingredient in formattedRecipe.Ingredients) {
+                        if (!string.IsNullOrEmpty(ingredient)
+                            && CraftingRecipesManager.CompareIngredients(ingredient, actualIngredient)) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
             }
-            return false;
+            catch (Exception ex) {
+                Engine.Log.Error("BlockItem.IsIngredient error, probably because the problem of IRecipe.GetExtraValue(\"" + FormattedRecipe.MatchedIngredientBlockValuesKey + "\"): " + ex);
+                return false;
+            }
         }
     }
 }

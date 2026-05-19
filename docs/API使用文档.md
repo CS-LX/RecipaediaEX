@@ -31,7 +31,8 @@
 推荐约定：
 
 - 在配方里维护 `ValuesDictionary`。
-- 设置 `MatchedResultBlockValues`（`int[]`），用于图鉴条目匹配。
+- 设置 `MatchedResultBlockValues`（`int[]`），用于图鉴产物条目 `Match`。
+- 设置 `MatchedIngredientBlockValues`（`int[]`），用于图鉴原料条目 `IsIngredient`；`FormattedRecipe` 在 `PreTransformIngredients()` 末尾会自动写入。
 
 ### 2.2 `IRecipesLoader`
 
@@ -62,9 +63,25 @@
 
 扩展工作台/熔炉在构造 `actual` 时会 `SetExtraValue("Project", Project)`，因此经 `FindCraftingRecipe` / `FindMatchingRecipe<T>` 可自动解析 AdHoc。自定义机器需要 AdHoc 时请同样在 `actual` 上写入 `Project`。
 
-### 2.4 `IDynamicRecipeLoader`
+### 2.4 动态配方（`IDynamicRecipeLoader` / `DynamicLoaders`）
 
-路径：`LoaderExtra/IDynamicRecipeLoader.cs`
+路径：
+
+- 接口：`LoaderExtra/IDynamicRecipeLoader.cs`
+- 内置实现：`LoaderExtra/DynamicLoaders/AdHocRecipeLoader.cs`
+- 注册表：`RecipesLoadManager.DynamicRecipeLoaders`
+- 入口：`RecipaediaEXManager.FindDynamicRecipe` / `FindMatchingRecipe<T>`
+
+#### 与静态 `IRecipesLoader` 的区别
+
+| | 静态 `IRecipesLoader` | 动态 `IDynamicRecipeLoader` |
+|---|---|---|
+| 配方来源 | `GetRecipes()` 写入 `RecipaediaEXManager.Recipes` | `GetDynamicRecipe(actual, project)` 按次生成 |
+| 进入图鉴总表 | 是 | 否（仅匹配时临时返回） |
+| 典型场景 | XML / 程序生成 / 固定表 | 原版 AdHoc、依赖世界状态的配方 |
+| 图鉴 `Match` / `IsIngredient` | 需在配方对象上设置 Extra | 动态返回的 `IRecipe` 同样应设置 `MatchedResultBlockValues` / `MatchedIngredientBlockValues`（`FormattedRecipe` 经 `PreTransformIngredients` 会写原料 Extra） |
+
+#### 接口
 
 ```csharp
 public interface IDynamicRecipeLoader {
@@ -74,33 +91,74 @@ public interface IDynamicRecipeLoader {
 }
 ```
 
-- **`GetDynamicRecipe`**：`actual` 为当前放入的快照；无匹配返回 `null`。
-- **`Order`**：升序排列后依次询问；先返回非 `null` 的 Loader 生效。
+- **`GetDynamicRecipe`**：`actual` 为当前格子布局的快照（通常为 `FormattedRecipe`）；无匹配返回 `null`。
+- **`Order`**：升序；`FindDynamicRecipe` 按顺序询问，**先返回非 `null` 的 Loader 生效**，后续 Loader 不再执行。
+- **`Initialize`**：接口已定义；`RecipaediaEXManager.Initialize()` 目前**不会**统一调用各 Loader 的 `Initialize`，可在 `GetDynamicRecipe` 内惰性初始化。
 
-`RecipesLoadManager.Initialize()` 扫描并填充 `RecipesLoadManager.DynamicRecipeLoaders`（与 `IRecipesLoader` 相同反射机制）。
+#### 自动发现
 
-内置 **`AdHocRecipeLoader`**（`RecipaediaEX.Implementation`，`Order = 0`）：
+`RecipesLoadManager.Initialize()` 扫描 `TypeCache.LoadedAssemblies` 中所有**非抽象**的 `IDynamicRecipeLoader` 实现，无参构造实例化后加入 `DynamicRecipeLoaders`，再按 `Order` 排序。与 `IRecipesLoader` 使用同一套反射机制；**无需**在 xdb 或 modinfo 中额外注册类名。
+
+调试：将 `RecipesLoadManager.DebugLogModToRecipeFileLoaders` 设为 `true` 时，日志会输出 `DynamicRecipeLoader {FullName}` 列表。
+
+#### 匹配入口
+
+```csharp
+// 仅动态链（不查静态表）
+IRecipe dynamic = RecipaediaEXManager.FindDynamicRecipe(actual, project);
+
+// 先动态、再静态（推荐用于工作台/熔炉）
+actual.SetExtraValue("Project", project);
+T recipe = RecipaediaEXManager.FindMatchingRecipe<T>(actual);
+
+// 仅静态表（不走 DynamicLoader）
+IRecipe staticOnly = RecipaediaEXManager.FindMatchingRecipe(actual);
+```
+
+扩展工作台 / 熔炉（`ComponentEXCraftingTable` / `ComponentEXFurnace`）构造 `actual` 时会 `SetExtraValue("Project", Project)`，因此生产逻辑与图鉴侧经 `FindMatchingRecipe<T>` 可解析 AdHoc。自定义机器需要 AdHoc 或自定义动态配方时，请在 `actual` 上同样写入 `Project`。
+
+#### 内置 `AdHocRecipeLoader`
 
 | 项 | 说明 |
 |----|------|
-| 输入 | `actual` 须为 `FormattedRecipe`，否则 `null` |
-| 查找 | 遍历 `BlocksManager.Blocks` → `GetAdHocCraftingRecipe` |
-| 输出类型 | `RequiredHeatLevel > 0` → `OriginalSmeltingRecipe`；否则 → `OriginalCraftingRecipe` |
-| 校验 | `formattedAdHocRecipe.Match(actual)` 失败则尝试下一个方块 |
+| 类型 | `RecipaediaEX.Implementation.AdHocRecipeLoader` |
+| `Order` | `0`（默认最先） |
+| 输入 | `actual` 须为 `FormattedRecipe`，否则返回 `null` |
+| 查找 | `project.FindSubsystem<SubsystemTerrain>()`，遍历 `BlocksManager.Blocks` → `block.GetAdHocCraftingRecipe(terrain, ingredients, heatLevel, playerLevel)` |
+| 输出 | `CraftingRecipe.ToFormattedRecipe<OriginalSmeltingRecipe>()`（`RequiredHeatLevel > 0`）或 `OriginalCraftingRecipe` |
+| 校验 | `formattedAdHocRecipe.Match(actual)` 为真才返回；否则继续下一个方块 |
+| 图鉴 Extra | 返回的 `FormattedRecipe` 会执行 `PreTransformIngredients()`（含 `MatchedIngredientBlockValues`）；若需在图鉴按产物检索，可对结果再 `SetExtraValue(MatchedResultBlockValuesKey, …)` |
 
-与 `OriginalComponentsExtensions.FindCraftingRecipe` 中 AdHoc 段一致；该方法在 AdHoc 未命中时还会 fallback 到 `FindMatchingRecipe<T>`。
+流程概览：
 
-自定义示例：
+```mermaid
+flowchart LR
+  actual[FormattedRecipe actual + Project]
+  chain[DynamicRecipeLoaders 按 Order]
+  adhoc[AdHocRecipeLoader]
+  match[formattedAdHocRecipe.Match]
+  out[IRecipe 或 null]
+  actual --> chain --> adhoc --> match --> out
+```
+
+#### 自定义 DynamicLoader
 
 ```csharp
 public class MyDynamicLoader : IDynamicRecipeLoader {
-    public int Order => 10;
+    public int Order => 10; // 大于 0 时在 AdHoc 之后；小于 0 可抢先于 AdHoc
+
     public void Initialize() { }
-    public IRecipe GetDynamicRecipe(IRecipe actual, Project project) => null;
+
+    public IRecipe GetDynamicRecipe(IRecipe actual, Project project) {
+        if (actual is not FormattedRecipe snapshot) return null;
+        // 读取 project / 方块 / 玩家状态，构造或克隆 IRecipe
+        // 记得设置 MatchedResultBlockValues / MatchedIngredientBlockValues（若需图鉴跳转）
+        return null;
+    }
 }
 ```
 
-> **注意**：`IDynamicRecipeLoader.Initialize()` 目前由接口定义，但 `RecipaediaEXManager.Initialize()` 尚未统一调用；可在 `GetDynamicRecipe` 内做惰性初始化。
+实现类放在**已加载的程序集**中即可（与自定义 `IRecipesLoader` 相同）；发布后确认日志中出现你的 `DynamicRecipeLoader` 全名。
 
 ### 2.5 `RecipaediaEventBus`
 
@@ -197,7 +255,7 @@ bool IsCrafter(int blockValue, IRecipe recipe);
 
 1. 定义你的 `IRecipe` 类型。
 2. 定义 `IRecipesLoader`，返回该配方集合。
-3. 在配方中写好 `MatchedResultBlockValues`。
+3. 在配方中写好 `MatchedResultBlockValues`（及按需 `MatchedIngredientBlockValues`）。
 4. 为要展示的条目实现 `IRecipaediaRecipeItem`。
 5. 为配方类型实现 `RecipeDescriptor` 并加特性。
 6. （可选）给工作站方块实现 `ICrafter`。
