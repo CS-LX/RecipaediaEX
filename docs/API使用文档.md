@@ -184,15 +184,66 @@ public class MyDynamicLoader : IDynamicRecipeLoader {
 
 ### 2.5 `RecipaediaEventBus`
 
-路径：`Events/RecipaediaEventBus.cs`
+路径：`Events/`（`RecipaediaEventBus.cs`、`EventChannel.cs`、`IPublisher.cs`、`ISubscriber.cs`）
 
-- `Channel<T>()`：按事件类型懒创建全局 `EventChannel<T>`。
-- `CrafterOutputRemoved`：内置通道，等价于 `Channel<CrafterOutputRemovedEvent>()`；扩展工作台/熔炉从产物格成功取出时发布。
+#### 设计
+
+- 每个事件类型 `T` 对应一个全局 `EventChannel<T>`（懒创建，线程安全注册表）。
+- `GetPublisher<T>()` / `GetSubscriber<T>()`：发布与订阅；也可使用 `RecipaediaEventBus` 上预置的便捷属性（见下表）。
+- `Subscribe(Action<T>)` 返回 `IDisposable`，**Dispose 即退订**（建议在模组卸载或世界退出时释放）。
+- 单个订阅者抛异常不会阻断其它订阅者（异常写入 `Log.Error`）。
 
 ```csharp
-IDisposable sub = RecipaediaEventBus.CrafterOutputRemoved.Subscribe(e => { });
-// 卸载时 sub.Dispose();
+using RecipaediaEX.Events;
+
+IDisposable sub = RecipaediaEventBus.RecipeMatched.Subscribe(e => {
+    if (e.FromDynamicLoader) { /* AdHoc 等 */ }
+});
+// 不再需要时
+sub.Dispose();
 ```
+
+#### 内置事件一览
+
+| 便捷属性 | 事件类型 | 触发时机 | 主要载荷 |
+|----------|----------|----------|----------|
+| `RecipesReset` | `RecipesResetEvent` | `RecipaediaEXManager.ResetRecipes()` 结束（含初始化末尾、进入存档后方块 ID 稳定时） | `RecipeCount` |
+| `RecipeMatched` | `RecipeMatchedEvent` | `FindMatchingRecipe` 在静态表命中，或 `FindMatchingRecipe<T>` 在动态链命中 | `Actual`、`Matched`、`FromDynamicLoader`、`Project?` |
+| `CraftingRecipeChanged` | `CraftingRecipeChangedEvent` | 扩展工作台重新匹配后**当前预览配方**引用变化 | `Inventory`、`PreviousRecipe`、`NewRecipe` |
+| `SmeltingRecipeChanged` | `SmeltingRecipeChangedEvent` | 扩展熔炉**激活冶炼配方**变化（含变为无配方） | 同上（熔炉配方类型） |
+| `CrafterOutputProduced` | `CrafterOutputProducedEvent` | 扩展熔炉冶炼完成并**写入产物格** | `OutputBlockValue`、`ProducedCount`、`Recipe`、`Kind` |
+| `CrafterOutputRemoved` | `CrafterOutputRemovedEvent` | 扩展工作台/熔炉从**产物格成功取出** | `OutputBlockValue`、`RemovedCount`、`Kind` |
+| `FurnaceFuelUsed` | `FurnaceFuelUsedEvent` | 扩展熔炉成功消耗一格燃料并开始燃烧 | `FuelBlockValue`、`HeatLevel`、`FireDuration` |
+
+`CrafterInventorySurfaceKind`：`CraftingTable` / `Furnace`（产物取出与产出事件共用）。
+
+#### 产出 vs 取出
+
+- **`CrafterOutputProduced`**：熔炉逻辑在 `ConsumeIngredientsAndCreateResult` 中把产物写入结果槽时触发；玩家尚未点击取出。
+- **`CrafterOutputRemoved`**：玩家（或自动化）从结果槽 `RemoveSlotItems` 成功时触发。工作台“合成”在取出时才消耗原料并计为取出事件。
+
+自定义机器若继承 `ComponentEXCraftingTable` / `ComponentEXFurnace` 并调用 `base` 相关方法，可自动获得上表熔炉/工作台事件；若仅调用 `RecipaediaEXManager.FindMatchingRecipe`，会收到 `RecipeMatched`（及静态表路径下的 `RecipesReset` 等全局事件）。
+
+#### 自定义事件类型
+
+任意模组可约定自己的 `struct` / `class` 作为 `T`，无需在 RX 内注册：
+
+```csharp
+public readonly struct MyPackRecipeRegisteredEvent {
+    public MyPackRecipeRegisteredEvent(IRecipe recipe) => Recipe = recipe;
+    public IRecipe Recipe { get; }
+}
+
+RecipaediaEventBus.GetSubscriber<MyPackRecipeRegisteredEvent>()
+    .Subscribe(e => { /* ... */ });
+
+RecipaediaEventBus.GetPublisher<MyPackRecipeRegisteredEvent>()
+    .Publish(new MyPackRecipeRegisteredEvent(recipe));
+```
+
+#### 与 `RecipeMatched` 的重复订阅说明
+
+扩展熔炉/工作台在切换配方时会先经 `FindMatchingRecipe<T>` 发布 `RecipeMatched`，随后在组件内可能再发布 `CraftingRecipeChanged` / `SmeltingRecipeChanged`。若只关心“最终绑定到机器的配方”，优先订阅 Changed 事件；若要在**任意**匹配入口（含自定义组件、图鉴探测）统一拦截，订阅 `RecipeMatched`。
 
 ---
 
@@ -282,6 +333,7 @@ bool IsCrafter(int blockValue, IRecipe recipe);
 5. 为配方类型实现 `RecipeDescriptor` 并加特性。
 6. （可选）给工作站方块实现 `ICrafter`。
 7. （可选）若需运行时 AdHoc 等逻辑，实现 `IDynamicRecipeLoader`；`actual` 匹配时写入 `Project`。
+8. （可选）在 `RecipaediaEventBus` 订阅内置事件，或发布/订阅自定义事件类型（见 [§2.5](#25-recipaediaeventbus)）。
 
 ---
 
@@ -335,6 +387,9 @@ public class MyRecipesLoader : IRecipesLoader {
 
 - **Q: AdHoc / 原版动态配方为什么匹配不到？**  
   A: 确认 `FindMatchingRecipe<T>` 的 `actual` 已 `SetExtraValue(RecipeExtraKeys.Project, project)`，且 `actual` 为 `FormattedRecipe`（如 `OriginalCraftingRecipe` / `OriginalSmeltingRecipe`）。非泛型 `FindMatchingRecipe` 不会走动态 Loader。
+
+- **Q: 熔炉冶炼完成和玩家取出产物，应该订阅哪个事件？**  
+  A: 写入产物格用 `CrafterOutputProduced`；玩家从产物格拿走用 `CrafterOutputRemoved`。工作台合成仅在取出时触发 `CrafterOutputRemoved`。
 
 ---
 

@@ -97,6 +97,22 @@ RecipaediaEX 是一个面向 Survivalcraft 模组开发的配方与图鉴扩展�
 1. `order` 高者优先
 2. `order` 相同则类名字典序后的覆盖前者
 
+## 事件总线（其它模组订阅）
+
+RecipaediaEX 提供 `RecipaediaEX.Events.RecipaediaEventBus`：按事件类型维护独立通道，**无需修改 RX 源码**即可订阅框架生命周期与工作台/熔炉行为。
+
+```csharp
+using RecipaediaEX.Events;
+
+// 内置事件：配方表重建后刷新本地缓存
+RecipaediaEventBus.RecipesReset.Subscribe(e => RebuildMyRecipeIndex(e.RecipeCount));
+
+// 自定义事件类型（跨模组约定载荷 struct/class 即可）
+RecipaediaEventBus.GetPublisher<MyModEvent>().Publish(new MyModEvent(...));
+```
+
+内置事件一览见 [API 使用文档 · 事件总线](docs/API使用文档.md#25-recipaediaeventbus)。
+
 ## 文档导航
 
 - [API 使用文档](docs/API使用文档.md)

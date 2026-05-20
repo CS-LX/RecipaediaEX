@@ -93,7 +93,7 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
             }
             int removed = base.RemoveSlotItems(slotIndex, count);
             if (removed > 0 && slotIndex == ResultSlotIndex && outputBlockValue != 0) {
-                RecipaediaEventBus.CrafterOutputRemoved.Publish(new CrafterOutputRemovedEvent(
+                RecipaediaEventBus.GetPublisher<CrafterOutputRemovedEvent>().Publish(new CrafterOutputRemovedEvent(
                     Project,
                     FindInteractingPlayer(),
                     outputBlockValue,
@@ -166,20 +166,34 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
         }
 
         protected virtual void ConsumeIngredientsAndCreateResult() {
+            OriginalSmeltingRecipe recipe = m_smeltingRecipe;
+            int outputBlockValue = recipe.ResultValue;
+            int producedCount = recipe.ResultCount;
             for (int i = 0; i < m_furnaceSize; i++) {
                 if (m_slots[i].Count > 0) {
                     m_slots[i].Count--;
                 }
             }
-            m_slots[ResultSlotIndex].Value = m_smeltingRecipe.ResultValue;
-            m_slots[ResultSlotIndex].Count += m_smeltingRecipe.ResultCount;
-            if (m_smeltingRecipe.RemainsValue != 0 && m_smeltingRecipe.RemainsCount > 0) {
-                m_slots[RemainsSlotIndex].Value = m_smeltingRecipe.RemainsValue;
-                m_slots[RemainsSlotIndex].Count += m_smeltingRecipe.RemainsCount;
+            m_slots[ResultSlotIndex].Value = recipe.ResultValue;
+            m_slots[ResultSlotIndex].Count += recipe.ResultCount;
+            if (recipe.RemainsValue != 0 && recipe.RemainsCount > 0) {
+                m_slots[RemainsSlotIndex].Value = recipe.RemainsValue;
+                m_slots[RemainsSlotIndex].Count += recipe.RemainsCount;
             }
             m_smeltingRecipe = null;
             m_smeltingProgress = 0f;
             m_updateSmeltingRecipe = true;
+            if (outputBlockValue != 0 && producedCount > 0) {
+                RecipaediaEventBus.GetPublisher<CrafterOutputProducedEvent>().Publish(
+                    new CrafterOutputProducedEvent(
+                        Project,
+                        this,
+                        FindInteractingPlayer(),
+                        recipe,
+                        outputBlockValue,
+                        producedCount,
+                        CrafterInventorySurfaceKind.Furnace));
+            }
         }
 
         protected virtual void OnBeforeReplaceFurnace(float dt) {
@@ -196,8 +210,11 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
             float heatLevel = GetHeatLevelForRecipeSearch();
             OriginalSmeltingRecipe craftingRecipe = FindSmeltingRecipe(heatLevel);
             if (craftingRecipe != m_smeltingRecipe) {
+                OriginalSmeltingRecipe previousRecipe = m_smeltingRecipe;
                 m_smeltingRecipe = (craftingRecipe != null && craftingRecipe.ResultValue != 0) ? craftingRecipe : null;
                 m_smeltingProgress = 0f;
+                RecipaediaEventBus.GetPublisher<SmeltingRecipeChangedEvent>().Publish(
+                    new SmeltingRecipeChangedEvent(Project, this, FindInteractingPlayer(), previousRecipe, m_smeltingRecipe));
             }
         }
 
@@ -228,9 +245,13 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                     m_subsystemExplosions.TryExplodeBlock(coordinates.X, coordinates.Y, coordinates.Z, slot2.Value);
                 }
                 else if (block.GetFuelHeatLevel(slot2.Value) > 0f) {
+                    int fuelBlockValue = slot2.Value;
                     slot2.Count--;
-                    m_fireTimeRemaining = block.GetFuelFireDuration(slot2.Value) * FuelTimeEfficiency;
-                    m_heatLevel = block.GetFuelHeatLevel(slot2.Value);
+                    float fireDuration = block.GetFuelFireDuration(fuelBlockValue) * FuelTimeEfficiency;
+                    m_fireTimeRemaining = fireDuration;
+                    m_heatLevel = block.GetFuelHeatLevel(fuelBlockValue);
+                    RecipaediaEventBus.GetPublisher<FurnaceFuelUsedEvent>().Publish(
+                        new FurnaceFuelUsedEvent(Project, this, fuelBlockValue, m_heatLevel, fireDuration));
                     return true;
                 }
             }

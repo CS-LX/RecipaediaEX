@@ -9,6 +9,7 @@ using Engine;
 using Engine.Serialization;
 using Game;
 using GameEntitySystem;
+using RecipaediaEX.Events;
 using RecipaediaEX.Implementation;
 using ZLinq;
 
@@ -52,6 +53,13 @@ namespace RecipaediaEX {
                 }
             }
             Recipes.RemoveAll(r => r == null);
+            RecipaediaEventBus.GetPublisher<RecipesResetEvent>().Publish(new RecipesResetEvent(Recipes.Count));
+        }
+
+        static void PublishRecipeMatched(IRecipe actual, IRecipe matched, bool fromDynamicLoader) {
+            Project? project = actual.GetExtraValue<Project>(RecipeExtraKeys.Project, null);
+            RecipaediaEventBus.GetPublisher<RecipeMatchedEvent>().Publish(
+                new RecipeMatchedEvent(actual, matched, fromDynamicLoader, project));
         }
 
         #region 对外方法
@@ -61,7 +69,11 @@ namespace RecipaediaEX {
         /// <param name="actual">玩家实际放置在生产方块中的配方</param>
         /// <returns>符合条件的第一个配方，如果没有则返回null</returns>
         public static IRecipe FindMatchingRecipe(IRecipe actual) {
-            return m_recipes.AsValueEnumerable().Where(x => x.Match(actual)).OrderBy(x => x.MatchPriority).FirstOrDefault();
+            IRecipe recipe = m_recipes.AsValueEnumerable().Where(x => x.Match(actual)).OrderBy(x => x.MatchPriority).FirstOrDefault();
+            if (recipe != null) {
+                PublishRecipeMatched(actual, recipe, fromDynamicLoader: false);
+            }
+            return recipe;
         }
         /// <summary>
         /// 寻找动态配方
@@ -79,7 +91,10 @@ namespace RecipaediaEX {
             Project project = actual.GetExtraValue<Project>(RecipeExtraKeys.Project, null);
             if (project != null) {
                 IRecipe dynamicRecipe = FindDynamicRecipe(actual, project);
-                if (dynamicRecipe != null) return dynamicRecipe as T;
+                if (dynamicRecipe != null) {
+                    PublishRecipeMatched(actual, dynamicRecipe, fromDynamicLoader: true);
+                    return dynamicRecipe as T;
+                }
             }
             IRecipe recipe = FindMatchingRecipe(actual);
             if (recipe == null) return null;

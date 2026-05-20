@@ -85,7 +85,7 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                             componentPlayer.PlayerStats.ItemsCrafted += num;
                         }
                         if (outputBlockValue != 0) {
-                            RecipaediaEventBus.CrafterOutputRemoved.Publish(new CrafterOutputRemovedEvent(
+                            RecipaediaEventBus.GetPublisher<CrafterOutputRemovedEvent>().Publish(new CrafterOutputRemovedEvent(
                                 Project,
                                 componentPlayer,
                                 outputBlockValue,
@@ -142,6 +142,7 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
             }
             ComponentPlayer componentPlayer = FindInteractingPlayer();
             float playerLevel = componentPlayer?.PlayerData.Level ?? 1f;
+            OriginalCraftingRecipe previousRecipe = m_matchedRecipe;
             OriginalCraftingRecipe craftingRecipe;
             if (recipeRefindNeeded) {
                 OriginalCraftingRecipe actualCraftingRecipe = new() { Ingredients = m_matchedIngredients, RequiredHeatLevel = 0f, RequiredPlayerLevel = playerLevel };
@@ -161,8 +162,12 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
             }
             else {
                 m_matchedRecipe = null;
-                m_slots[ResultSlotIndex].Value = 0;
                 m_slots[ResultSlotIndex].Count = 0;
+                m_slots[ResultSlotIndex].Value = 0;
+            }
+            if (recipeRefindNeeded && !ReferenceEquals(previousRecipe, m_matchedRecipe)) {
+                RecipaediaEventBus.GetPublisher<CraftingRecipeChangedEvent>().Publish(
+                    new CraftingRecipeChangedEvent(Project, this, componentPlayer, previousRecipe, m_matchedRecipe));
             }
             if (craftingRecipe != null
                 && !string.IsNullOrEmpty(craftingRecipe.Message)) {
