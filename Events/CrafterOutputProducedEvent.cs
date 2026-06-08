@@ -13,14 +13,14 @@ namespace RecipaediaEX.Events {
             IRecipe? recipe,
             int outputBlockValue,
             int producedCount,
-            CrafterInventorySurfaceKind kind) {
+            string crafterKind) {
             Project = project;
             Inventory = inventory;
             InteractingPlayer = interactingPlayer;
             Recipe = recipe;
             OutputBlockValue = outputBlockValue;
             ProducedCount = producedCount;
-            Kind = kind;
+            CrafterKind = crafterKind ?? string.Empty;
         }
 
         public Project Project { get; }
@@ -29,6 +29,7 @@ namespace RecipaediaEX.Events {
         public IRecipe? Recipe { get; }
         public int OutputBlockValue { get; }
         public int ProducedCount { get; }
-        public CrafterInventorySurfaceKind Kind { get; }
+        /// <summary>发布方 Crafter 名称或约定标识。</summary>
+        public string CrafterKind { get; }
     }
 }

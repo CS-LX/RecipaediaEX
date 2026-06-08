@@ -90,7 +90,7 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                                 componentPlayer,
                                 outputBlockValue,
                                 num,
-                                CrafterInventorySurfaceKind.CraftingTable));
+                                CrafterKind.CraftingTable));
                         }
                     }
                 }

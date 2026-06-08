@@ -213,11 +213,11 @@ sub.Dispose();
 | `RecipeMatched` | `RecipeMatchedEvent` | `FindMatchingRecipe` 在静态表命中，或 `FindMatchingRecipe<T>` 在动态链命中 | `Actual`、`Matched`、`FromDynamicLoader`、`Project?` |
 | `CraftingRecipeChanged` | `CraftingRecipeChangedEvent` | 扩展工作台重新匹配后**当前预览配方**引用变化 | `Inventory`、`PreviousRecipe`、`NewRecipe` |
 | `SmeltingRecipeChanged` | `SmeltingRecipeChangedEvent` | 扩展熔炉**激活冶炼配方**变化（含变为无配方） | 同上（熔炉配方类型） |
-| `CrafterOutputProduced` | `CrafterOutputProducedEvent` | 扩展熔炉冶炼完成并**写入产物格** | `OutputBlockValue`、`ProducedCount`、`Recipe`、`Kind` |
-| `CrafterOutputRemoved` | `CrafterOutputRemovedEvent` | 扩展工作台/熔炉从**产物格成功取出** | `OutputBlockValue`、`RemovedCount`、`Kind` |
+| `CrafterOutputProduced` | `CrafterOutputProducedEvent` | 扩展熔炉冶炼完成并**写入产物格** | `OutputBlockValue`、`ProducedCount`、`Recipe`、`CrafterKind` |
+| `CrafterOutputRemoved` | `CrafterOutputRemovedEvent` | Crafter 从**产物格成功取出** | `OutputBlockValue`、`RemovedCount`、`CrafterKind` |
 | `FurnaceFuelUsed` | `FurnaceFuelUsedEvent` | 扩展熔炉成功消耗一格燃料并开始燃烧 | `FuelBlockValue`、`HeatLevel`、`FireDuration` |
 
-`CrafterInventorySurfaceKind`：`CraftingTable` / `Furnace`（产物取出与产出事件共用）。
+`CrafterKind`（`string`）：发布方机器名称或约定标识。RecipaediaEX 内置常量见 `CrafterKind.CraftingTable` / `CrafterKind.Furnace`；其它模组传入自有名称（如 `"Presser"`）。
 
 #### 产出 vs 取出
 

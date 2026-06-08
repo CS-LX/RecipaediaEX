@@ -98,7 +98,7 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                     FindInteractingPlayer(),
                     outputBlockValue,
                     removed,
-                    CrafterInventorySurfaceKind.Furnace));
+                    CrafterKind.Furnace));
             }
             return removed;
         }
@@ -192,7 +192,7 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                         recipe,
                         outputBlockValue,
                         producedCount,
-                        CrafterInventorySurfaceKind.Furnace));
+                        CrafterKind.Furnace));
             }
         }
 
