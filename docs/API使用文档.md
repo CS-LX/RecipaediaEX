@@ -35,7 +35,7 @@
 
 - 在配方里维护 `ValuesDictionary`。
 - 键名使用 **`RecipeExtraKeys`**（`RecipesExtra/RecipeExtraKeys.cs`），勿手写字符串。
-- 图鉴相关：`MatchedResultBlockValues` / `MatchedIngredientBlockValues` / `MatchedResultFluidValues`（见下表）。
+- 图鉴相关：`MatchedResultBlockValues` / `MatchedIngredientBlockValues`（见下表）。非方块产物语义由依赖模组自定 Extra 键。
 - `FormattedRecipe` 在 `PreTransformIngredients()` 末尾会自动写入 `MatchedIngredientBlockValues`。
 
 #### `RecipeExtraKeys` 约定键一览
@@ -44,7 +44,6 @@
 |------|--------|------|
 | `MatchedResultBlockValues` | `int[]` | 图鉴方块产物 `BlockItem.Match` |
 | `MatchedIngredientBlockValues` | `int[]` | 图鉴方块原料 `BlockItem.IsIngredient` |
-| `MatchedResultFluidValues` | `int[]` | 图鉴流体产物 `FluidItem.Match` |
 | `Project` | `Project` | `FindMatchingRecipe<T>` 触发动态配方链 |
 | `ActualIngredients` | `int?[]` | 槽位方块快照；`IECraftingRecipe` / `IESmeltingRecipe` 等匹配 |
 | `Inventory` | `IInventory` | 扩展工作台/熔炉发起匹配时的库存引用 |
@@ -379,7 +378,7 @@ public class MyRecipesLoader : IRecipesLoader {
 ## 8. 常见问题
 
 - **Q: 为什么图鉴里看不到我的配方？**  
-  A: 先检查该配方是否设置了 `RecipeExtraKeys.MatchedResultBlockValues`（流体配方用 `MatchedResultFluidValues`），以及条目的 `IRecipaediaRecipeItem.Match()` 是否命中。
+  A: 先检查该配方是否设置了 `RecipeExtraKeys.MatchedResultBlockValues`，以及条目的 `IRecipaediaRecipeItem.Match()` 是否命中。非方块条目由模组自定 Match 与 Extra 约定。
 
 - **Q: 为什么配方页显示了错误的 UI？**  
   A: 检查该配方类型是否有多个 `RecipeDescriptor`，确认 `order` 规则和构造函数签名。

@@ -9,9 +9,6 @@ namespace RecipaediaEX {
         /// <summary>图鉴原料条目 <c>IsIngredient</c>：可作为原料的方块 <c>blockValue</c> 列表（<c>int[]</c>）。</summary>
         public const string MatchedIngredientBlockValues = "MatchedIngredientBlockValues";
 
-        /// <summary>图鉴流体产物条目 <c>Match</c>：可产出该配方的流体值列表（<c>int[]</c>）。</summary>
-        public const string MatchedResultFluidValues = "MatchedResultFluidValues";
-
         /// <summary>当前世界 <see cref="GameEntitySystem.Project"/>；<see cref="RecipaediaEXManager.FindMatchingRecipe{T}"/> 据此走动态配方链。</summary>
         public const string Project = "Project";
 

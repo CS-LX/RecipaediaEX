@@ -84,7 +84,15 @@
     <Compile Include="ScreenExtra\Providers\BlocksCategoryProvider.cs" />
     <Compile Include="ScreenExtra\RecipaediaEXDescriptionScreen.cs" />
     <Compile Include="ScreenExtra\RecipaediaEXRecipesScreen.cs" />
+    <Compile Include="Search\ItemSearchDocument.cs" />
+    <Compile Include="Search\IRecipaediaSearchContributor.cs" />
+    <Compile Include="Search\RecipaediaSearchEngine.cs" />
+    <Compile Include="Search\RecipaediaSearchFilterState.cs" />
+    <Compile Include="Search\RecipaediaSearchIndex.cs" />
+    <Compile Include="Search\RecipaediaSearchParser.cs" />
+    <Compile Include="Search\SearchQuery.cs" />
     <Compile Include="ScreenExtra\RecipaediaEXScreen.cs" />
+    <Compile Include="UI\RecipaediaSearchFilterDialog.cs" />
     <Compile Include="ScreenExtra\RecipeDescriptor.cs" />
     <Compile Include="ScreenExtra\RecipeDescriptorAttribute.cs" />
     <Compile Include="WidgetExtra\AdvancedBevelledButtonWidget.cs" />
@@ -122,6 +130,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Assets\RecipaediaEX\Screens\RecipaediaEXScreen.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\RecipaediaEX\Dialogs\RecipaediaSearchFilterDialog.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\Lang\zh-CN.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\Lang\en-US.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Assets\RecipaediaEX\Widgets\Descriptors\SmeltingRecipeDescriptor.xml">

@@ -48,7 +48,7 @@ RecipaediaEX 是一个面向 Survivalcraft 模组开发的配方与图鉴扩展�
 建议在配方里维护 `ValuesDictionary`，键名使用 **`RecipeExtraKeys`**（`RecipesExtra/RecipeExtraKeys.cs`），并至少写入：
 
 - `RecipeExtraKeys.MatchedResultBlockValues`（`int[]`），供图鉴方块产物匹配；
-- 按需 `MatchedIngredientBlockValues` / `MatchedResultFluidValues`。
+- 按需 `MatchedIngredientBlockValues`。
 
 ### 2. 提供配方加载器
 

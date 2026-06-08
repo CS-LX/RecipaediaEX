@@ -12,13 +12,12 @@ namespace RecipaediaEX.Implementation {
         public int m_blockValue;
         public int m_order;
         public Block m_block;
-        public int m_recipesCount;
+        public int RecipesCount => RecipaediaEXManager.Recipes.AsValueEnumerable().Count(Match);
 
         public BlockItem(Block block, int order, int blockValue) {
             m_block = block;
             m_blockValue = blockValue;
             m_order = order;
-            m_recipesCount = RecipaediaEXManager.Recipes.AsValueEnumerable().Count(Match);
         }
 
         public object Value => m_blockValue;
@@ -114,8 +113,8 @@ namespace RecipaediaEX.Implementation {
             Dictionary<string, string> translatedTexts = dictionary.AsValueEnumerable().Select(pair => new KeyValuePair<string, string>(LanguageControl.Get(RecipaediaDescriptionScreen.fName, pair.Key), pair.Value)).ToDictionary();
             return translatedTexts;
         }
-        public bool RecipesButtonEnabled => m_recipesCount > 0;
-        public string RecipesButtonText => m_recipesCount > 0 ? $"{m_recipesCount} {((m_recipesCount == 1) ? LanguageControl.Get(nameof(RecipaediaScreen), 1) : LanguageControl.Get(nameof(RecipaediaScreen), 2))}" : LanguageControl.Get(nameof(RecipaediaScreen), 3);
+        public bool RecipesButtonEnabled => RecipesCount > 0;
+        public string RecipesButtonText => RecipesCount > 0 ? $"{RecipesCount} {((RecipesCount == 1) ? LanguageControl.Get(nameof(RecipaediaScreen), 1) : LanguageControl.Get(nameof(RecipaediaScreen), 2))}" : LanguageControl.Get(nameof(RecipaediaScreen), 3);
         public bool DetailsButtonEnabled => true;
         public string DetailsButtonText => LanguageControl.Get("ContentWidgets", nameof(RecipaediaScreen), "1");
 

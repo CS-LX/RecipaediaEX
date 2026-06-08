@@ -5,30 +5,38 @@ using System.Xml.Linq;
 using Engine;
 using Engine.Serialization;
 using Game;
+using RecipaediaEX.Search;
 using ZLinq;
 using ZLinq.Linq;
 
 namespace RecipaediaEX.UI {
     public class RecipaediaEXScreen : Screen {
-        //功能
+        public const string SearchLanguageName = "RecipaediaSearch";
+
         public List<Assembly> m_scannedAssemblies = [];
-        public Dictionary<Type, IRecipaediaCategoryProvider> m_categoryProviderCache = [];//所有分类配置器提供器
-        public List<string> m_categoriesName = [];//所有分类配置器的名称
-        public Dictionary<string, IRecipaediaCategory> m_categories = [];//所有分类配置器（易失）
+        public Dictionary<Type, IRecipaediaCategoryProvider> m_categoryProviderCache = [];
+        public List<string> m_categoriesName = [];
+        public Dictionary<string, IRecipaediaCategory> m_categories = [];
         public string m_selectedCategory;
         public string m_listCategory = string.Empty;
         public Func<object, Widget> m_currentItemWidgetFactory;
         public bool m_categoriesInitialized;
+        public string m_searchQuery = string.Empty;
+        public RecipaediaSearchFilterState m_filterState = new();
 
-        //界面
         public LabelWidget m_categoryLabel;
         public ButtonWidget m_prevCategoryButton;
         public ButtonWidget m_nextCategoryButton;
         public ButtonWidget m_detailsButton;
         public ButtonWidget m_recipesButton;
-        public ListPanelWidget m_blocksList;//（内容易失）
+        public ListPanelWidget m_blocksList;
         public Screen m_previousScreen;
 
+        public TextBoxWidget m_inputKey;
+        public LabelWidget m_placeHolder;
+        public LinkWidget m_clearSearchLink;
+        public ButtonWidget m_searchButton;
+        public ButtonWidget m_searchTypeButton;
 
         public RecipaediaEXScreen() {
             XElement node = RecipaediaEXLoader.RequestScreenFile("RecipaediaEXScreen");
@@ -40,8 +48,13 @@ namespace RecipaediaEX.UI {
             m_recipesButton = Children.Find<ButtonWidget>("RecipesButton");
             m_blocksList = Children.Find<ListPanelWidget>("BlocksList");
             m_blocksList.ItemClicked = OnBlocksListItemClicked;
+            m_inputKey = Children.Find<TextBoxWidget>("key");
+            m_placeHolder = Children.Find<LabelWidget>("placeholder");
+            m_clearSearchLink = Children.Find<LinkWidget>("ClearSearchLink");
+            m_searchButton = Children.Find<ButtonWidget>("Search");
+            m_searchTypeButton = Children.Find<ButtonWidget>("SearchType");
 
-            GetProviders();//获取类别提供器
+            GetProviders();
         }
 
         public override void Enter(object[] parameters) {
@@ -58,18 +71,19 @@ namespace RecipaediaEX.UI {
 
         public override void Update() {
             base.Update();
-            ValueEnumerable<FromList<IRecipe>, IRecipe> recipes = RecipaediaEXManager.Recipes.AsValueEnumerable();
-            //类别有改变，刷新列表
+
             if (m_selectedCategory != m_listCategory) {
                 m_listCategory = m_selectedCategory;
+                ClearSearch();
                 PopulateBlocksList();
             }
 
-            //列表最上方的名称
+            UpdateSearchBarVisibility();
+            UpdateSearchTypeButtonText();
+
             string arg = m_categories[m_selectedCategory].DisplayName;
             m_categoryLabel.Text = $"{arg} ({m_blocksList.Items.Count})";
 
-            //切换类别按钮逻辑
             m_prevCategoryButton.IsEnabled = m_selectedCategory != m_categoriesName[0];
             m_nextCategoryButton.IsEnabled = m_selectedCategory != m_categoriesName[^1];
             if (m_prevCategoryButton.IsClicked || Input.Left) {
@@ -79,12 +93,21 @@ namespace RecipaediaEX.UI {
                 m_selectedCategory = m_categoriesName[MathUtils.Min(m_categoriesName.IndexOf(m_selectedCategory) + 1, m_categoriesName.Count - 1)];
             }
 
-            //选中后
+            if (m_searchButton.IsClicked) {
+                ApplySearchFromInput();
+            }
+            if (m_clearSearchLink.IsClicked) {
+                ClearSearch();
+                PopulateBlocksList();
+            }
+            if (m_searchTypeButton.IsClicked) {
+                OpenFilterDialog();
+            }
+
             IRecipaediaItem selectedItem = m_blocksList.SelectedItem as IRecipaediaItem;
             if (m_blocksList.SelectedItem is IRecipaediaItem item) {
                 selectedItem = item;
             }
-            //配方按钮逻辑
             if (selectedItem != null) {
                 m_recipesButton.IsEnabled = selectedItem.RecipesButtonEnabled;
                 m_recipesButton.Text = selectedItem.RecipesButtonText;
@@ -96,7 +119,6 @@ namespace RecipaediaEX.UI {
             if (selectedItem != null && m_recipesButton.IsClicked) {
                 ScreensManager.SwitchScreen(selectedItem.RecipeScreenName, selectedItem);
             }
-            //描述按钮逻辑
             if (selectedItem != null) {
                 m_detailsButton.IsEnabled = selectedItem.DetailsButtonEnabled;
                 m_detailsButton.Text = selectedItem.DetailsButtonText;
@@ -109,23 +131,65 @@ namespace RecipaediaEX.UI {
                 ScreensManager.SwitchScreen(selectedItem.DetailScreenName, selectedItem, m_blocksList.Items.AsValueEnumerable().Cast<IRecipaediaItem>().ToList());
             }
 
-            //退出逻辑
             if (Input.Back || Input.Cancel || Children.Find<ButtonWidget>("TopBar.Back").IsClicked) {
-                m_categories.Clear();
-                m_categoriesName.Clear();
-                m_blocksList.ClearItems();
-                m_listCategory = string.Empty;
-                ScreensManager.SwitchScreen(m_previousScreen);
+                if (!string.IsNullOrEmpty(m_searchQuery) || !string.IsNullOrEmpty(m_inputKey.Text)) {
+                    ClearSearch();
+                    PopulateBlocksList();
+                }
+                else {
+                    m_categories.Clear();
+                    m_categoriesName.Clear();
+                    m_blocksList.ClearItems();
+                    m_listCategory = string.Empty;
+                    ScreensManager.SwitchScreen(m_previousScreen);
+                }
             }
         }
 
-        public void GetProviders() {//获取类别提供器
+        void UpdateSearchBarVisibility() {
+            m_placeHolder.IsVisible = string.IsNullOrEmpty(m_inputKey.Text);
+            m_clearSearchLink.IsVisible = !string.IsNullOrEmpty(m_inputKey.Text) || m_inputKey.HasFocus;
+        }
+
+        void UpdateSearchTypeButtonText() {
+            if (m_filterState.ActiveFilterCount > 0) {
+                m_searchTypeButton.Text = string.Format(LanguageControl.GetContentWidgets(SearchLanguageName, 2), m_filterState.ActiveFilterCount);
+            }
+            else {
+                m_searchTypeButton.Text = LanguageControl.GetContentWidgets(SearchLanguageName, 1);
+            }
+        }
+
+        void ApplySearchFromInput() {
+            m_searchQuery = m_inputKey.Text?.Replace("\n", string.Empty).Trim() ?? string.Empty;
+            m_filterState = RecipaediaSearchParser.ParseToFilterState(m_searchQuery);
+            PopulateBlocksList();
+        }
+
+        void ClearSearch() {
+            m_searchQuery = string.Empty;
+            m_filterState = new RecipaediaSearchFilterState();
+            m_inputKey.Text = string.Empty;
+        }
+
+        void OpenFilterDialog() {
+            DialogsManager.ShowDialog(
+                this,
+                new RecipaediaSearchFilterDialog(m_filterState, state => {
+                    m_filterState = state;
+                    m_searchQuery = RecipaediaSearchParser.BuildQuery(state);
+                    m_inputKey.Text = m_searchQuery;
+                    PopulateBlocksList();
+                })
+            );
+        }
+
+        public void GetProviders() {
             foreach (Assembly item in TypeCache.LoadedAssemblies.AsValueEnumerable().Where(a => !TypeCache.IsKnownSystemAssembly(a))) {
                 if (!m_scannedAssemblies.Contains(item)) {
                     foreach (TypeInfo definedType in item.DefinedTypes) {
                         Type type = definedType.AsType();
                         if (typeof(IRecipaediaCategoryProvider).IsAssignableFrom(type) && !type.IsAbstract && !type.IsInterface) {
-                            // 确保类型没有被实例化过
                             if (!m_categoryProviderCache.ContainsKey(type)) {
                                 IRecipaediaCategoryProvider instance = (IRecipaediaCategoryProvider)Activator.CreateInstance(type);
                                 m_categoryProviderCache.Add(type, instance);
@@ -137,7 +201,7 @@ namespace RecipaediaEX.UI {
             }
         }
 
-        public void GetCategories() {//获取类别
+        public void GetCategories() {
             m_categories.Clear();
             m_categoriesName.Clear();
             foreach (IRecipaediaCategoryProvider provider in m_categoryProviderCache.Values) {
@@ -160,12 +224,21 @@ namespace RecipaediaEX.UI {
             Widget CurrentFunc(object o) => selectedCategory.ItemWidgetFactory(o as IRecipaediaItem);
             m_blocksList.ItemWidgetFactory = CurrentFunc;
 
-            foreach (IRecipaediaItem item in selectedCategory.GetItems()) {
-                m_blocksList.AddItem(item);
+            IEnumerable<IRecipaediaItem> items = selectedCategory.GetItems();
+            if (!string.IsNullOrWhiteSpace(m_searchQuery)) {
+                List<SearchMatchResult> matches = RecipaediaSearchEngine.Filter(items, m_selectedCategory, m_searchQuery);
+                foreach (SearchMatchResult match in matches) {
+                    m_blocksList.AddItem(match.Item);
+                }
+            }
+            else {
+                foreach (IRecipaediaItem item in items) {
+                    m_blocksList.AddItem(item);
+                }
             }
         }
 
-        public void OnBlocksListItemClicked(object item) {//实现条目双击跳转详情页逻辑
+        public void OnBlocksListItemClicked(object item) {
             if (m_blocksList.SelectedItem == item && item is IRecipaediaItem selectedItem) {
                 ScreensManager.SwitchScreen(selectedItem.DetailScreenName, selectedItem, m_blocksList.Items.AsValueEnumerable().Cast<IRecipaediaItem>().ToList());
             }

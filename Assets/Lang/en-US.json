@@ -1,0 +1,29 @@
+{
+  "ContentWidgets": {
+    "RecipaediaSearch": {
+      "0": "Search entries…",
+      "1": "Filter",
+      "2": "Filter ({0})"
+    },
+    "RecipaediaSearchFilterDialog": {
+      "0": "Advanced Filter",
+      "1": "Name",
+      "2": "Has recipe",
+      "3": "Can be ingredient",
+      "4": "Entry type",
+      "5": "All types",
+      "6": "Package",
+      "7": "Mod",
+      "8": "Crafter",
+      "9": "Recipe type",
+      "10": "Contains ingredient",
+      "11": "Produces",
+      "12": "Exclude",
+      "13": "Reset",
+      "14": "Cancel",
+      "15": "Apply",
+      "block": "Block",
+      "custom": "Custom"
+    }
+  }
+}

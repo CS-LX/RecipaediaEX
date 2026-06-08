@@ -39,6 +39,24 @@
 
 ---
 
+## [Unreleased]
+
+### 新增
+
+- **图鉴搜索 Phase 1**：`RecipaediaSearchIndex` / `Parser` / `Engine`；`RecipaediaEXScreen` 社区同款搜索行；`RecipaediaSearchFilterDialog`（滚动表单、`TextBoxArea` 衬底、固定底栏按钮）；`Assets/Lang` 语言包（键位于 `ContentWidgets`）。
+
+### 变更
+
+- ⚠️ **移除** `RecipeExtraKeys.MatchedResultFluidValues`。REX 核心仅约定方块产物/原料 Extra；其它产物语义（如流体）由依赖模组自定键名，并通过 `IRecipaediaRecipeItem` / `IRecipaediaSearchContributor` 扩展。
+- 图鉴搜索：移除 `ItemSearchKind.Fluid`、`ResultFluidValues`、`@t:fluid` 及类名推断流体逻辑。
+
+### 适配指南
+
+1. 若模组曾使用 `RecipeExtraKeys.MatchedResultFluidValues`，改为模组内自有常量（如 `MyRecipeExtraKeys.MatchedResultFluidValues`），并在 `FluidItem.Match` 等处引用该常量。
+2. 搜索 `@t:fluid` 改为 `@t:custom` 或由 `IRecipaediaSearchContributor` 注册标签。
+
+---
+
 ## [2.0.0.0-preview5] — 2026-05-20
 
 **对比基准：** `2.0.0.0-preview2`（提交 [`cc765e3`](https://github.com/CS-LX/RecipaediaEX/commit/cc765e3)）→ `2.0.0.0-preview5`（提交 [`b71e6a0`](https://github.com/CS-LX/RecipaediaEX/commit/b71e6a0)，Git 标签 `preivew5`）
@@ -60,7 +78,7 @@
 - **动态配方链** — `IDynamicRecipeLoader`、`RecipesLoadManager.DynamicRecipeLoaders`、`RecipaediaEXManager.FindDynamicRecipe`
   - 内置 `AdHocRecipeLoader`：对接原版 `Block.GetAdHocCraftingRecipe`（`Order = 0`）。
   - `FindMatchingRecipe<T>(actual)` 在 `actual` 含 `Project` Extra 时**先**走动态链，再查静态表。
-- **`RecipeExtraKeys`** — `IRecipe` Extra 约定键名常量（`MatchedResultBlockValues`、`MatchedIngredientBlockValues`、`MatchedResultFluidValues`、`Project`、`ActualIngredients`、`Inventory`）。
+- **`RecipeExtraKeys`** — `IRecipe` Extra 约定键名常量（`MatchedResultBlockValues`、`MatchedIngredientBlockValues`、`Project`、`ActualIngredients`、`Inventory`）。
 - **图鉴原料匹配** — `FormattedRecipe.PreTransformIngredients()` 结束时自动写入 `MatchedIngredientBlockValues`；`BlockItem.IsIngredient` 优先读该 Extra。
 
 ### 修复

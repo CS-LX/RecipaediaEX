@@ -12,12 +12,22 @@
 
 			<CanvasWidget Size="0, 10" />
 
-			<StackPanelWidget Direction="Horizontal" HorizontalAlignment="Center">
-				<BevelledButtonWidget Style="{Styles/ButtonStyle_ArrowLeft}" Name="PreviousCategory" Margin="20, 0" VerticalAlignment="Center"/>
-				<CanvasWidget Size="340, 60" VerticalAlignment="Center">
+			<StackPanelWidget Direction="Horizontal" HorizontalAlignment="Center" Margin="10, 0">
+				<BevelledButtonWidget Style="{Styles/ButtonStyle_ArrowLeft}" Name="PreviousCategory" Margin="8, 0" VerticalAlignment="Center"/>
+				<CanvasWidget Size="220, 60" VerticalAlignment="Center">
 					<LabelWidget Name="Category" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 				</CanvasWidget>
-				<BevelledButtonWidget Style="{Styles/ButtonStyle_ArrowRight}" Name="NextCategory" Margin="20, 0" VerticalAlignment="Center"/>
+				<BevelledButtonWidget Style="{Styles/ButtonStyle_ArrowRight}" Name="NextCategory" Margin="8, 0" VerticalAlignment="Center"/>
+				<CanvasWidget Size="12, 0"/>
+				<CanvasWidget VerticalAlignment="Center" Size="280, 50" Margin="0, 5">
+					<BevelledRectangleWidget Style="{Styles/TextBoxArea}" />
+					<LabelWidget Name="placeholder" HorizontalAlignment="Center" VerticalAlignment="Center" Text="[RecipaediaSearch:0]" Color="96, 96, 96"/>
+					<TextBoxWidget Name="key" Size="Infinity, 60" VerticalAlignment="Center" Margin="10, 0"/>
+					<LinkWidget Name="ClearSearchLink" Text="[OriginalCommunityContentScreen:7]" Color="64, 192, 64" HorizontalAlignment="Far" VerticalAlignment="Center" DropShadow="true" Margin="10, 0" />
+				</CanvasWidget>
+				<CanvasWidget Size="5, 0"/>
+				<BevelledButtonWidget Name="Search" Text="[CommunityContentScreen:10]" Style="{Styles/ButtonStyle_115x60}" VerticalAlignment="Center"/>
+				<BevelledButtonWidget Name="SearchType" Text="[RecipaediaSearch:1]" Style="{Styles/ButtonStyle_115x60}" VerticalAlignment="Center"/>
 			</StackPanelWidget>
 
 			<CanvasWidget Size="0, 10" />
