@@ -35,7 +35,7 @@ namespace RecipaediaEX.UI {
         public TextBoxWidget m_inputKey;
         public LabelWidget m_placeHolder;
         public LinkWidget m_clearSearchLink;
-        public LinkWidget m_historyLink;
+        public ButtonWidget m_historyButton;
         public ButtonWidget m_searchButton;
         public ButtonWidget m_searchTypeButton;
 
@@ -52,7 +52,7 @@ namespace RecipaediaEX.UI {
             m_inputKey = Children.Find<TextBoxWidget>("key");
             m_placeHolder = Children.Find<LabelWidget>("placeholder");
             m_clearSearchLink = Children.Find<LinkWidget>("ClearSearchLink");
-            m_historyLink = Children.Find<LinkWidget>("HistoryLink");
+            m_historyButton = Children.Find<ButtonWidget>("History");
             m_searchButton = Children.Find<ButtonWidget>("Search");
             m_searchTypeButton = Children.Find<ButtonWidget>("SearchType");
 
@@ -81,7 +81,7 @@ namespace RecipaediaEX.UI {
             }
 
             UpdateSearchBarVisibility();
-            UpdateSearchTypeButtonText();
+            UpdateSearchTypeButtonState();
 
             string arg = m_categories[m_selectedCategory].DisplayName;
             m_categoryLabel.Text = $"{arg} ({m_blocksList.Items.Count})";
@@ -102,7 +102,7 @@ namespace RecipaediaEX.UI {
                 ClearSearch();
                 PopulateBlocksList();
             }
-            if (m_historyLink.IsClicked) {
+            if (m_historyButton.IsClicked) {
                 OpenSearchHistoryDialog();
             }
             if (m_searchTypeButton.IsClicked) {
@@ -154,16 +154,12 @@ namespace RecipaediaEX.UI {
         void UpdateSearchBarVisibility() {
             m_placeHolder.IsVisible = string.IsNullOrEmpty(m_inputKey.Text);
             m_clearSearchLink.IsVisible = !string.IsNullOrEmpty(m_inputKey.Text) || m_inputKey.HasFocus;
-            m_historyLink.IsVisible = RecipaediaSearchHistory.Entries.Count > 0;
+            m_historyButton.IsVisible = RecipaediaSearchHistory.Entries.Count > 0;
         }
 
-        void UpdateSearchTypeButtonText() {
-            if (m_filterState.ActiveFilterCount > 0) {
-                m_searchTypeButton.Text = string.Format(LanguageControl.GetContentWidgets(SearchLanguageName, 2), m_filterState.ActiveFilterCount);
-            }
-            else {
-                m_searchTypeButton.Text = LanguageControl.GetContentWidgets(SearchLanguageName, 1);
-            }
+        void UpdateSearchTypeButtonState() {
+            m_searchTypeButton.Text = string.Empty;
+            m_searchTypeButton.IsChecked = m_filterState.ActiveFilterCount > 0;
         }
 
         void ApplySearchFromInput() {

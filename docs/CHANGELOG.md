@@ -44,11 +44,13 @@
 ### 新增
 
 - **图鉴搜索 Phase 1**：`RecipaediaSearchIndex` / `Parser` / `Engine`；`RecipaediaEXScreen` 社区同款搜索行；`RecipaediaSearchFilterDialog`（滚动表单、`TextBoxArea` 衬底、固定底栏按钮）；`Assets/Lang` 语言包（键位于 `ContentWidgets`）。
-- **图鉴搜索 Phase 2（核心）**：拼音索引（`NPinyin.Core`）；`or` / `()` 查询 AST；`@recipes>=N` 等比较；搜索历史（`RecipaediaEXSearchHistory.txt` +「历史」链接）。
+- **图鉴搜索 Phase 2（核心）**：拼音索引（`NPinyin.Core`）；`or` / `()` 查询 AST；`@recipes>=N` 等比较；搜索历史（`RecipaediaEXSearchHistory.txt` + 历史图标按钮）。
+- **图鉴搜索栏 UI**：搜索 / 历史 / 筛选改为 Bevelled 图标按钮（`ButtonStyle_Search|History|Filter` + 模组纹理）。
 
 ### 修复
 
 - 排除词 `-keyword` / Dialog「排除词」双重取反导致结果反转。
+- 外部 PNG 图标在 `RectangleWidget` 上默认 `AlphaBlend` 导致白色抗锯齿光晕；图标样式改用 `BlendState=NonPremultiplied`（对齐宿主 `MainMenuScreen`）。
 
 ### 变更
 

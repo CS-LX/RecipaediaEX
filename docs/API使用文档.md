@@ -394,9 +394,11 @@ public class MyRecipesLoader : IRecipesLoader {
 
 ---
 
-## 9. 图鉴搜索（策划）
+## 9. 图鉴搜索
 
-条目过滤、Advanced Filter Dialog、查询 Token 与分阶段交付见 **[图鉴搜索功能策划](图鉴搜索功能策划.md)**（v0.3 已定稿，待实现）。
+条目过滤、Advanced Filter Dialog、查询 Token、`or` / 拼音 / `@recipes` / 搜索历史与分阶段交付见 **[图鉴搜索功能策划](图鉴搜索功能策划.md)**（Phase 1 / Phase 2 核心已落地并验收）。
+
+实现入口：`RecipaediaEX/Search/`、`UI/RecipaediaSearchFilterDialog.cs`、`ScreenExtra/RecipaediaEXScreen.cs`。
 
 ---
 
