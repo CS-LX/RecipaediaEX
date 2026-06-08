@@ -17,6 +17,7 @@ namespace RecipaediaEX.Search {
         public List<SearchNode> Children { get; } = [];
 
         public static SearchNode And(IEnumerable<SearchNode> children) => Combine(SearchNodeKind.And, children);
+
         public static SearchNode Or(IEnumerable<SearchNode> children) => Combine(SearchNodeKind.Or, children);
 
         public static SearchNode Not(SearchNode child) => new() { Kind = SearchNodeKind.Not, Children = { child } };
