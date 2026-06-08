@@ -395,7 +395,13 @@ public class MyRecipesLoader : IRecipesLoader {
 
 ---
 
-## 9. 兼容说明
+## 9. 图鉴搜索（策划）
+
+条目过滤、Advanced Filter Dialog、查询 Token 与分阶段交付见 **[图鉴搜索功能策划](图鉴搜索功能策划.md)**（v0.3 已定稿，待实现）。
+
+---
+
+## 10. 兼容说明
 
 - `RecipeReaderAttribute`、`RecipeFileLoaderAttribute` 在当前主流程中并非硬依赖入口。
 - 建议通过 `IRecipesLoader` 作为主扩展入口，在 Loader 内部自行组织 Reader 分发策略。

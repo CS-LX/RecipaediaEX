@@ -117,6 +117,7 @@ RecipaediaEventBus.GetPublisher<MyModEvent>().Publish(new MyModEvent(...));
 
 - [更新日志（模组开发者）](docs/CHANGELOG.md)
 - [API 使用文档](docs/API使用文档.md)
+- [图鉴搜索功能策划](docs/图鉴搜索功能策划.md)
 
 ## 说明
 
