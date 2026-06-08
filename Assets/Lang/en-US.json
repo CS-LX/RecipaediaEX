@@ -3,7 +3,8 @@
     "RecipaediaSearch": {
       "0": "Search entries…",
       "1": "Filter",
-      "2": "Filter ({0})"
+      "2": "Filter ({0})",
+      "3": "History"
     },
     "RecipaediaSearchFilterDialog": {
       "0": "Advanced Filter",

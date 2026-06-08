@@ -44,6 +44,11 @@
 ### 新增
 
 - **图鉴搜索 Phase 1**：`RecipaediaSearchIndex` / `Parser` / `Engine`；`RecipaediaEXScreen` 社区同款搜索行；`RecipaediaSearchFilterDialog`（滚动表单、`TextBoxArea` 衬底、固定底栏按钮）；`Assets/Lang` 语言包（键位于 `ContentWidgets`）。
+- **图鉴搜索 Phase 2（核心）**：拼音索引（`NPinyin.Core`）；`or` / `()` 查询 AST；`@recipes>=N` 等比较；搜索历史（`RecipaediaEXSearchHistory.txt` +「历史」链接）。
+
+### 修复
+
+- 排除词 `-keyword` / Dialog「排除词」双重取反导致结果反转。
 
 ### 变更
 

@@ -12,15 +12,16 @@ namespace RecipaediaEX.Search {
 
     public static class RecipaediaSearchEngine {
         public static List<SearchMatchResult> Filter(IEnumerable<IRecipaediaItem> candidates, string categoryId, string query) {
-            SearchQuery parsed = RecipaediaSearchParser.Parse(query);
-            if (parsed.TextTerms.Count == 0 && parsed.Clauses.Count == 0) {
+            SearchNode root = RecipaediaSearchParser.ParseExpression(query);
+            if (IsEmpty(root)) {
                 return candidates.AsValueEnumerable().Select(item => new SearchMatchResult { Item = item, Score = 0 }).ToList();
             }
 
             List<SearchMatchResult> results = [];
             foreach (IRecipaediaItem item in candidates) {
                 ItemSearchDocument doc = RecipaediaSearchIndex.GetDocument(item, categoryId);
-                if (!Matches(doc, parsed, out int score)) continue;
+                int score = 0;
+                if (!Matches(doc, root, ref score)) continue;
                 results.Add(new SearchMatchResult { Item = item, Score = score });
             }
 
@@ -36,24 +37,62 @@ namespace RecipaediaEX.Search {
             return results;
         }
 
-        static bool Matches(ItemSearchDocument doc, SearchQuery query, out int score) {
+        static bool IsEmpty(SearchNode node) {
+            if (node == null) return true;
+            return node.Kind switch {
+                SearchNodeKind.And => node.Children.Count == 0,
+                SearchNodeKind.Or => node.Children.Count == 0,
+                SearchNodeKind.Text => string.IsNullOrWhiteSpace(node.Text),
+                SearchNodeKind.Clause => false,
+                SearchNodeKind.Not => node.Children.Count == 0,
+                _ => true,
+            };
+        }
+
+        static bool Matches(ItemSearchDocument doc, SearchNode node, ref int score) {
             score = 0;
-            foreach (string term in query.TextTerms) {
-                if (!MatchesText(doc, term, false, ref score)) return false;
+            return node.Kind switch {
+                SearchNodeKind.And => MatchAll(doc, node.Children, ref score),
+                SearchNodeKind.Or => MatchAny(doc, node.Children, ref score),
+                SearchNodeKind.Not => MatchNot(doc, node),
+                SearchNodeKind.Text => MatchesText(doc, node.Text, ref score),
+                SearchNodeKind.Clause => MatchesClause(doc, node.Clause, ref score),
+                _ => true,
+            };
+        }
+
+        static bool MatchNot(ItemSearchDocument doc, SearchNode node) {
+            if (node.Children.Count == 0) return true;
+            int ignored = 0;
+            return !Matches(doc, node.Children[0], ref ignored);
+        }
+
+        static bool MatchAll(ItemSearchDocument doc, List<SearchNode> children, ref int score) {
+            int localScore = 0;
+            foreach (SearchNode child in children) {
+                if (!Matches(doc, child, ref localScore)) return false;
             }
-            foreach (SearchClause clause in query.Clauses) {
-                bool matched = MatchesClause(doc, clause, ref score);
-                if (clause.Exclude) {
-                    if (matched) return false;
-                }
-                else if (!matched) return false;
+            score += localScore;
+            return true;
+        }
+
+        static bool MatchAny(ItemSearchDocument doc, List<SearchNode> children, ref int score) {
+            int bestScore = 0;
+            bool any = false;
+            foreach (SearchNode child in children) {
+                int branchScore = 0;
+                if (!Matches(doc, child, ref branchScore)) continue;
+                any = true;
+                if (branchScore > bestScore) bestScore = branchScore;
             }
+            if (!any) return false;
+            score += bestScore;
             return true;
         }
 
         static bool MatchesClause(ItemSearchDocument doc, SearchClause clause, ref int score) {
             return clause.Kind switch {
-                SearchClauseKind.Text => MatchesText(doc, clause.Value, clause.Exclude, ref score),
+                SearchClauseKind.Text => MatchesText(doc, clause.Value, ref score),
                 SearchClauseKind.NameExact => StringEquals(doc.DisplayName, clause.Value),
                 SearchClauseKind.NameContains => Contains(doc.NormalizedName, RecipaediaSearchIndex.Normalize(clause.Value)),
                 SearchClauseKind.ItemType => MatchesItemType(doc, clause.Value),
@@ -65,11 +104,22 @@ namespace RecipaediaEX.Search {
                 SearchClauseKind.RecipeType => MatchesRecipeType(doc, clause.Value),
                 SearchClauseKind.HasRecipe => doc.RecipeCountAsResult > 0,
                 SearchClauseKind.CanUse => doc.RecipeCountAsIngredient > 0,
+                SearchClauseKind.RecipeCount => CompareCount(doc.RecipeCountAsResult, clause.CompareOp, clause.CompareValue),
                 _ => true,
             };
         }
 
-        static bool MatchesText(ItemSearchDocument doc, string term, bool exclude, ref int score) {
+        static bool CompareCount(int actual, SearchCompareOp op, int expected) => op switch {
+            SearchCompareOp.Equal => actual == expected,
+            SearchCompareOp.NotEqual => actual != expected,
+            SearchCompareOp.Greater => actual > expected,
+            SearchCompareOp.GreaterOrEqual => actual >= expected,
+            SearchCompareOp.Less => actual < expected,
+            SearchCompareOp.LessOrEqual => actual <= expected,
+            _ => true,
+        };
+
+        static bool MatchesText(ItemSearchDocument doc, string term, ref int score) {
             if (string.IsNullOrWhiteSpace(term)) return true;
             string normalized = RecipaediaSearchIndex.Normalize(term);
             bool matched = false;
@@ -96,7 +146,25 @@ namespace RecipaediaEX.Search {
                     matched = true;
                 }
             }
-            return exclude ? !matched : matched;
+            if (PinyinHelper.IsAsciiLetters(term)) {
+                string pyTerm = RecipaediaSearchIndex.Normalize(term);
+                if (!string.IsNullOrEmpty(doc.PinyinFull)) {
+                    if (doc.PinyinFull.StartsWith(pyTerm, StringComparison.Ordinal)) {
+                        score += 30;
+                        matched = true;
+                    }
+                    else if (Contains(doc.PinyinFull, pyTerm)) {
+                        score += 30;
+                        matched = true;
+                    }
+                }
+                if (!string.IsNullOrEmpty(doc.PinyinInitials)
+                    && (doc.PinyinInitials.StartsWith(pyTerm, StringComparison.Ordinal) || Contains(doc.PinyinInitials, pyTerm))) {
+                    score += 15;
+                    matched = true;
+                }
+            }
+            return matched;
         }
 
         static bool MatchesItemType(ItemSearchDocument doc, string value) {

@@ -86,10 +86,13 @@
     <Compile Include="ScreenExtra\RecipaediaEXRecipesScreen.cs" />
     <Compile Include="Search\ItemSearchDocument.cs" />
     <Compile Include="Search\IRecipaediaSearchContributor.cs" />
+    <Compile Include="Search\PinyinHelper.cs" />
     <Compile Include="Search\RecipaediaSearchEngine.cs" />
     <Compile Include="Search\RecipaediaSearchFilterState.cs" />
+    <Compile Include="Search\RecipaediaSearchHistory.cs" />
     <Compile Include="Search\RecipaediaSearchIndex.cs" />
     <Compile Include="Search\RecipaediaSearchParser.cs" />
+    <Compile Include="Search\SearchNode.cs" />
     <Compile Include="Search\SearchQuery.cs" />
     <Compile Include="ScreenExtra\RecipaediaEXScreen.cs" />
     <Compile Include="UI\RecipaediaSearchFilterDialog.cs" />
@@ -158,10 +161,14 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="NPinyin.Core" Version="2.1.3" GeneratePathProperty="true" />
     <PackageReference Include="SurvivalcraftAPI.Survivalcraft" Version="1.9.0.2" />
     <PackageReference Include="ZLinq" Version="1.5.6" GeneratePathProperty="true" />
   </ItemGroup>
 	<ItemGroup>
+		<None Include="$(PkgNPinyin_Core)\lib\netstandard2.0\NPinyin.Core.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Include="$(PkgZLinq)\lib\net10.0\ZLinq.dll">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

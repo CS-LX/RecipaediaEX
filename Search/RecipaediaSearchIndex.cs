@@ -94,6 +94,8 @@ namespace RecipaediaEX.Search {
                 CategoryId = categoryId,
                 DisplayName = displayName,
                 NormalizedName = Normalize(displayName),
+                PinyinFull = PinyinHelper.ToFullPinyin(displayName),
+                PinyinInitials = PinyinHelper.ToInitials(displayName),
                 DescriptionSnippet = Truncate(description, 120),
                 Kind = kind,
                 PackId = packId,

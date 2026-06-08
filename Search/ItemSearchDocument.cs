@@ -13,6 +13,8 @@ namespace RecipaediaEX.Search {
         public string CategoryId { get; init; } = string.Empty;
         public string DisplayName { get; init; } = string.Empty;
         public string NormalizedName { get; init; } = string.Empty;
+        public string PinyinFull { get; init; } = string.Empty;
+        public string PinyinInitials { get; init; } = string.Empty;
         public string DescriptionSnippet { get; init; } = string.Empty;
         public ItemSearchKind Kind { get; init; }
         public string PackId { get; init; } = string.Empty;

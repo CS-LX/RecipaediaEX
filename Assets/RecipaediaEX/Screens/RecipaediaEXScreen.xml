@@ -23,6 +23,7 @@
 					<BevelledRectangleWidget Style="{Styles/TextBoxArea}" />
 					<LabelWidget Name="placeholder" HorizontalAlignment="Center" VerticalAlignment="Center" Text="[RecipaediaSearch:0]" Color="96, 96, 96"/>
 					<TextBoxWidget Name="key" Size="Infinity, 60" VerticalAlignment="Center" Margin="10, 0"/>
+					<LinkWidget Name="HistoryLink" Text="[RecipaediaSearch:3]" Color="128, 160, 192" HorizontalAlignment="Near" VerticalAlignment="Center" DropShadow="true" Margin="10, 0" />
 					<LinkWidget Name="ClearSearchLink" Text="[OriginalCommunityContentScreen:7]" Color="64, 192, 64" HorizontalAlignment="Far" VerticalAlignment="Center" DropShadow="true" Margin="10, 0" />
 				</CanvasWidget>
 				<CanvasWidget Size="5, 0"/>

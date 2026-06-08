@@ -35,6 +35,7 @@ namespace RecipaediaEX.UI {
         public TextBoxWidget m_inputKey;
         public LabelWidget m_placeHolder;
         public LinkWidget m_clearSearchLink;
+        public LinkWidget m_historyLink;
         public ButtonWidget m_searchButton;
         public ButtonWidget m_searchTypeButton;
 
@@ -51,6 +52,7 @@ namespace RecipaediaEX.UI {
             m_inputKey = Children.Find<TextBoxWidget>("key");
             m_placeHolder = Children.Find<LabelWidget>("placeholder");
             m_clearSearchLink = Children.Find<LinkWidget>("ClearSearchLink");
+            m_historyLink = Children.Find<LinkWidget>("HistoryLink");
             m_searchButton = Children.Find<ButtonWidget>("Search");
             m_searchTypeButton = Children.Find<ButtonWidget>("SearchType");
 
@@ -99,6 +101,9 @@ namespace RecipaediaEX.UI {
             if (m_clearSearchLink.IsClicked) {
                 ClearSearch();
                 PopulateBlocksList();
+            }
+            if (m_historyLink.IsClicked) {
+                OpenSearchHistoryDialog();
             }
             if (m_searchTypeButton.IsClicked) {
                 OpenFilterDialog();
@@ -149,6 +154,7 @@ namespace RecipaediaEX.UI {
         void UpdateSearchBarVisibility() {
             m_placeHolder.IsVisible = string.IsNullOrEmpty(m_inputKey.Text);
             m_clearSearchLink.IsVisible = !string.IsNullOrEmpty(m_inputKey.Text) || m_inputKey.HasFocus;
+            m_historyLink.IsVisible = RecipaediaSearchHistory.Entries.Count > 0;
         }
 
         void UpdateSearchTypeButtonText() {
@@ -163,7 +169,29 @@ namespace RecipaediaEX.UI {
         void ApplySearchFromInput() {
             m_searchQuery = m_inputKey.Text?.Replace("\n", string.Empty).Trim() ?? string.Empty;
             m_filterState = RecipaediaSearchParser.ParseToFilterState(m_searchQuery);
+            if (!string.IsNullOrEmpty(m_searchQuery)) RecipaediaSearchHistory.Add(m_searchQuery);
             PopulateBlocksList();
+        }
+
+        void OpenSearchHistoryDialog() {
+            IReadOnlyList<string> entries = RecipaediaSearchHistory.Entries;
+            if (entries.Count == 0) return;
+            DialogsManager.ShowDialog(
+                this,
+                new ListSelectionDialog(
+                    LanguageControl.GetContentWidgets(SearchLanguageName, 3),
+                    entries,
+                    48f,
+                    item => item?.ToString() ?? string.Empty,
+                    item => {
+                        string query = item?.ToString() ?? string.Empty;
+                        m_inputKey.Text = query;
+                        m_searchQuery = query;
+                        m_filterState = RecipaediaSearchParser.ParseToFilterState(query);
+                        PopulateBlocksList();
+                    }
+                )
+            );
         }
 
         void ClearSearch() {
@@ -179,6 +207,7 @@ namespace RecipaediaEX.UI {
                     m_filterState = state;
                     m_searchQuery = RecipaediaSearchParser.BuildQuery(state);
                     m_inputKey.Text = m_searchQuery;
+                    if (!string.IsNullOrEmpty(m_searchQuery)) RecipaediaSearchHistory.Add(m_searchQuery);
                     PopulateBlocksList();
                 })
             );

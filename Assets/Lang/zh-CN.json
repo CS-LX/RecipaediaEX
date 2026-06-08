@@ -3,7 +3,8 @@
     "RecipaediaSearch": {
       "0": "搜索图鉴条目…",
       "1": "筛选",
-      "2": "筛选 ({0})"
+      "2": "筛选 ({0})",
+      "3": "历史"
     },
     "RecipaediaSearchFilterDialog": {
       "0": "高级筛选",
