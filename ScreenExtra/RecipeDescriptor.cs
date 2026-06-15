@@ -1,13 +1,8 @@
-﻿using System;
-using Game;
+﻿using Game;
 
 namespace RecipaediaEX.UI {
-    public abstract class RecipeDescriptor : CanvasWidget {
-        public RecipaediaEXRecipesScreen m_belongingScreen;
-
-        protected RecipeDescriptor(RecipaediaEXRecipesScreen belongingScreen) {
-            m_belongingScreen = belongingScreen;
-        }
+    public abstract class RecipeDescriptor(RecipaediaEXRecipesScreen belongingScreen) : CanvasWidget {
+        public RecipaediaEXRecipesScreen m_belongingScreen = belongingScreen;
 
         /// <summary>
         /// 当此配方呈现界面被展示时调用

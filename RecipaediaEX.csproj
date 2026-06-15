@@ -1,190 +1,191 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.Net.Sdk">
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{6F0EBCCC-587F-40D5-A2E1-ECEF16EF34E6}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RecipaediaEX</RootNamespace>
-    <AssemblyName>RecipaediaEX</AssemblyName>
-	  <TargetFramework>net10.0</TargetFramework>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-	  <LangVersion>preview</LangVersion>
-	  <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-	  <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-	  <Version>2.0.0.0-preview5</Version>
-	  <AssemblyVersion>2.0.0.0</AssemblyVersion>
-	  <InformationalVersion>2.0.0.0-preview5</InformationalVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>none</DebugType>
-    <Optimize>true</Optimize>
-	  <DebugSymbols>false</DebugSymbols>
-	  <GenerateDependencyFile>false</GenerateDependencyFile>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="ComponentsExtra\Implementation\ComponentEXCraftingTable.cs" />
-    <Compile Include="ComponentsExtra\Implementation\ComponentEXFurnace.cs" />
-    <Compile Include="ComponentsExtra\OriginalComponentsExtensions.cs" />
-    <Compile Include="CrafterExtra\Crafters\CraftingTableBlock.cs" />
-    <Compile Include="CrafterExtra\Crafters\FurnaceBlock.cs" />
-    <Compile Include="CrafterExtra\ICrafter.cs" />
-    <Compile Include="Events\IPublisher.cs" />
-    <Compile Include="Events\ISubscriber.cs" />
-    <Compile Include="LoaderExtra\DynamicLoaders\AdHocRecipeLoader.cs" />
-    <Compile Include="LoaderExtra\IDynamicRecipeLoader.cs" />
-    <Compile Include="LoaderExtra\Loaders\BlockProceduralRecipesLoader.cs" />
-    <Compile Include="LoaderExtra\Loaders\RegularRecipesLoader.cs" />
-    <Compile Include="Events\CrafterOutputProducedEvent.cs" />
-    <Compile Include="Events\CrafterOutputRemovedEvent.cs" />
-    <Compile Include="Events\CraftingRecipeChangedEvent.cs" />
-    <Compile Include="Events\EventChannel.cs" />
-    <Compile Include="Events\FurnaceFuelUsedEvent.cs" />
-    <Compile Include="Events\RecipeMatchedEvent.cs" />
-    <Compile Include="Events\RecipesResetEvent.cs" />
-    <Compile Include="Events\RecipaediaEventBus.cs" />
-    <Compile Include="Events\SmeltingRecipeChangedEvent.cs" />
-    <Compile Include="RecipaediaEXLoader.cs" />
-    <Compile Include="LoaderExtra\IRecipesLoader.cs" />
-    <Compile Include="LoaderExtra\Loaders\XmlRecipesLoader.cs" />
-    <Compile Include="LoaderExtra\RecipeFileLoaderAttribute.cs" />
-    <Compile Include="RecipesCrafterManager.cs" />
-    <Compile Include="RecipesLoadManager.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RecipaediaEXManager.cs" />
-    <Compile Include="RecipesExtra\IRecipe.cs" />
-    <Compile Include="RecipesExtra\RecipeExtraKeys.cs" />
-    <Compile Include="RecipesExtra\RecipeReaderAttribute.cs" />
-    <Compile Include="RecipesExtra\Recipes\OriginalCraftingRecipe.cs" />
-    <Compile Include="RecipesExtra\Recipes\FormattedRecipe.cs" />
-    <Compile Include="RecipesExtra\Recipes\OriginalSmeltingRecipe.cs" />
-    <Compile Include="ScreenExtra\Categories\BlocksCategory.cs" />
-    <Compile Include="ScreenExtra\Descriptors\CraftingRecipeDescriptor.cs" />
-    <Compile Include="ScreenExtra\Descriptors\SmeltingRecipeDescriptor.cs" />
-    <Compile Include="ScreenExtra\IAdvancedCategory.cs" />
-    <Compile Include="ScreenExtra\IRecipaediaCategory.cs" />
-    <Compile Include="ScreenExtra\IRecipaediaCategoryProvider.cs" />
-    <Compile Include="ScreenExtra\IRecipaediaDescriptionItem.cs" />
-    <Compile Include="ScreenExtra\IRecipaediaItem.cs" />
-    <Compile Include="ScreenExtra\IRecipaediaRecipeItem.cs" />
-    <Compile Include="ScreenExtra\Items\BlockItem.cs" />
-    <Compile Include="ScreenExtra\Providers\BlocksCategoryProvider.cs" />
-    <Compile Include="ScreenExtra\RecipaediaEXDescriptionScreen.cs" />
-    <Compile Include="ScreenExtra\RecipaediaEXRecipesScreen.cs" />
-    <Compile Include="Search\ItemSearchDocument.cs" />
-    <Compile Include="Search\IRecipaediaSearchContributor.cs" />
-    <Compile Include="Search\PinyinHelper.cs" />
-    <Compile Include="Search\RecipaediaSearchEngine.cs" />
-    <Compile Include="Search\RecipaediaSearchFilterState.cs" />
-    <Compile Include="Search\RecipaediaSearchHistory.cs" />
-    <Compile Include="Search\RecipaediaSearchIndex.cs" />
-    <Compile Include="Search\RecipaediaSearchParser.cs" />
-    <Compile Include="Search\SearchNode.cs" />
-    <Compile Include="Search\SearchQuery.cs" />
-    <Compile Include="ScreenExtra\RecipaediaEXScreen.cs" />
-    <Compile Include="UI\RecipaediaSearchFilterDialog.cs" />
-    <Compile Include="ScreenExtra\RecipeDescriptor.cs" />
-    <Compile Include="ScreenExtra\RecipeDescriptorAttribute.cs" />
-    <Compile Include="WidgetExtra\AdvancedBevelledButtonWidget.cs" />
-    <Compile Include="WidgetExtra\CrafterButtonWidget.cs" />
-    <Compile Include="WidgetExtra\CrafterSlots\BlockCrafterButtonWidget.cs" />
-    <Compile Include="WidgetExtra\InteractableWidget.cs" />
-    <Compile Include="WidgetExtra\RecipeSlots\BlockRecipeSlotWidget.cs" />
-    <Compile Include="WidgetExtra\RecipeSlotWidget.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-    <None Update="modinfo.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="icon.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Screens\RecipaediaEXScreen.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Remove="RTest\**" />
-    <None Update="Assets\Screens\RecipaediaEXDescriptionScreen.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Screens\RecipaediaEXRecipesScreen.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\RecipaediaEX\Styles\ButtonStyle_Previous.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\RecipaediaEX\Styles\ButtonStyle_Search.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\RecipaediaEX\Textures\SearchLine.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\RecipaediaEX\Textures\HistoryLine.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\RecipaediaEX\Textures\MenuSearchLine.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\RecipaediaEX\Styles\ButtonStyle_History.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\RecipaediaEX\Styles\ButtonStyle_Filter.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\RecipaediaEX\Screens\RecipaediaEXDescriptionScreen.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\RecipaediaEX\Screens\RecipaediaEXRecipesScreen.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\RecipaediaEX\Screens\RecipaediaEXScreen.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\RecipaediaEX\Dialogs\RecipaediaSearchFilterDialog.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Lang\zh-CN.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Lang\en-US.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\RecipaediaEX\Widgets\Descriptors\SmeltingRecipeDescriptor.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\RecipaediaEX\Widgets\Descriptors\CraftingRecipeDescriptor.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\RecipaediaEX\Widgets\CraftingRecipeSlot.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\RecipaediaEX\Widgets\AdvancedBevelledButtonContents.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="RecipaediaEX.xdb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="NPinyin.Core" Version="2.1.3" GeneratePathProperty="true" />
-    <PackageReference Include="SurvivalcraftAPI.Survivalcraft" Version="1.9.2" />
-    <PackageReference Include="ZLinq" Version="1.5.6" GeneratePathProperty="true" />
-  </ItemGroup>
+	<PropertyGroup>
+		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+		<ProjectGuid>{6F0EBCCC-587F-40D5-A2E1-ECEF16EF34E6}</ProjectGuid>
+		<OutputType>Library</OutputType>
+		<AppDesignerFolder>Properties</AppDesignerFolder>
+		<RootNamespace>RecipaediaEX</RootNamespace>
+		<Nullable>annotations</Nullable>
+		<AssemblyName>RecipaediaEX</AssemblyName>
+		<TargetFramework>net10.0</TargetFramework>
+		<FileAlignment>512</FileAlignment>
+		<Deterministic>true</Deterministic>
+		<LangVersion>preview</LangVersion>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+		<Version>2.0.0.0-preview5</Version>
+		<AssemblyVersion>2.0.0.0</AssemblyVersion>
+		<InformationalVersion>2.0.0.0-preview5</InformationalVersion>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+		<DebugSymbols>true</DebugSymbols>
+		<DebugType>full</DebugType>
+		<Optimize>false</Optimize>
+		<OutputPath>bin\Debug\</OutputPath>
+		<DefineConstants>DEBUG;TRACE</DefineConstants>
+		<ErrorReport>prompt</ErrorReport>
+		<WarningLevel>4</WarningLevel>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+		<DebugType>none</DebugType>
+		<Optimize>true</Optimize>
+		<DebugSymbols>false</DebugSymbols>
+		<GenerateDependencyFile>false</GenerateDependencyFile>
+		<OutputPath>bin\Release\</OutputPath>
+		<DefineConstants>TRACE</DefineConstants>
+		<ErrorReport>prompt</ErrorReport>
+		<WarningLevel>4</WarningLevel>
+	</PropertyGroup>
+	<ItemGroup>
+		<Compile Include="ComponentsExtra\Implementation\ComponentEXCraftingTable.cs"/>
+		<Compile Include="ComponentsExtra\Implementation\ComponentEXFurnace.cs"/>
+		<Compile Include="ComponentsExtra\OriginalComponentsExtensions.cs"/>
+		<Compile Include="CrafterExtra\Crafters\CraftingTableBlock.cs"/>
+		<Compile Include="CrafterExtra\Crafters\FurnaceBlock.cs"/>
+		<Compile Include="CrafterExtra\ICrafter.cs"/>
+		<Compile Include="Events\IPublisher.cs"/>
+		<Compile Include="Events\ISubscriber.cs"/>
+		<Compile Include="LoaderExtra\DynamicLoaders\AdHocRecipeLoader.cs"/>
+		<Compile Include="LoaderExtra\IDynamicRecipeLoader.cs"/>
+		<Compile Include="LoaderExtra\Loaders\BlockProceduralRecipesLoader.cs"/>
+		<Compile Include="LoaderExtra\Loaders\RegularRecipesLoader.cs"/>
+		<Compile Include="Events\CrafterOutputProducedEvent.cs"/>
+		<Compile Include="Events\CrafterOutputRemovedEvent.cs"/>
+		<Compile Include="Events\CraftingRecipeChangedEvent.cs"/>
+		<Compile Include="Events\EventChannel.cs"/>
+		<Compile Include="Events\FurnaceFuelUsedEvent.cs"/>
+		<Compile Include="Events\RecipeMatchedEvent.cs"/>
+		<Compile Include="Events\RecipesResetEvent.cs"/>
+		<Compile Include="Events\RecipaediaEventBus.cs"/>
+		<Compile Include="Events\SmeltingRecipeChangedEvent.cs"/>
+		<Compile Include="RecipaediaEXLoader.cs"/>
+		<Compile Include="LoaderExtra\IRecipesLoader.cs"/>
+		<Compile Include="LoaderExtra\Loaders\XmlRecipesLoader.cs"/>
+		<Compile Include="LoaderExtra\RecipeFileLoaderAttribute.cs"/>
+		<Compile Include="RecipesCrafterManager.cs"/>
+		<Compile Include="RecipesLoadManager.cs"/>
+		<Compile Include="Properties\AssemblyInfo.cs"/>
+		<Compile Include="RecipaediaEXManager.cs"/>
+		<Compile Include="RecipesExtra\IRecipe.cs"/>
+		<Compile Include="RecipesExtra\RecipeExtraKeys.cs"/>
+		<Compile Include="RecipesExtra\RecipeReaderAttribute.cs"/>
+		<Compile Include="RecipesExtra\Recipes\OriginalCraftingRecipe.cs"/>
+		<Compile Include="RecipesExtra\Recipes\FormattedRecipe.cs"/>
+		<Compile Include="RecipesExtra\Recipes\OriginalSmeltingRecipe.cs"/>
+		<Compile Include="ScreenExtra\Categories\BlocksCategory.cs"/>
+		<Compile Include="ScreenExtra\Descriptors\CraftingRecipeDescriptor.cs"/>
+		<Compile Include="ScreenExtra\Descriptors\SmeltingRecipeDescriptor.cs"/>
+		<Compile Include="ScreenExtra\IAdvancedCategory.cs"/>
+		<Compile Include="ScreenExtra\IRecipaediaCategory.cs"/>
+		<Compile Include="ScreenExtra\IRecipaediaCategoryProvider.cs"/>
+		<Compile Include="ScreenExtra\IRecipaediaDescriptionItem.cs"/>
+		<Compile Include="ScreenExtra\IRecipaediaItem.cs"/>
+		<Compile Include="ScreenExtra\IRecipaediaRecipeItem.cs"/>
+		<Compile Include="ScreenExtra\Items\BlockItem.cs"/>
+		<Compile Include="ScreenExtra\Providers\BlocksCategoryProvider.cs"/>
+		<Compile Include="ScreenExtra\RecipaediaEXDescriptionScreen.cs"/>
+		<Compile Include="ScreenExtra\RecipaediaEXRecipesScreen.cs"/>
+		<Compile Include="Search\ItemSearchDocument.cs"/>
+		<Compile Include="Search\IRecipaediaSearchContributor.cs"/>
+		<Compile Include="Search\PinyinHelper.cs"/>
+		<Compile Include="Search\RecipaediaSearchEngine.cs"/>
+		<Compile Include="Search\RecipaediaSearchFilterState.cs"/>
+		<Compile Include="Search\RecipaediaSearchHistory.cs"/>
+		<Compile Include="Search\RecipaediaSearchIndex.cs"/>
+		<Compile Include="Search\RecipaediaSearchParser.cs"/>
+		<Compile Include="Search\SearchNode.cs"/>
+		<Compile Include="Search\SearchQuery.cs"/>
+		<Compile Include="ScreenExtra\RecipaediaEXScreen.cs"/>
+		<Compile Include="UI\RecipaediaSearchFilterDialog.cs"/>
+		<Compile Include="ScreenExtra\RecipeDescriptor.cs"/>
+		<Compile Include="ScreenExtra\RecipeDescriptorAttribute.cs"/>
+		<Compile Include="WidgetExtra\AdvancedBevelledButtonWidget.cs"/>
+		<Compile Include="WidgetExtra\CrafterButtonWidget.cs"/>
+		<Compile Include="WidgetExtra\CrafterSlots\BlockCrafterButtonWidget.cs"/>
+		<Compile Include="WidgetExtra\InteractableWidget.cs"/>
+		<Compile Include="WidgetExtra\RecipeSlots\BlockRecipeSlotWidget.cs"/>
+		<Compile Include="WidgetExtra\RecipeSlotWidget.cs"/>
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="packages.config"/>
+		<None Update="modinfo.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="icon.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\Screens\RecipaediaEXScreen.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Remove="RTest\**"/>
+		<None Update="Assets\Screens\RecipaediaEXDescriptionScreen.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\Screens\RecipaediaEXRecipesScreen.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\RecipaediaEX\Styles\ButtonStyle_Previous.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\RecipaediaEX\Styles\ButtonStyle_Search.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\RecipaediaEX\Textures\SearchLine.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\RecipaediaEX\Textures\HistoryLine.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\RecipaediaEX\Textures\MenuSearchLine.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\RecipaediaEX\Styles\ButtonStyle_History.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\RecipaediaEX\Styles\ButtonStyle_Filter.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\RecipaediaEX\Screens\RecipaediaEXDescriptionScreen.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\RecipaediaEX\Screens\RecipaediaEXRecipesScreen.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\RecipaediaEX\Screens\RecipaediaEXScreen.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\RecipaediaEX\Dialogs\RecipaediaSearchFilterDialog.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\Lang\zh-CN.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\Lang\en-US.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\RecipaediaEX\Widgets\Descriptors\SmeltingRecipeDescriptor.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\RecipaediaEX\Widgets\Descriptors\CraftingRecipeDescriptor.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\RecipaediaEX\Widgets\CraftingRecipeSlot.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\RecipaediaEX\Widgets\AdvancedBevelledButtonContents.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="RecipaediaEX.xdb">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="NPinyin.Core" Version="2.1.3" GeneratePathProperty="true"/>
+		<PackageReference Include="SurvivalcraftAPI.Survivalcraft" Version="1.9.2"/>
+		<PackageReference Include="ZLinq" Version="1.5.6" GeneratePathProperty="true"/>
+	</ItemGroup>
 	<ItemGroup>
 		<None Include="$(PkgNPinyin_Core)\lib\netstandard2.0\NPinyin.Core.dll">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -194,21 +195,19 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-	  <EmbeddedResource Remove="RTest\**" />
+		<EmbeddedResource Remove="RTest\**"/>
 	</ItemGroup>
-
 	<!-- 构建前从 modinfo.json 同步版本号 -->
 	<Target Name="SyncVersion" BeforeTargets="Build" Condition="'$(RecipaediaEXSkipSyncVersion)' != 'true'">
-		<Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)tools\sync-version.ps1&quot;" />
+		<Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)tools\sync-version.ps1&quot;"/>
 	</Target>
-
 	<!-- 打包并部署 .scmod 到游戏 Mods 文件夹 -->
 	<!-- 需在 tools\pack.config.json 中配置本机路径（参考 tools\pack.config.example.json） -->
 	<Target Name="PackMod" AfterTargets="Build" Condition="'$(RecipaediaEXSkipPack)' != 'true'">
 		<PropertyGroup>
 			<_TargetDirSafe>$(TargetDir.TrimEnd('\'))</_TargetDirSafe>
 		</PropertyGroup>
-		<Message Text="[PackMod] Target fired. TargetDir=$(_TargetDirSafe)" Importance="High" />
-		<Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)tools\pack.ps1&quot; -BuildOutputDir &quot;$(_TargetDirSafe)&quot; -Configuration &quot;$(Configuration)&quot;" />
+		<Message Text="[PackMod] Target fired. TargetDir=$(_TargetDirSafe)" Importance="High"/>
+		<Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)tools\pack.ps1&quot; -BuildOutputDir &quot;$(_TargetDirSafe)&quot; -Configuration &quot;$(Configuration)&quot;"/>
 	</Target>
 </Project>

@@ -1,8 +1,6 @@
 ﻿using Engine;
 using Game;
 using RecipaediaEX.UI;
-using System;
-using System.Collections.Generic;
 using System.Xml.Linq;
 using ZLinq;
 using ZLinq.Linq;

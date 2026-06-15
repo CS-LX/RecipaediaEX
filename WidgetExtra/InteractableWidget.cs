@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Game;
+﻿using Game;
 
 namespace RecipaediaEX.UI
 {
@@ -27,7 +22,7 @@ namespace RecipaediaEX.UI
             else {
                 IsMouseHover = false;
             }
-            if (!Input.SpecialClick.HasValue || this.HitTestGlobal(Input.SpecialClick.Value.Start) != this || this.HitTestGlobal(Input.SpecialClick.Value.End) != this) {
+            if (!Input.SpecialClick.HasValue || HitTestGlobal(Input.SpecialClick.Value.Start) != this || HitTestGlobal(Input.SpecialClick.Value.End) != this) {
                 IsSpecialClicked = false;
             }
             else {

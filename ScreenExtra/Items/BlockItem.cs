@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Game;
-using RecipaediaEX;
-using RecipaediaEX.Implementation;
 using RecipaediaEX.UI;
 using ZLinq;
 
@@ -105,7 +103,6 @@ namespace RecipaediaEX.Implementation {
             ModsManager.HookAction(
                 "EditBlockDescriptionScreen",
                 loader => {
-                    loader.EditBlockDescriptionScreen(dictionary);
                     loader.EditBlockDescriptionScreen(dictionary, value);
                     return false;
                 }

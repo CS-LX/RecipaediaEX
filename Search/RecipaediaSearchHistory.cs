@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Engine;
-using Game;
 
 namespace RecipaediaEX.Search {
     /// <summary>图鉴搜索历史（UI 偏好，非世界存档）。</summary>
@@ -41,7 +40,7 @@ namespace RecipaediaEX.Search {
             query = query?.Replace("\n", string.Empty).Trim() ?? string.Empty;
             if (query.Length == 0) return;
             EnsureLoaded();
-            s_entries.RemoveAll(e => string.Equals(e, query, System.StringComparison.OrdinalIgnoreCase));
+            s_entries.RemoveAll(e => string.Equals(e, query, StringComparison.OrdinalIgnoreCase));
             s_entries.Insert(0, query);
             while (s_entries.Count > MaxEntries) s_entries.RemoveAt(s_entries.Count - 1);
             Save();

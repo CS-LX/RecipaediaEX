@@ -1,13 +1,6 @@
 using Game;
 using RecipaediaEX.ComponentsExtra;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using XmlUtilities;
-
-using RecipaediaEX;
 
 namespace RecipaediaEX.Implementation {
     public class BlockProceduralRecipesLoader: IRecipesLoader {
@@ -17,7 +10,7 @@ namespace RecipaediaEX.Implementation {
 
         public IEnumerable<IRecipe> GetRecipes() {
             List<IRecipe> recipes = new();
-            for (int i = 0; i < BlocksManager.Blocks.Count(); i++) {
+            for (int i = 0; i < BlocksManager.Blocks.Length; i++) {
                 Block block = BlocksManager.Blocks[i];
                 IEnumerable<CraftingRecipe> originalRecipes = block.GetProceduralCraftingRecipes();
                 foreach (CraftingRecipe originalRecipe in originalRecipes) {

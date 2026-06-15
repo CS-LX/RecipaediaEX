@@ -4,7 +4,6 @@ using Game;
 using GameEntitySystem;
 using RecipaediaEX.Events;
 using RecipaediaEX.Implementation;
-using RecipaediaEX;
 using TemplatesDatabase;
 using FurnaceBlock = Game.FurnaceBlock;
 
@@ -285,12 +284,7 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
         /// 将方块值替换为点燃/未点燃的原版熔炉方块。
         /// </summary>
         protected virtual void ReplaceFurnaceBlock(int cellValue) {
-            if (m_heatLevel > 0f) {
-                m_componentBlockEntity.BlockValue = Terrain.ReplaceContents(cellValue, LitFurnaceBlock.Index);
-            }
-            else {
-                m_componentBlockEntity.BlockValue = Terrain.ReplaceContents(cellValue, FurnaceBlock.Index);
-            }
+            m_componentBlockEntity.BlockValue = Terrain.ReplaceContents(cellValue, m_heatLevel > 0f ? LitFurnaceBlock.Index : FurnaceBlock.Index);
         }
 
         public override void StopSmelting(bool resetProgress) {

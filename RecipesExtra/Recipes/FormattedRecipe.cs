@@ -1,8 +1,6 @@
 using Game;
 using RecipaediaEX.ComponentsExtra;
-using RecipaediaEX;
 using System.Collections.Generic;
-using System.Linq;
 using TemplatesDatabase;
 using ZLinq;
 using System;
@@ -111,14 +109,14 @@ namespace RecipaediaEX.Implementation {
                     AddIngredientBlockValues(values, ingredient);
                 }
             }
-            return values.ToArray();
+            return values.AsValueEnumerable().ToArray();
         }
 
         public static int[] ExpandIngredientToBlockValues(string ingredient) {
             if (string.IsNullOrEmpty(ingredient)) return Array.Empty<int>();
             HashSet<int> values = new();
             AddIngredientBlockValues(values, ingredient);
-            return values.ToArray();
+            return values.AsValueEnumerable().ToArray();
         }
 
         static void AddIngredientBlockValues(HashSet<int> values, string ingredient) {

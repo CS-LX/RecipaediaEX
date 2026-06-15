@@ -1,5 +1,5 @@
 ﻿namespace RecipaediaEX.Events {
-    public interface IPublisher<T> {
+    public interface IPublisher<in T> {
         void Publish(T message);
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using Engine;
 using Game;
-using RecipaediaEX.Implementation;
 using RecipaediaEX.UI;
 
 namespace RecipaediaEX.Implementation {
@@ -22,7 +21,7 @@ namespace RecipaediaEX.Implementation {
             Children.Add(m_iconWidget);
             m_countLabel = new LabelWidget { HorizontalAlignment = WidgetAlignment.Far, VerticalAlignment = WidgetAlignment.Far, Margin = new Vector2(6, 2) };
             Children.Add(m_countLabel);
-            m_blockNameLabel = new LabelWidget { VerticalAlignment = WidgetAlignment.Near, HorizontalAlignment = WidgetAlignment.Center, FontScale = 0.5f, Margin = new Engine.Vector2(0, 5) };
+            m_blockNameLabel = new LabelWidget { VerticalAlignment = WidgetAlignment.Near, HorizontalAlignment = WidgetAlignment.Center, FontScale = 0.5f, Margin = new Vector2(0, 5) };
             Children.Add(m_blockNameLabel);
         }
 

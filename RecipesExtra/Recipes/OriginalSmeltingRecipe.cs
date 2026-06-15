@@ -1,6 +1,4 @@
-﻿using Game;
-
-namespace RecipaediaEX.Implementation {
+﻿namespace RecipaediaEX.Implementation {
     public class OriginalSmeltingRecipe : FormattedRecipe, IRecipe {
         public override bool Match(IRecipe actual) {
             if (actual == null || actual is not OriginalSmeltingRecipe craftingRecipe) return false;

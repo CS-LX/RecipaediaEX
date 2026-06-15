@@ -1,4 +1,3 @@
-using System;
 using Game;
 using GameEntitySystem;
 using RecipaediaEX.ComponentsExtra;

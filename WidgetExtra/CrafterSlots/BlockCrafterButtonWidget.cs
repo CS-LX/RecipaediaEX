@@ -11,7 +11,7 @@ namespace RecipaediaEX.Implementation {
         public BlockCrafterButtonWidget() : base() {
             m_iconWidget = new BlockIconWidget { Size = new Vector2(42, 42), HorizontalAlignment = WidgetAlignment.Center, VerticalAlignment = WidgetAlignment.Center };
             Children.Add(m_iconWidget);
-            m_blockNameLabel = new LabelWidget { VerticalAlignment = WidgetAlignment.Near, HorizontalAlignment = WidgetAlignment.Center, FontScale = 0.5f, Margin = new Engine.Vector2(0, 5) };
+            m_blockNameLabel = new LabelWidget { VerticalAlignment = WidgetAlignment.Near, HorizontalAlignment = WidgetAlignment.Center, FontScale = 0.5f, Margin = new Vector2(0, 5) };
             Children.Add(m_blockNameLabel);
         }
 

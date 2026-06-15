@@ -5,7 +5,6 @@ using Game;
 using GameEntitySystem;
 using RecipaediaEX.Events;
 using RecipaediaEX.Implementation;
-using RecipaediaEX;
 using TemplatesDatabase;
 
 namespace RecipaediaEX.ComponentsExtra.Implementation {

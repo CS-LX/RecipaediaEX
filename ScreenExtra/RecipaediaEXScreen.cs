@@ -7,7 +7,6 @@ using Engine.Serialization;
 using Game;
 using RecipaediaEX.Search;
 using ZLinq;
-using ZLinq.Linq;
 
 namespace RecipaediaEX.UI {
     public class RecipaediaEXScreen : Screen {

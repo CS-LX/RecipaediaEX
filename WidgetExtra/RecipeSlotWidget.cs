@@ -1,5 +1,4 @@
-﻿using System.Xml.Linq;
-using Engine;
+﻿using Engine;
 using Game;
 using ZLinq;
 using ZLinq.Linq;
@@ -47,7 +46,7 @@ namespace RecipaediaEX.UI {
             LoadContents(this, RecipaediaEXLoader.RequestWidgetFile("CraftingRecipeSlot"));
             m_interactableWidget = new InteractableWidget();
             Children.Add(m_interactableWidget);
-            m_highlightedRect = new RectangleWidget { FillColor = new Engine.Color(30, 30, 30, 100), OutlineColor = new Engine.Color(48, 48, 48), OutlineThickness = 1f };
+            m_highlightedRect = new RectangleWidget { FillColor = new Color(30, 30, 30, 100), OutlineColor = new Color(48, 48, 48), OutlineThickness = 1f };
             Children.Add(m_highlightedRect);
             m_bevelRect = Children.Find<BevelledRectangleWidget>("BevelRect");
         }
