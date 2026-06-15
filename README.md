@@ -118,6 +118,31 @@ RecipaediaEventBus.GetPublisher<MyModEvent>().Publish(new MyModEvent(...));
 - [更新日志（模组开发者）](docs/CHANGELOG.md)
 - [API 使用文档](docs/API使用文档.md)
 - [图鉴搜索功能策划](docs/图鉴搜索功能策划.md)
+- [打包 → 发布 CI 策划](docs/打包发布CI策划.md)
+- [发版指南](docs/RELEASE.md)
+
+## 构建与打包
+
+版本号以 **`modinfo.json` → `Version`** 为准；构建前 `tools/sync-version.ps1` 自动同步到 csproj。
+
+### 本机开发
+
+1. 复制 `tools/pack.config.example.json` 为 `tools/pack.config.json`，填写 `ModsFolder`（游戏 Mods 目录）。
+2. 在仓库根目录执行 `dotnet build RecipaediaEX.csproj -c Release`（或 Debug）。
+3. 构建结束后 `tools/pack.ps1` 自动将输出目录打成 **`RecipaediaEX.scmod`**（短名）并复制到 `ModsFolder`。
+
+若 monorepo 内与 IE2 同仓开发，脚本会优先使用 `SCIENEW/tools/7z/7z.exe`；独立克隆时回退为 PowerShell `Compress-Archive`。
+
+跳过自动打包：`-p:RecipaediaEXSkipPack=true`。跳过版本同步：`-p:RecipaediaEXSkipSyncVersion=true`。
+
+### GitHub CI
+
+| 工作流 | 触发 | 产物 |
+|--------|------|------|
+| `build.yml` | push main、PR | `RecipaediaEX-ci.{sha7}.scmod` |
+| `release.yml` | 推送 tag `v*` | GitHub Release：`RecipaediaEX-{Version}.scmod` |
+
+发版步骤见 [docs/RELEASE.md](docs/RELEASE.md)。RecipaediaEX 无 SCIENEW 编译期依赖，CI 仅需 checkout 本仓库。
 
 ## 说明
 

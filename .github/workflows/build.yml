@@ -1,0 +1,49 @@
+name: Build
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Sync version from modinfo.json
+        shell: pwsh
+        run: ./tools/sync-version.ps1
+
+      - name: Restore
+        run: dotnet restore RecipaediaEX.csproj
+
+      - name: Build
+        run: dotnet build RecipaediaEX.csproj -c Release --no-restore -p:RecipaediaEXSkipPack=true -p:RecipaediaEXSkipSyncVersion=true
+
+      - name: Pack scmod
+        shell: pwsh
+        run: |
+          $root = $env:GITHUB_WORKSPACE
+          $sha = "${{ github.sha }}".Substring(0, 7)
+          $out = Join-Path $root "bin/Release/net10.0"
+          $artifact = Join-Path $env:RUNNER_TEMP "recipaediaex-artifacts"
+          New-Item -ItemType Directory -Path $artifact -Force | Out-Null
+          & (Join-Path $root "tools/pack.ps1") `
+            -BuildOutputDir $out `
+            -Configuration Release `
+            -ArtifactDir $artifact `
+            -PackageLabel ci `
+            -GitSha "${{ github.sha }}"
+          "ARTIFACT_NAME=RecipaediaEX-ci.$sha" >> $env:GITHUB_ENV
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ runner.temp }}/recipaediaex-artifacts/*.scmod

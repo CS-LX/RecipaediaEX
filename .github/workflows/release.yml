@@ -1,0 +1,86 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Sync version from modinfo.json
+        shell: pwsh
+        run: ./tools/sync-version.ps1
+
+      - name: Validate tag matches modinfo.json
+        shell: pwsh
+        run: |
+          $modinfo = Get-Content modinfo.json -Raw -Encoding UTF8 | ConvertFrom-Json
+          $tagVersion = $env:GITHUB_REF_NAME.TrimStart('v')
+          $modVersion = [string]$modinfo.Version.Trim()
+          if ($tagVersion -ne $modVersion) {
+            Write-Error "Tag '$($env:GITHUB_REF_NAME)' (version '$tagVersion') does not match modinfo.json Version '$modVersion'."
+          }
+          $prerelease = $modVersion -match '-preview'
+          "MOD_VERSION=$modVersion" >> $env:GITHUB_ENV
+          "PRERELEASE=$prerelease" >> $env:GITHUB_ENV
+          Write-Host "Release version: $modVersion (prerelease=$prerelease)"
+
+      - name: Restore
+        run: dotnet restore RecipaediaEX.csproj
+
+      - name: Build
+        run: dotnet build RecipaediaEX.csproj -c Release --no-restore -p:RecipaediaEXSkipPack=true -p:RecipaediaEXSkipSyncVersion=true
+
+      - name: Pack release scmod
+        shell: pwsh
+        run: |
+          $root = $env:GITHUB_WORKSPACE
+          $out = Join-Path $root "bin/Release/net10.0"
+          $artifact = Join-Path $env:RUNNER_TEMP "recipaediaex-release"
+          New-Item -ItemType Directory -Path $artifact -Force | Out-Null
+          & (Join-Path $root "tools/pack.ps1") `
+            -BuildOutputDir $out `
+            -Configuration Release `
+            -ArtifactDir $artifact `
+            -Version $env:MOD_VERSION
+          "SCMOD_NAME=RecipaediaEX-$($env:MOD_VERSION).scmod" >> $env:GITHUB_ENV
+
+      - name: Generate release notes
+        shell: pwsh
+        run: |
+          $currentTag = $env:GITHUB_REF_NAME
+          $prevTag = git tag --sort=-creatordate | Where-Object { $_ -ne $currentTag } | Select-Object -First 1
+          if ($prevTag) {
+            Write-Host "Commits since $prevTag"
+            git log "$prevTag..HEAD" --pretty=format:"- %s (%h)" | Out-File -FilePath release_notes.md -Encoding utf8
+          }
+          else {
+            Write-Host "No previous tag; using recent commits"
+            git log -20 --pretty=format:"- %s (%h)" | Out-File -FilePath release_notes.md -Encoding utf8
+          }
+          if (-not (Get-Content release_notes.md -ErrorAction SilentlyContinue)) {
+            "No commits." | Out-File -FilePath release_notes.md -Encoding utf8
+          }
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: RecipaediaEX ${{ env.MOD_VERSION }}
+          body_path: release_notes.md
+          prerelease: ${{ env.PRERELEASE == 'True' }}
+          files: ${{ runner.temp }}/recipaediaex-release/${{ env.SCMOD_NAME }}

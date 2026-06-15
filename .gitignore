@@ -57,3 +57,6 @@ nunit-*.xml
 .idea/
 
 *.user
+
+# 本机打包部署配置（见 tools/pack.config.example.json）
+tools/pack.config.json

@@ -1,0 +1,10 @@
+{
+    "_comment": [
+        "将此文件复制为 pack.config.json 并按本机实际情况修改。",
+        "pack.config.json 已被 .gitignore 排除，不会提交到版本库。",
+        "本机部署使用短名 RecipaediaEX.scmod（覆盖 Mods 目录同名文件）。",
+        "CI / Release 命名见 docs/打包发布CI策划.md。"
+    ],
+    "ModsFolder": "C:\\Users\\你的用户名\\AppData\\Local\\Survivalcraft2\\Mods",
+    "ModFileName": "RecipaediaEX"
+}
