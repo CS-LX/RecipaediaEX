@@ -10,8 +10,8 @@ using ZLinq;
 
 namespace RecipaediaEX.Search {
     public static class RecipaediaSearchIndex {
-        static readonly Dictionary<IRecipaediaItem, ItemSearchDocument> s_documents = new();
-        static readonly List<IRecipaediaSearchContributor> s_contributors = [];
+        static readonly Dictionary<IRecipaediaItem, ItemSearchDocument> m_documents = new();
+        static readonly List<IRecipaediaSearchContributor> m_contributors = [];
         static IDisposable m_resetSubscription;
         static bool m_initialized;
 
@@ -21,29 +21,29 @@ namespace RecipaediaEX.Search {
             DiscoverContributors();
             m_resetSubscription?.Dispose();
             m_resetSubscription = RecipaediaEventBus.RecipesReset.Subscribe(_ => {
-                s_documents.Clear();
+                m_documents.Clear();
                 BlocksCategoryProvider.InvalidateCache();
             });
         }
 
         static void DiscoverContributors() {
-            s_contributors.Clear();
+            m_contributors.Clear();
             foreach (Assembly assembly in TypeCache.LoadedAssemblies.AsValueEnumerable().Where(a => !TypeCache.IsKnownSystemAssembly(a))) {
                 foreach (TypeInfo typeInfo in assembly.DefinedTypes) {
                     Type type = typeInfo.AsType();
                     if (!typeof(IRecipaediaSearchContributor).IsAssignableFrom(type) || type.IsAbstract || type.IsInterface) continue;
                     if (Activator.CreateInstance(type) is IRecipaediaSearchContributor contributor) {
-                        s_contributors.Add(contributor);
+                        m_contributors.Add(contributor);
                     }
                 }
             }
         }
 
         public static ItemSearchDocument GetDocument(IRecipaediaItem item, string categoryId) {
-            if (s_documents.TryGetValue(item, out ItemSearchDocument cached)) return cached;
+            if (m_documents.TryGetValue(item, out ItemSearchDocument cached)) return cached;
 
             ItemSearchDocument doc = BuildDocument(item, categoryId);
-            s_documents[item] = doc;
+            m_documents[item] = doc;
             return doc;
         }
 
@@ -110,7 +110,7 @@ namespace RecipaediaEX.Search {
                 IngredientBlockValues = ingredientBlockValues,
             };
 
-            foreach (IRecipaediaSearchContributor contributor in s_contributors) {
+            foreach (IRecipaediaSearchContributor contributor in m_contributors) {
                 contributor.EnrichItem(item, doc);
             }
 

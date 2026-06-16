@@ -7,10 +7,10 @@ namespace RecipaediaEX.Events {
     /// 便于其它模组在不改 RX 源码的情况下订阅自定义载荷类型。
     /// </summary>
     public static class RecipaediaEventBus {
-        static readonly ConcurrentDictionary<Type, IEventChannel> s_channelsByType = new();
+        static readonly ConcurrentDictionary<Type, IEventChannel> m_channelsByType = new();
 
         /// <summary>按类型获取或创建通道（用于自定义事件类型）。</summary>
-        static EventChannel<T> Channel<T>() => (EventChannel<T>)s_channelsByType.GetOrAdd(typeof(T), _ => new EventChannel<T>());
+        static EventChannel<T> Channel<T>() => (EventChannel<T>)m_channelsByType.GetOrAdd(typeof(T), _ => new EventChannel<T>());
 
         /// <summary>获取当前类型的发布通道</summary>
         public static IPublisher<T> GetPublisher<T>() => Channel<T>();

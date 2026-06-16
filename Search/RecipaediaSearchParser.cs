@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace RecipaediaEX.Search {
     public static class RecipaediaSearchParser {
-        static readonly Dictionary<string, SearchClauseKind> s_ingredientAliases = new(StringComparer.OrdinalIgnoreCase) {
+        static readonly Dictionary<string, SearchClauseKind> m_ingredientAliases = new(StringComparer.OrdinalIgnoreCase) {
             ["in"] = SearchClauseKind.Ingredient,
             ["uses"] = SearchClauseKind.Ingredient,
         };
-        static readonly Dictionary<string, SearchClauseKind> s_productAliases = new(StringComparer.OrdinalIgnoreCase) {
+        static readonly Dictionary<string, SearchClauseKind> m_productAliases = new(StringComparer.OrdinalIgnoreCase) {
             ["out"] = SearchClauseKind.Product,
             ["makes"] = SearchClauseKind.Product,
         };
@@ -141,10 +141,10 @@ namespace RecipaediaEX.Search {
             if (key.Equals("rtype", StringComparison.OrdinalIgnoreCase)) {
                 return new SearchClause { Kind = SearchClauseKind.RecipeType, Value = value };
             }
-            if (s_ingredientAliases.TryGetValue(key, out SearchClauseKind ingredientKind)) {
+            if (m_ingredientAliases.TryGetValue(key, out SearchClauseKind ingredientKind)) {
                 return new SearchClause { Kind = ingredientKind, Value = value };
             }
-            if (s_productAliases.TryGetValue(key, out SearchClauseKind productKind)) {
+            if (m_productAliases.TryGetValue(key, out SearchClauseKind productKind)) {
                 return new SearchClause { Kind = productKind, Value = value };
             }
             return new SearchClause { Kind = SearchClauseKind.Text, Value = token };
