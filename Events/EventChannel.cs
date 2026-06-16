@@ -6,8 +6,18 @@ namespace RecipaediaEX.Events {
     /// <summary>
     /// 单类型事件的发布/订阅通道；<see cref="Subscribe"/> 返回 <see cref="IDisposable"/>，Dispose 即退订（语义类似 Rx 的 Subscribe 返回值）。
     /// </summary>
-    public sealed class EventChannel<T> : IPublisher<T>, ISubscriber<T> {
+    public sealed class EventChannel<T> : IPublisher<T>, ISubscriber<T>, IEventChannel<T> {
         readonly List<Action<T>> m_handlers = new();
+
+        public Type ChannelType => typeof(T);
+
+        public IReadOnlyList<Action<T>> Handlers {
+            get {
+                lock (m_handlers) {
+                    return m_handlers.AsReadOnly();
+                }
+            }
+        }
 
         /// <summary>订阅事件；Dispose 后不再接收发布。</summary>
         public IDisposable Subscribe(Action<T> handler) {

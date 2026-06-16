@@ -45,6 +45,7 @@
 		<Compile Include="CrafterExtra\Crafters\CraftingTableBlock.cs"/>
 		<Compile Include="CrafterExtra\Crafters\FurnaceBlock.cs"/>
 		<Compile Include="CrafterExtra\ICrafter.cs"/>
+		<Compile Include="Events\IAnyEventChannel.cs" />
 		<Compile Include="Events\IPublisher.cs"/>
 		<Compile Include="Events\ISubscriber.cs"/>
 		<Compile Include="LoaderExtra\DynamicLoaders\AdHocRecipeLoader.cs"/>
@@ -54,7 +55,7 @@
 		<Compile Include="Events\CrafterOutputProducedEvent.cs"/>
 		<Compile Include="Events\CrafterOutputRemovedEvent.cs"/>
 		<Compile Include="Events\CraftingRecipeChangedEvent.cs"/>
-		<Compile Include="Events\EventChannel.cs"/>
+		<Compile Include="Events\EventChannel.cs" />
 		<Compile Include="Events\FurnaceFuelUsedEvent.cs"/>
 		<Compile Include="Events\RecipeMatchedEvent.cs"/>
 		<Compile Include="Events\RecipesResetEvent.cs"/>
