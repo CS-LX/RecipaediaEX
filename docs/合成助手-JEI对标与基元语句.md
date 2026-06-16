@@ -1,6 +1,6 @@
 # 合成助手 — JEI 对标解构与基元语句
 
-> **版本**：v1.1  
+> **版本**：v1.2  
 > **状态**：设计参考（与 [工作台悬浮助手策划.md](工作台悬浮助手策划.md) 配套）  
 > **范围**：RecipaediaEX 合成助手（Crafting Overlay）的产品与技术对齐依据  
 > **对标产品**：Minecraft [Just Enough Items (JEI)](https://github.com/mezz/JustEnoughItems)
@@ -213,11 +213,12 @@ v0.2 策划曾出现 `FluidVolume`、`PlacementKind.FluidTank`、`PlacementSourc
 **V3. 分类展示公理**  
 > 一种工作站/工序对应一种 **Recipe Category（Descriptor）**；同一产物若有多条路径（工作台 vs 机床 vs 反应釜），必须 **分 category 展示**，不能混成一张图。
 
-**V4. 上下文过滤公理**  
-> 在容器内打开助手时，默认候选配方集 = **全局条目** ∩ **当前工作站可做** ∩ **当前容器形态可接纳**（网格宽、热等级、ProcessType 等）。
+**V4. 上下文过滤公理**（v0.4 拆分）  
+> **搜索**：悬浮助手条目候选 = **全局 All Blocks**（与 JEI 齐平）。  
+> **预览**：选中条目后，配方 Descriptor 列表 = **该条目 Match** ∩ **当前工作站（`@crafter`）** ∩ **网格宽度（`GridWidth`）**；**不设 `ProcessType` 字段**；**舍弃 `@grid` Token**。
 
 **V5. 搜索一致公理**  
-> 悬浮助手与全屏图鉴 **共用** 搜索引擎与索引；差异只在 UI 壳与上下文 filter，不维护第二套数据。
+> 悬浮助手与全屏图鉴 **共用** 搜索引擎与索引；助手搜索 **永远 All Blocks**；工作站约束 **仅作用于预览 Grid**，不拼进搜索 query。
 
 **V6. 只读预览公理**  
 > 配方预览区 **只读**；点击原料格可跳转相关配方，但 **不隐式改动** 容器内物品。
@@ -263,7 +264,7 @@ v0.2 策划曾出现 `FluidVolume`、`PlacementKind.FluidTank`、`PlacementSourc
 > 不能自动 `+` 的配方类型，不是「不支持助手」，而是 **未实现 `IPlacableRecipe`**；UI 仍应能预览，只是禁用 `+` 并说明原因。
 
 **E3. 快捷键上下文公理**  
-> `X`/R/U 的行为随焦点变化：打开 **可放置容器** → toggle 悬浮助手；否则 → 全屏图鉴；在槽位上 → 优先对该物品 R/U。
+> `X`/R/U 的行为随焦点变化：打开 **可放置容器** → toggle 悬浮助手；否则 → 经 **`RecipaediaEventBus`** 请求全屏图鉴（REX Hook 统一监听，内容模组订阅）；在槽位上 → 优先对该物品 R/U。
 
 **E4. 缺失可行动公理**  
 > 预检失败时，提示必须 **可行动**（「缺铜锭×2」），而非仅「无法合成」；条件允许时链到 **获取途径**（图鉴/科技树/用途 U）。
@@ -274,13 +275,14 @@ v0.2 策划曾出现 `FluidVolume`、`PlacementKind.FluidTank`、`PlacementSourc
 
 | 基元 | REX / 内容模组落点 |
 |------|-------------------|
-| V1–V6 | `RecipaediaCraftingOverlayDialog`、`IRecipaediaOverlayHost` |
+| V1–V6 | `RecipaediaCraftingOverlayDialog`、`IRecipaediaOverlayHost`、预览 **Grid + Scroll** |
+| V6 / 导航 | `IRecipaediaRecipeNavigator` + `RecipeDescriptorRegistry`（解耦 Screen） |
 | P1–P4 | `IRecipePlacementTarget` + `PlacementResult`（dry-run / execute） |
 | P2 | REX：`PlacementAddressKind` + `Quantity`；流体/罐体：内容模组 Target |
 | P9 | `CraftingTablePlacementTarget` + `TransformRecipe` |
 | P7 | Target 实现末尾调用 `UpdateCraftingResult` / `FindEquation` |
 | E1–E2 | `IPlacableRecipe` + 内容模组 `*PlacementTarget` |
-| E3 | REX 统一 `Recipaedia` 键路由 |
+| E3 | REX `RecipaediaEXLoader` Hook + `RecipaediaEventBus` |
 | P10 | Phase 3 `IGhostPlacementTarget`（可选） |
 
 ---
@@ -307,3 +309,4 @@ REX 合成助手只要把接口从「36 格 + `IInventory`」升格为 **「`Pla
 |------|------|------|
 | v1.0 | 2026-06-16 | 初稿：JEI 解构、REX 对照、基元语句、工业机器扩展依据 |
 | v1.1 | 2026-06-16 | 对齐 anti-patterns：废止 FluidVolume/FluidTank/ITank；P2/P8/§5.2/§7 修订 |
+| v1.2 | 2026-06-16 | 对齐策划 v0.4：V4/V5 搜索与预览拆分、E3 EventBus、Navigator 映射 |
