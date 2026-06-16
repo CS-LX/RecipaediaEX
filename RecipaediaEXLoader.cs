@@ -33,6 +33,7 @@ namespace RecipaediaEX
         }
         public override void CraftingRecipesManagerInitialized() {
             RecipaediaEXManager.ResetRecipes();
+            RecipesCrafterManager.Initialize();
         }
 
         public override void BlocksInitalized() {

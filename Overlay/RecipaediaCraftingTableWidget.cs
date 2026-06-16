@@ -1,4 +1,5 @@
 using Game;
+using GameEntitySystem;
 
 namespace RecipaediaEX.Overlay {
     /// <summary>原版 3×3 工作台 Modal，接入合成助手 Host。</summary>
@@ -12,7 +13,13 @@ namespace RecipaediaEX.Overlay {
 
         public RecipaediaCraftingContext? GetCraftingContext() {
             if (!m_componentCraftingTable.IsAddedToProject) return null;
-            return RecipaediaCraftingTableContextHelper.BuildContext(m_componentCraftingTable, m_craftingGrid.ColumnsCount);
+            ComponentPlayer? player = m_componentCraftingTable.FindInteractingPlayer();
+            return new RecipaediaCraftingContext {
+                CrafterBlockValue = m_componentCraftingTable.Entity.FindComponent<ComponentBlockEntity>(false)?.BlockValue ?? 0,
+                PlayerLevel = player?.PlayerData.Level ?? 1f,
+                Project = m_componentCraftingTable.Project,
+                Inventory = player?.ComponentMiner.Inventory,
+            };
         }
     }
 }

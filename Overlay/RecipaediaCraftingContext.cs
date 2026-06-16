@@ -3,11 +3,8 @@ using GameEntitySystem;
 
 namespace RecipaediaEX.Overlay {
     public sealed class RecipaediaCraftingContext {
-        /// <summary>预览配方列表过滤（等价 @crafter:，不拼进搜索 query）。</summary>
+        /// <summary>当前 Host 方块值：默认 Crafter Tab、Phase 2a「+」是否可用。</summary>
         public int CrafterBlockValue { get; init; }
-
-        /// <summary>有形合成预览宽度过滤：3 / 4 / 5；非网格机器可为 0。</summary>
-        public int GridWidth { get; init; }
 
         public float PlayerLevel { get; init; } = 1f;
 

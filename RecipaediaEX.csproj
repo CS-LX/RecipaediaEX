@@ -65,11 +65,13 @@
 		<Compile Include="Overlay\IRecipaediaOverlayHost.cs"/>
 		<Compile Include="Overlay\IRecipePlacementTarget.cs"/>
 		<Compile Include="Overlay\RecipeDescriptorRegistry.cs"/>
+		<Compile Include="Overlay\RecipaediaCrafterRecipeGroup.cs"/>
 		<Compile Include="Overlay\RecipaediaCraftingContext.cs"/>
-		<Compile Include="Overlay\RecipaediaCraftingTableContextHelper.cs"/>
 		<Compile Include="Overlay\RecipaediaCraftingTableWidget.cs"/>
 		<Compile Include="Overlay\RecipaediaCraftingOverlayController.cs"/>
 		<Compile Include="Overlay\RecipaediaCraftingOverlayDialog.cs"/>
+		<Compile Include="Overlay\RecipaediaOverlayCrafterTabBar.cs"/>
+		<Compile Include="Overlay\RecipaediaOverlayDescriptorSlot.cs"/>
 		<Compile Include="Overlay\RecipaediaOverlayHostUi.cs"/>
 		<Compile Include="Overlay\RecipaediaOverlayInput.cs"/>
 		<Compile Include="Overlay\RecipaediaOverlayRecipePreview.cs"/>

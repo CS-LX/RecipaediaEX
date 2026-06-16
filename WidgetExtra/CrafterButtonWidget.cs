@@ -107,7 +107,7 @@ namespace RecipaediaEX.UI {
                 ValueEnumerable<ListWhere<IRecipe>, IRecipe> newItems = RecipaediaEXManager.Recipes.AsValueEnumerable().Where(x => recipeItem.Match(x));
                 if (newItems.Count() > 0) {
                     AudioManager.PlaySound("Audio/UI/ButtonClick", 1, 0, 0);
-                    m_navigator.ShowRecipes(newItems.ToList(), 0);
+                    m_navigator.ShowRecipes(recipeItem, newItems.ToList(), 0);
                 }
             }
         }
@@ -121,7 +121,7 @@ namespace RecipaediaEX.UI {
                 ValueEnumerable<ListWhere<IRecipe>, IRecipe> newItems = RecipaediaEXManager.Recipes.AsValueEnumerable().Where(x => recipeItem2.IsIngredient(x));
                 if (newItems.Count() > 0) {
                     AudioManager.PlaySound("Audio/UI/ButtonClick", 1, 0, 0);
-                    m_navigator.ShowRecipes(newItems.ToList(), 0);
+                    m_navigator.ShowRecipes(recipeItem2, newItems.ToList(), 0);
                 }
             }
         }

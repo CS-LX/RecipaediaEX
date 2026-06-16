@@ -14,14 +14,80 @@ namespace RecipaediaEX.Overlay {
             return category.GetItems();
         }
 
-        public static List<IRecipe> ResolvePreviewRecipes(IRecipaediaRecipeItem item, RecipaediaCraftingContext context) {
+        public static List<IRecipe> ResolveAllRecipes(IRecipaediaRecipeItem item, RecipaediaCraftingContext context) {
             List<IRecipe> recipes = [];
             foreach (IRecipe recipe in RecipaediaEXManager.Recipes.AsValueEnumerable().Where(item.Match)) {
-                if (PassesContextFilter(recipe, context) && !ContainsRecipe(recipes, recipe)) recipes.Add(recipe);
+                if (!ContainsRecipe(recipes, recipe)) recipes.Add(recipe);
             }
 
             TryAddDynamicPreviewRecipes(item, context, recipes);
             return recipes.AsValueEnumerable().OrderBy(r => r.DisplayOrder).ToList();
+        }
+
+        public static List<RecipaediaCrafterRecipeGroup> BuildCrafterGroups(IReadOnlyList<IRecipe> recipes, RecipaediaCraftingContext context) {
+            Dictionary<string, RecipaediaCrafterRecipeGroup> groupsByCrafterId = [];
+            foreach (IRecipe recipe in recipes) {
+                foreach (int blockValue in GetCrafterBlockValues(recipe)) {
+                    string crafterId = GetCrafterId(blockValue);
+                    if (string.IsNullOrEmpty(crafterId)) continue;
+                    if (!groupsByCrafterId.TryGetValue(crafterId, out RecipaediaCrafterRecipeGroup? group)) {
+                        group = new RecipaediaCrafterRecipeGroup {
+                            CrafterId = crafterId,
+                            RepresentativeBlockValue = blockValue,
+                        };
+                        groupsByCrafterId[crafterId] = group;
+                    }
+                    if (!ContainsRecipe(group.Recipes, recipe)) group.Recipes.Add(recipe);
+                }
+            }
+
+            List<RecipaediaCrafterRecipeGroup> groups = [.. groupsByCrafterId.Values];
+            foreach (RecipaediaCrafterRecipeGroup group in groups) {
+                group.Recipes.Sort((a, b) => a.DisplayOrder.CompareTo(b.DisplayOrder));
+            }
+
+            string hostCrafterId = context.CrafterBlockValue != 0
+                ? GetCrafterId(context.CrafterBlockValue)
+                : string.Empty;
+            groups.Sort((a, b) => CompareGroups(a, b, hostCrafterId));
+            return groups;
+        }
+
+        public static int SelectDefaultGroupIndex(IReadOnlyList<RecipaediaCrafterRecipeGroup> groups, RecipaediaCraftingContext context) {
+            if (groups.Count == 0) return -1;
+            if (context.CrafterBlockValue != 0) {
+                string hostCrafterId = GetCrafterId(context.CrafterBlockValue);
+                for (int i = 0; i < groups.Count; i++) {
+                    if (groups[i].CrafterId == hostCrafterId) return i;
+                }
+            }
+            return 0;
+        }
+
+        static int CompareGroups(RecipaediaCrafterRecipeGroup a, RecipaediaCrafterRecipeGroup b, string hostCrafterId) {
+            if (a.CrafterId == hostCrafterId) return -1;
+            if (b.CrafterId == hostCrafterId) return 1;
+            return string.Compare(a.DisplayName, b.DisplayName, StringComparison.CurrentCulture);
+        }
+
+        static string GetCrafterId(int blockValue) {
+            if (blockValue == 0) return string.Empty;
+            Block block = BlocksManager.Blocks[Terrain.ExtractContents(blockValue)];
+            return block.GetCraftingId(blockValue);
+        }
+
+        static List<int> GetCrafterBlockValues(IRecipe recipe) {
+            Dictionary<string, int> craftersById = [];
+            foreach (Block block in BlocksManager.Blocks) {
+                if (block is not ICrafter crafter) continue;
+                foreach (int blockValue in block.GetCreativeValues()) {
+                    if (!crafter.IsCrafter(blockValue, recipe)) continue;
+                    string crafterId = GetCrafterId(blockValue);
+                    if (string.IsNullOrEmpty(crafterId) || craftersById.ContainsKey(crafterId)) continue;
+                    craftersById[crafterId] = blockValue;
+                }
+            }
+            return [.. craftersById.Values];
         }
 
         static bool ContainsRecipe(List<IRecipe> recipes, IRecipe recipe) {
@@ -38,7 +104,6 @@ namespace RecipaediaEX.Overlay {
                 IRecipe? dynamicRecipe = TryProbeDynamicRecipe(loader, item, context);
                 if (dynamicRecipe == null) continue;
                 if (!item.Match(dynamicRecipe)) continue;
-                if (!PassesContextFilter(dynamicRecipe, context)) continue;
                 if (!ContainsRecipe(recipes, dynamicRecipe)) recipes.Add(dynamicRecipe);
             }
         }
@@ -53,43 +118,6 @@ namespace RecipaediaEX.Overlay {
             probe.SetExtraValue(RecipeExtraKeys.Project, context.Project);
             if (context.Inventory != null) probe.SetExtraValue(RecipeExtraKeys.Inventory, context.Inventory);
             return loader.GetDynamicRecipe(probe, context.Project!);
-        }
-
-        public static bool PassesContextFilter(IRecipe recipe, RecipaediaCraftingContext context) {
-            if (context.CrafterBlockValue != 0) {
-                int contents = Terrain.ExtractContents(context.CrafterBlockValue);
-                Block block = BlocksManager.Blocks[contents];
-                if (block is ICrafter crafter) {
-                    if (!crafter.IsCrafter(context.CrafterBlockValue, recipe)) return false;
-                }
-                else if (!RecipesCrafterManager.Crafters.TryGetValue(recipe, out List<int>? crafters)
-                    || !crafters.Contains(context.CrafterBlockValue)) {
-                    return false;
-                }
-            }
-
-            if (context.GridWidth > 0 && recipe is OriginalCraftingRecipe craftingRecipe) {
-                int recipeWidth = GetCraftingGridWidth(craftingRecipe.Ingredients);
-                if (recipeWidth > 0) {
-                    if (recipeWidth > context.GridWidth) return false;
-                    // US-C03：4×4 / 5×5 工作站不展示仅 3×3 可用的有形配方。
-                    if (context.GridWidth > 3 && recipeWidth == 3) return false;
-                }
-            }
-
-            return true;
-        }
-
-        public static int GetCraftingGridWidth(string[] ingredients) {
-            if (ingredients == null || ingredients.Length < 36) return 0;
-            int maxCol = 0;
-            int maxRow = 0;
-            for (int i = 0; i < 36; i++) {
-                if (string.IsNullOrEmpty(ingredients[i])) continue;
-                maxCol = Math.Max(maxCol, (i % 6) + 1);
-                maxRow = Math.Max(maxRow, (i / 6) + 1);
-            }
-            return Math.Max(maxCol, maxRow);
         }
     }
 }

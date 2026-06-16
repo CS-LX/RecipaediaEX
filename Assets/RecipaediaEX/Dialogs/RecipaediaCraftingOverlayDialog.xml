@@ -10,6 +10,10 @@
         <CanvasWidget Size="Infinity, 40" HorizontalAlignment="Stretch" VerticalAlignment="Near">
           <RectangleWidget OutlineColor="0, 0, 0, 0" FillColor="0, 0, 0, 102" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Size="Infinity, Infinity"/>
           <StackPanelWidget Direction="Horizontal" Margin="12, 0" VerticalAlignment="Center">
+            <CanvasWidget Name="RecipeDetailBackHost" Size="32, 32" VerticalAlignment="Center" Margin="0, 0, 8, 0" IsVisible="false">
+              <RectangleWidget Size="20, 20" Subtexture="{Textures/Atlas/UpDirectory}" FillColor="255, 255, 255, 200" OutlineColor="0, 0, 0, 0" HorizontalAlignment="Center" VerticalAlignment="Center" TextureLinearFilter="true"/>
+              <ClickableWidget Name="RecipeDetailBack" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SoundName="Audio/UI/ButtonClick"/>
+            </CanvasWidget>
             <LabelWidget Name="RecipeDetailTitle" Text="" Color="255, 255, 255, 255" VerticalAlignment="Center" />
             <CanvasWidget Size="Infinity, 0" />
             <CanvasWidget Size="32, 32">
@@ -19,7 +23,11 @@
           </StackPanelWidget>
         </CanvasWidget>
 
-        <CanvasWidget Size="Infinity, Infinity" ClampToBounds="true" Margin="8, 8, 8, 8">
+        <CanvasWidget Size="Infinity, 52" HorizontalAlignment="Stretch" Margin="8, 0, 8, 0">
+          <rex:RecipaediaOverlayCrafterTabBar Name="CrafterTabBar" />
+        </CanvasWidget>
+
+        <CanvasWidget Size="Infinity, Infinity" ClampToBounds="true" Margin="8, 4, 8, 8">
           <RectangleWidget OutlineColor="0, 0, 0, 0" FillColor="0, 0, 0, 76" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Size="Infinity, Infinity"/>
           <rex:RecipaediaOverlayRecipePreview Name="RecipePreview" Margin="8, 8" />
         </CanvasWidget>

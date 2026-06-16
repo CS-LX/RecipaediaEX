@@ -40,7 +40,7 @@ namespace RecipaediaEX.UI {
             RecipeDescriptorRegistry.EnsureScanned();
         }
 
-        public void ShowRecipes(IReadOnlyList<IRecipe> recipes, int startIndex = 0) {
+        public void ShowRecipes(IRecipaediaRecipeItem item, IReadOnlyList<IRecipe> recipes, int startIndex = 0) {
             SwitchToNewRecipe([.. recipes], startIndex);
         }
 
