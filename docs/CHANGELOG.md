@@ -43,6 +43,7 @@
 
 ### 新增
 
+- **合成助手 Phase 1**：`RecipaediaCraftingOverlayDialog`（右侧条带 + JEI 式二级配方弹窗）；`IRecipaediaOverlayHost` / `RecipaediaCraftingContext`；`IRecipaediaRecipeNavigator` + `RecipeDescriptorRegistry`；`Recipaedia` 键 Hook（合成 Modal toggle / EventBus 全屏图鉴）；`OpenFullRecipaediaRequestedEvent`。
 - **图鉴搜索 Phase 1**：`RecipaediaSearchIndex` / `Parser` / `Engine`；`RecipaediaEXScreen` 社区同款搜索行；`RecipaediaSearchFilterDialog`（滚动表单、`TextBoxArea` 衬底、固定底栏按钮）；`Assets/Lang` 语言包（键位于 `ContentWidgets`）。
 - **图鉴搜索 Phase 2（核心）**：拼音索引（`NPinyin.Core`）；`or` / `()` 查询 AST；`@recipes>=N` 等比较；搜索历史（`RecipaediaEXSearchHistory.txt` + 历史图标按钮）。
 - **图鉴搜索栏 UI**：搜索 / 历史 / 筛选改为 Bevelled 图标按钮（`ButtonStyle_Search|History|Filter` + 模组纹理）。
@@ -54,6 +55,7 @@
 
 ### 变更
 
+- ⚠️ **`RecipeDescriptor` 构造签名**：由 `RecipaediaEXRecipesScreen` 改为 `IRecipaediaRecipeNavigator`；依赖模组中所有 `[RecipeDescriptor]` 实现须同步迁移（IE2 已适配）。
 - ⚠️ **移除** `RecipeExtraKeys.MatchedResultFluidValues`。REX 核心仅约定方块产物/原料 Extra；其它产物语义（如流体）由依赖模组自定键名，并通过 `IRecipaediaRecipeItem` / `IRecipaediaSearchContributor` 扩展。
 - 图鉴搜索：移除 `ItemSearchKind.Fluid`、`ResultFluidValues`、`@t:fluid` 及类名推断流体逻辑。
 

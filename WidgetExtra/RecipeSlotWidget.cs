@@ -10,7 +10,7 @@ namespace RecipaediaEX.UI {
     public class RecipeSlotWidget : CanvasWidget {
         public InteractableWidget m_interactableWidget;//可点击界面
         public RectangleWidget m_highlightedRect;
-        public RecipaediaEXRecipesScreen m_belongingScreen;
+        public IRecipaediaRecipeNavigator m_navigator;
         public BevelledRectangleWidget m_bevelRect;
 
         /// <summary>
@@ -88,10 +88,10 @@ namespace RecipaediaEX.UI {
         /// <param name="ingredients">展示的原料</param>
         /// <param name="belongingScreen">所属的Screen</param>
         /// <param name="additionalData">其余参数</param>
-        public virtual void SetIngredients(IRecipaediaItem[] ingredients, RecipaediaEXRecipesScreen belongingScreen, params object[] additionalData) {
+        public virtual void SetIngredients(IRecipaediaItem[] ingredients, IRecipaediaRecipeNavigator navigator, params object[] additionalData) {
             RecipaediaItems = ingredients;
             SlotMode = Mode.Ingredient;
-            m_belongingScreen = belongingScreen;
+            m_navigator = navigator;
         }
 
         /// <summary>
@@ -100,10 +100,10 @@ namespace RecipaediaEX.UI {
         /// <param name="result"></param>
         /// <param name="belongingScreen">所属的Screen</param>
         /// <param name="additionalData"></param>
-        public virtual void SetResult(IRecipaediaItem result, RecipaediaEXRecipesScreen belongingScreen, params object[] additionalData) {
+        public virtual void SetResult(IRecipaediaItem result, IRecipaediaRecipeNavigator navigator, params object[] additionalData) {
             RecipaediaItems = [result];
             SlotMode = Mode.Result;
-            m_belongingScreen = belongingScreen;
+            m_navigator = navigator;
         }
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace RecipaediaEX.UI {
                     ValueEnumerable<ListWhere<IRecipe>, IRecipe> newItems = RecipaediaEXManager.Recipes.AsValueEnumerable().Where(x => recipeItem.Match(x));
                     if (newItems.Count() > 0) {
                         AudioManager.PlaySound("Audio/UI/ButtonClick", 1, 0, 0);
-                        m_belongingScreen.SwitchToNewRecipe(newItems.ToList(), 0);
+                        m_navigator.ShowRecipes(newItems.ToList(), 0);
                     }
                 }
             }
@@ -154,7 +154,7 @@ namespace RecipaediaEX.UI {
                 ValueEnumerable<ListWhere<IRecipe>, IRecipe> newItems = RecipaediaEXManager.Recipes.AsValueEnumerable().Where(x => recipeItem2.IsIngredient(x));
                 if (newItems.Count() > 0) {
                     AudioManager.PlaySound("Audio/UI/ButtonClick", 1, 0, 0);
-                    m_belongingScreen.SwitchToNewRecipe(newItems.ToList(), 0);
+                    m_navigator.ShowRecipes(newItems.ToList(), 0);
                 }
             }
         }

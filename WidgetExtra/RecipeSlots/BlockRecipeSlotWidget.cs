@@ -31,8 +31,8 @@ namespace RecipaediaEX.Implementation {
             if (IsCountVisible != null) m_countLabel.IsVisible = IsCountVisible(this);
         }
 
-        public override void SetResult(IRecipaediaItem result, RecipaediaEXRecipesScreen belongingScreen, params object[] additionalData) {
-            base.SetResult(result, belongingScreen, additionalData);
+        public override void SetResult(IRecipaediaItem result, IRecipaediaRecipeNavigator navigator, params object[] additionalData) {
+            base.SetResult(result, navigator, additionalData);
             m_count = (int)additionalData[0];
         }
 

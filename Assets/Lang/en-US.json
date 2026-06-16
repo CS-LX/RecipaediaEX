@@ -6,6 +6,10 @@
       "2": "Filter ({0})",
       "3": "History"
     },
+    "RecipaediaCraftingOverlay": {
+      "0": "Crafting Assistant",
+      "1": "No recipes match this workstation"
+    },
     "RecipaediaSearchFilterDialog": {
       "0": "Advanced Filter",
       "1": "Name",

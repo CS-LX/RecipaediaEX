@@ -1,0 +1,78 @@
+<CanvasWidget xmlns="runtime-namespace:Game" xmlns:rex="runtime-namespace:RecipaediaEX.Overlay">
+
+  <StackPanelWidget Name="OverlayRoot" Direction="Horizontal" HorizontalAlignment="Far" VerticalAlignment="Stretch">
+
+    <CanvasWidget Name="RecipeDetailPopup" Size="500, Infinity" ClampToBounds="true" IsVisible="false">
+      <RectangleWidget OutlineColor="0, 0, 0, 0" FillColor="0, 0, 0, 160" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Size="Infinity, Infinity"/>
+
+      <StackPanelWidget Direction="Vertical" Margin="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+
+        <CanvasWidget Size="Infinity, 40" HorizontalAlignment="Stretch" VerticalAlignment="Near">
+          <RectangleWidget OutlineColor="0, 0, 0, 0" FillColor="0, 0, 0, 102" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Size="Infinity, Infinity"/>
+          <StackPanelWidget Direction="Horizontal" Margin="12, 0" VerticalAlignment="Center">
+            <LabelWidget Name="RecipeDetailTitle" Text="" Color="255, 255, 255, 255" VerticalAlignment="Center" />
+            <CanvasWidget Size="Infinity, 0" />
+            <CanvasWidget Size="32, 32">
+              <RectangleWidget Size="20, 20" Subtexture="{Textures/Gui/CloseLine}" FillColor="255, 255, 255, 200" OutlineColor="0, 0, 0, 0" HorizontalAlignment="Center" VerticalAlignment="Center" TextureLinearFilter="true"/>
+              <ClickableWidget Name="RecipeDetailClose" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SoundName="Audio/UI/ButtonClick"/>
+            </CanvasWidget>
+          </StackPanelWidget>
+        </CanvasWidget>
+
+        <CanvasWidget Size="Infinity, Infinity" ClampToBounds="true" Margin="8, 8, 8, 8">
+          <RectangleWidget OutlineColor="0, 0, 0, 0" FillColor="0, 0, 0, 76" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Size="Infinity, Infinity"/>
+          <rex:RecipaediaOverlayRecipePreview Name="RecipePreview" Margin="8, 8" />
+        </CanvasWidget>
+
+      </StackPanelWidget>
+    </CanvasWidget>
+
+    <CanvasWidget Name="OverlayStrip" Size="420, Infinity" ClampToBounds="true">
+      <RectangleWidget OutlineColor="0, 0, 0, 0" FillColor="0, 0, 0, 140" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Size="Infinity, Infinity"/>
+
+      <StackPanelWidget Direction="Vertical" Margin="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+
+        <CanvasWidget Size="Infinity, 40" HorizontalAlignment="Stretch" VerticalAlignment="Near">
+          <RectangleWidget OutlineColor="0, 0, 0, 0" FillColor="0, 0, 0, 102" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Size="Infinity, Infinity"/>
+          <StackPanelWidget Direction="Horizontal" Margin="12, 0" VerticalAlignment="Center">
+            <LabelWidget Text="[RecipaediaCraftingOverlay:0]" Color="255, 255, 255, 255" VerticalAlignment="Center" />
+            <CanvasWidget Size="Infinity, 0" />
+            <CanvasWidget Size="32, 32">
+              <RectangleWidget Name="CloseIcon" Size="20, 20" Subtexture="{Textures/Gui/CloseLine}" FillColor="255, 255, 255, 200" OutlineColor="0, 0, 0, 0" HorizontalAlignment="Center" VerticalAlignment="Center" TextureLinearFilter="true"/>
+              <ClickableWidget Name="Close" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SoundName="Audio/UI/ButtonClick"/>
+            </CanvasWidget>
+          </StackPanelWidget>
+        </CanvasWidget>
+
+        <StackPanelWidget Direction="Horizontal" VerticalAlignment="Center" Margin="8, 8, 8, 4">
+          <CanvasWidget Size="32, 32" VerticalAlignment="Center" Margin="0, 0, 4, 0">
+            <RectangleWidget Size="20, 20" Subtexture="{RecipaediaEX/Textures/HistoryLine}" FillColor="255, 255, 255, 180" OutlineColor="0, 0, 0, 0" HorizontalAlignment="Center" VerticalAlignment="Center" BlendState="NonPremultiplied" TextureLinearFilter="true"/>
+            <ClickableWidget Name="History" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SoundName="Audio/UI/ButtonClick"/>
+          </CanvasWidget>
+          <CanvasWidget VerticalAlignment="Center" Size="Infinity, 40" Margin="0, 0, 4, 0">
+            <RectangleWidget OutlineColor="0, 0, 0, 0" FillColor="0, 0, 0, 102" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Size="Infinity, Infinity"/>
+            <LabelWidget Name="placeholder" HorizontalAlignment="Center" VerticalAlignment="Center" Text="[RecipaediaSearch:0]" Color="160, 160, 160, 255"/>
+            <TextBoxWidget Name="key" Color="255, 255, 255, 255" Size="Infinity, 40" VerticalAlignment="Center" Margin="8, 0, 36, 0"/>
+            <LinkWidget Name="ClearSearchLink" Text="[OriginalCommunityContentScreen:7]" Color="120, 220, 120, 255" HorizontalAlignment="Far" VerticalAlignment="Center" Margin="8, 0, 8, 0" />
+          </CanvasWidget>
+          <CanvasWidget Size="32, 32" VerticalAlignment="Center" Margin="0, 0, 4, 0">
+            <RectangleWidget Size="20, 20" Subtexture="{RecipaediaEX/Textures/SearchLine}" FillColor="255, 255, 255, 180" OutlineColor="0, 0, 0, 0" HorizontalAlignment="Center" VerticalAlignment="Center" BlendState="NonPremultiplied" TextureLinearFilter="true"/>
+            <ClickableWidget Name="Search" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SoundName="Audio/UI/ButtonClick"/>
+          </CanvasWidget>
+          <CanvasWidget Size="32, 32" VerticalAlignment="Center">
+            <RectangleWidget Name="FilterIcon" Size="20, 20" Subtexture="{RecipaediaEX/Textures/MenuSearchLine}" FillColor="255, 255, 255, 180" OutlineColor="0, 0, 0, 0" HorizontalAlignment="Center" VerticalAlignment="Center" BlendState="NonPremultiplied" TextureLinearFilter="true"/>
+            <ClickableWidget Name="SearchType" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SoundName="Audio/UI/ButtonClick"/>
+          </CanvasWidget>
+        </StackPanelWidget>
+
+        <CanvasWidget Size="Infinity, Infinity" ClampToBounds="true" Margin="8, 4, 8, 8">
+          <RectangleWidget OutlineColor="0, 0, 0, 0" FillColor="0, 0, 0, 102" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Size="Infinity, Infinity"/>
+          <ListPanelWidget Name="BlocksList" Direction="Vertical" Margin="4, 4" ItemSize="64" SelectionColor="40, 120, 40, 120"/>
+        </CanvasWidget>
+
+      </StackPanelWidget>
+    </CanvasWidget>
+
+  </StackPanelWidget>
+
+</CanvasWidget>

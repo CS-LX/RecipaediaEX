@@ -17,7 +17,7 @@ namespace RecipaediaEX.Implementation {
 
 		public BlockRecipeSlotWidget m_resultWidget;
 
-		public  CraftingRecipeDescriptor(RecipaediaEXRecipesScreen belongingScreen) : base(belongingScreen) {
+		public CraftingRecipeDescriptor(IRecipaediaRecipeNavigator navigator) : base(navigator) {
             XElement node = RecipaediaEXLoader.RequestWidgetFile("Descriptors/CraftingRecipeDescriptor");
             LoadContents(this, node);
             m_nameWidget = Children.Find<LabelWidget>("CraftingRecipeDescriptor.Name");
@@ -48,10 +48,10 @@ namespace RecipaediaEX.Implementation {
                 if (!string.IsNullOrEmpty(ingredient)) {
                     CraftingRecipesManager.DecodeIngredient(ingredient, out string craftingId, out int? data);
                     ValueEnumerable<FromArray<Block>, Block> blocksByCraftingId = BlocksManager.FindBlocksByCraftingId(craftingId).AsValueEnumerable();
-                    child.SetIngredients(blocksByCraftingId.Select(x => new BlockItem(x, 0, Terrain.MakeBlockValue(x.BlockIndex, 0, data.GetValueOrDefault(0)))).OfType<IRecipaediaItem>().ToArray(), m_belongingScreen);
+                    child.SetIngredients(blocksByCraftingId.Select(x => new BlockItem(x, 0, Terrain.MakeBlockValue(x.BlockIndex, 0, data.GetValueOrDefault(0)))).OfType<IRecipaediaItem>().ToArray(), m_navigator);
                 }
             }
-            m_resultWidget.SetResult(new BlockItem(BlocksManager.Blocks[Terrain.ExtractContents(craftingRecipe.ResultValue)], 0, craftingRecipe.ResultValue), m_belongingScreen, craftingRecipe.ResultCount);
+            m_resultWidget.SetResult(new BlockItem(BlocksManager.Blocks[Terrain.ExtractContents(craftingRecipe.ResultValue)], 0, craftingRecipe.ResultValue), m_navigator, craftingRecipe.ResultCount);
         }
 
         public override void Hide() {
@@ -65,7 +65,7 @@ namespace RecipaediaEX.Implementation {
         }
 
         public override CrafterButtonWidget GetCrafterButton(IRecipe recipe) {
-           return CrafterButtonWidget.GetDefaultWidget(recipe, m_belongingScreen);
+           return CrafterButtonWidget.GetDefaultWidget(recipe, m_navigator);
         }
     }
 }

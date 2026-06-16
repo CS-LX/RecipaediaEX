@@ -7,7 +7,7 @@ using ZLinq.Linq;
 
 namespace RecipaediaEX.UI {
     public class CrafterButtonWidget : CanvasWidget {
-        public RecipaediaEXRecipesScreen m_belongingScreen;
+        public IRecipaediaRecipeNavigator m_navigator;
         public AdvancedBevelledButtonWidget m_bevelledButtonWidget;
 
         /// <summary>
@@ -70,9 +70,9 @@ namespace RecipaediaEX.UI {
         /// <param name="crafterItems"></param>
         /// <param name="belongingScreen">所属的Screen</param>
         /// <param name="additionalData"></param>
-        public virtual void SetCrafters(IRecipaediaItem[] crafterItems, RecipaediaEXRecipesScreen belongingScreen, params object[] additionalData) {
+        public virtual void SetCrafters(IRecipaediaItem[] crafterItems, IRecipaediaRecipeNavigator navigator, params object[] additionalData) {
             RecipaediaItems = crafterItems;
-            m_belongingScreen = belongingScreen;
+            m_navigator = navigator;
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace RecipaediaEX.UI {
                 ValueEnumerable<ListWhere<IRecipe>, IRecipe> newItems = RecipaediaEXManager.Recipes.AsValueEnumerable().Where(x => recipeItem.Match(x));
                 if (newItems.Count() > 0) {
                     AudioManager.PlaySound("Audio/UI/ButtonClick", 1, 0, 0);
-                    m_belongingScreen.SwitchToNewRecipe(newItems.ToList(), 0);
+                    m_navigator.ShowRecipes(newItems.ToList(), 0);
                 }
             }
         }
@@ -121,15 +121,15 @@ namespace RecipaediaEX.UI {
                 ValueEnumerable<ListWhere<IRecipe>, IRecipe> newItems = RecipaediaEXManager.Recipes.AsValueEnumerable().Where(x => recipeItem2.IsIngredient(x));
                 if (newItems.Count() > 0) {
                     AudioManager.PlaySound("Audio/UI/ButtonClick", 1, 0, 0);
-                    m_belongingScreen.SwitchToNewRecipe(newItems.ToList(), 0);
+                    m_navigator.ShowRecipes(newItems.ToList(), 0);
                 }
             }
         }
 
-        public static CrafterButtonWidget GetDefaultWidget(IRecipe recipe, RecipaediaEXRecipesScreen belongingScreen) {
+        public static CrafterButtonWidget GetDefaultWidget(IRecipe recipe, IRecipaediaRecipeNavigator navigator) {
             if (RecipesCrafterManager.Crafters.TryGetValue(recipe, out List<int> crafterIDs) && crafterIDs.Count > 0) {
                 BlockCrafterButtonWidget blockCrafterButtonWidget = new();
-                blockCrafterButtonWidget.SetCrafters(crafterIDs.AsValueEnumerable().Select(x => new BlockItem(BlocksManager.Blocks[Terrain.ExtractContents(x)], 0, x)).OfType<IRecipaediaItem>().ToArray(), belongingScreen);
+                blockCrafterButtonWidget.SetCrafters(crafterIDs.AsValueEnumerable().Select(x => new BlockItem(BlocksManager.Blocks[Terrain.ExtractContents(x)], 0, x)).OfType<IRecipaediaItem>().ToArray(), navigator);
                 return blockCrafterButtonWidget;
             }
             return null;

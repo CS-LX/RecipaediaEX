@@ -6,6 +6,10 @@
       "2": "筛选 ({0})",
       "3": "历史"
     },
+    "RecipaediaCraftingOverlay": {
+      "0": "合成助手",
+      "1": "当前工作站下无匹配配方"
+    },
     "RecipaediaSearchFilterDialog": {
       "0": "高级筛选",
       "1": "名称",

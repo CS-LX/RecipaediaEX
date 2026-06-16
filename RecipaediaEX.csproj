@@ -60,6 +60,21 @@
 		<Compile Include="Events\RecipeMatchedEvent.cs"/>
 		<Compile Include="Events\RecipesResetEvent.cs"/>
 		<Compile Include="Events\RecipaediaEventBus.cs"/>
+		<Compile Include="Events\OpenFullRecipaediaRequestedEvent.cs"/>
+		<Compile Include="Overlay\IRecipaediaRecipeNavigator.cs"/>
+		<Compile Include="Overlay\IRecipaediaOverlayHost.cs"/>
+		<Compile Include="Overlay\IRecipePlacementTarget.cs"/>
+		<Compile Include="Overlay\RecipeDescriptorRegistry.cs"/>
+		<Compile Include="Overlay\RecipaediaCraftingContext.cs"/>
+		<Compile Include="Overlay\RecipaediaCraftingTableContextHelper.cs"/>
+		<Compile Include="Overlay\RecipaediaCraftingTableWidget.cs"/>
+		<Compile Include="Overlay\RecipaediaCraftingOverlayController.cs"/>
+		<Compile Include="Overlay\RecipaediaCraftingOverlayDialog.cs"/>
+		<Compile Include="Overlay\RecipaediaOverlayHostUi.cs"/>
+		<Compile Include="Overlay\RecipaediaOverlayInput.cs"/>
+		<Compile Include="Overlay\RecipaediaOverlayRecipePreview.cs"/>
+		<Compile Include="Overlay\RecipaediaOverlayRecipeResolver.cs"/>
+		<Compile Include="Overlay\RecipaediaOverlayToggleButton.cs"/>
 		<Compile Include="Events\SmeltingRecipeChangedEvent.cs"/>
 		<Compile Include="RecipaediaEXLoader.cs"/>
 		<Compile Include="LoaderExtra\IRecipesLoader.cs"/>
@@ -158,6 +173,9 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="Assets\RecipaediaEX\Screens\RecipaediaEXScreen.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\RecipaediaEX\Dialogs\RecipaediaCraftingOverlayDialog.xml">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="Assets\RecipaediaEX\Dialogs\RecipaediaSearchFilterDialog.xml">
