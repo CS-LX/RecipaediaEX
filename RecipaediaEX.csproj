@@ -70,6 +70,9 @@
 		<Compile Include="RecipaediaEXManager.cs"/>
 		<Compile Include="RecipesExtra\IRecipe.cs"/>
 		<Compile Include="RecipesExtra\RecipeExtraKeys.cs"/>
+		<Compile Include="RecipesExtra\RecipeConstraintChecker.cs"/>
+		<Compile Include="RecipesExtra\RecipeMatchPipeline.cs"/>
+		<Compile Include="RecipesExtra\CrafterHints.cs"/>
 		<Compile Include="RecipesExtra\RecipeReaderAttribute.cs"/>
 		<Compile Include="RecipesExtra\Recipes\OriginalCraftingRecipe.cs"/>
 		<Compile Include="RecipesExtra\Recipes\FormattedRecipe.cs"/>

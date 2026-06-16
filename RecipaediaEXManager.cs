@@ -48,11 +48,14 @@ namespace RecipaediaEX {
             RecipaediaEventBus.GetPublisher<RecipesResetEvent>().Publish(new RecipesResetEvent(Recipes.Count));
         }
 
-        static void PublishRecipeMatched(IRecipe actual, IRecipe matched, bool fromDynamicLoader) {
+        internal static void NotifyRecipeMatched(IRecipe actual, IRecipe matched, bool fromDynamicLoader) {
             Project? project = actual.GetExtraValue<Project>(RecipeExtraKeys.Project, null);
             RecipaediaEventBus.GetPublisher<RecipeMatchedEvent>().Publish(
                 new RecipeMatchedEvent(actual, matched, fromDynamicLoader, project));
         }
+
+        static void PublishRecipeMatched(IRecipe actual, IRecipe matched, bool fromDynamicLoader) =>
+            NotifyRecipeMatched(actual, matched, fromDynamicLoader);
 
         #region 对外方法
         /// <summary>

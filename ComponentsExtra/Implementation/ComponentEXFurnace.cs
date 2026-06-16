@@ -337,7 +337,10 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                 actualSmeltingRecipe.SetExtraValue(RecipeExtraKeys.Project, Project);
                 actualSmeltingRecipe.SetExtraValue<IInventory>(RecipeExtraKeys.Inventory, this);
                 actualSmeltingRecipe.SetExtraValue(RecipeExtraKeys.ActualIngredients, actualIngredients);
-                OriginalSmeltingRecipe craftingRecipe = RecipaediaEXManager.FindMatchingRecipe<OriginalSmeltingRecipe>(actualSmeltingRecipe);
+                RecipeMatchResult matchResult = RecipeMatchPipeline.Resolve(actualSmeltingRecipe, CrafterMatchMode.Furnace, Project);
+                OriginalSmeltingRecipe? craftingRecipe = !matchResult.IsHint && matchResult.Recipe is OriginalSmeltingRecipe productiveRecipe
+                    ? productiveRecipe
+                    : null;
                 if (craftingRecipe != null
                     && craftingRecipe.ResultValue != 0) {
                     if (craftingRecipe.RequiredHeatLevel <= 0f) {
@@ -365,9 +368,8 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                         }
                     }
                 }
-                if (craftingRecipe != null
-                    && !string.IsNullOrEmpty(craftingRecipe.Message)) {
-                    componentPlayer?.ComponentGui.DisplaySmallMessage(craftingRecipe.Message, Color.White, blinking: true, playNotificationSound: true);
+                if (matchResult.IsHint || !string.IsNullOrEmpty(matchResult.Recipe?.Message)) {
+                    CrafterHints.TryShow(componentPlayer, matchResult.Recipe);
                 }
                 return craftingRecipe;
             }

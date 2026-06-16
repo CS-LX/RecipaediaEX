@@ -39,12 +39,17 @@ namespace RecipaediaEX.Implementation {
         public int DisplayOrder = 0;
         int IRecipe.DisplayOrder => DisplayOrder;
 
+        public virtual bool MatchIngredientsOnly(IRecipe actual) {
+            if (actual is not FormattedRecipe formattedRecipe) return false;
+            return TransformedIngredients.AsValueEnumerable().Any(
+                ingredients => CompareIngredientsArray(ingredients, formattedRecipe.Ingredients)
+            );
+        }
+
         public virtual bool Match(IRecipe actual) {
             try {
                 if (actual is not FormattedRecipe formattedRecipe) return false;
-                return TransformedIngredients.AsValueEnumerable().Any(
-                    ingredients => CompareIngredientsArray(ingredients, formattedRecipe.Ingredients)
-                );
+                return MatchIngredientsOnly(actual);
             }
             catch(Exception e) {
                 if (LogErrorOnMatchFail) {

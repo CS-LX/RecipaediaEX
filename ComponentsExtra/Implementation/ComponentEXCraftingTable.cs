@@ -142,17 +142,16 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
             ComponentPlayer componentPlayer = FindInteractingPlayer();
             float playerLevel = componentPlayer?.PlayerData.Level ?? 1f;
             OriginalCraftingRecipe previousRecipe = m_matchedRecipe;
-            OriginalCraftingRecipe craftingRecipe;
-            if (recipeRefindNeeded) {
-                OriginalCraftingRecipe actualCraftingRecipe = new() { Ingredients = m_matchedIngredients, RequiredHeatLevel = 0f, RequiredPlayerLevel = playerLevel };
-                actualCraftingRecipe.SetExtraValue(RecipeExtraKeys.Project, Project);
-                actualCraftingRecipe.SetExtraValue<IInventory>(RecipeExtraKeys.Inventory, this);
-                actualCraftingRecipe.SetExtraValue(RecipeExtraKeys.ActualIngredients, actualIngredients);
-                craftingRecipe = RecipaediaEXManager.FindMatchingRecipe<OriginalCraftingRecipe>(actualCraftingRecipe);
-            }
-            else {
-                craftingRecipe = m_matchedRecipe;
-            }
+            OriginalCraftingRecipe actualCraftingRecipe = new() { Ingredients = m_matchedIngredients, RequiredHeatLevel = 0f, RequiredPlayerLevel = playerLevel };
+            actualCraftingRecipe.SetExtraValue(RecipeExtraKeys.Project, Project);
+            actualCraftingRecipe.SetExtraValue<IInventory>(RecipeExtraKeys.Inventory, this);
+            actualCraftingRecipe.SetExtraValue(RecipeExtraKeys.ActualIngredients, actualIngredients);
+            RecipeMatchResult matchResult = recipeRefindNeeded
+                ? RecipeMatchPipeline.Resolve(actualCraftingRecipe, CrafterMatchMode.CraftingTable, Project)
+                : new RecipeMatchResult { Recipe = m_matchedRecipe, IsHint = false };
+            OriginalCraftingRecipe? craftingRecipe = !matchResult.IsHint && matchResult.Recipe is OriginalCraftingRecipe productiveRecipe
+                ? productiveRecipe
+                : null;
             if (craftingRecipe != null
                 && craftingRecipe.ResultValue != 0) {
                 m_matchedRecipe = craftingRecipe;
@@ -168,14 +167,9 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                 RecipaediaEventBus.GetPublisher<CraftingRecipeChangedEvent>().Publish(
                     new CraftingRecipeChangedEvent(Project, this, componentPlayer, previousRecipe, m_matchedRecipe));
             }
-            if (craftingRecipe != null
-                && !string.IsNullOrEmpty(craftingRecipe.Message)) {
-                string message = craftingRecipe.Message;
-                if (message.StartsWith("[")
-                    && message.EndsWith("]")) {
-                    message = LanguageControl.Get("CRMessage", message.Substring(1, message.Length - 2));
-                }
-                componentPlayer?.ComponentGui.DisplaySmallMessage(message, Color.White, blinking: true, playNotificationSound: true);
+            if (recipeRefindNeeded
+                && (matchResult.IsHint || !string.IsNullOrEmpty(matchResult.Recipe?.Message))) {
+                CrafterHints.TryShow(componentPlayer, matchResult.Recipe);
             }
         }
 
