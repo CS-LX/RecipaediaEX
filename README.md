@@ -118,6 +118,8 @@ RecipaediaEventBus.GetPublisher<MyModEvent>().Publish(new MyModEvent(...));
 - [更新日志（模组开发者）](docs/CHANGELOG.md)
 - [API 使用文档](docs/API使用文档.md)
 - [图鉴搜索功能策划](docs/图鉴搜索功能策划.md)
+- [合成助手策划（Crafting Overlay）](docs/工作台悬浮助手策划.md)
+- [合成助手 · JEI 对标与基元语句](docs/合成助手-JEI对标与基元语句.md)
 - [打包 → 发布 CI 策划](docs/打包发布CI策划.md)
 - [发版指南](docs/RELEASE.md)
 
