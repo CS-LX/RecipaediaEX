@@ -1,6 +1,6 @@
 # 合成助手 — JEI 对标解构与基元语句
 
-> **版本**：v1.0  
+> **版本**：v1.1  
 > **状态**：设计参考（与 [工作台悬浮助手策划.md](工作台悬浮助手策划.md) 配套）  
 > **范围**：RecipaediaEX 合成助手（Crafting Overlay）的产品与技术对齐依据  
 > **对标产品**：Minecraft [Just Enough Items (JEI)](https://github.com/mezz/JustEnoughItems)
@@ -165,8 +165,8 @@ transferRecipe(container, recipe, recipeSlots, player, maxTransfer, doTransfer)
 | R / U | 图鉴 `Match` / `IsIngredient` + `RecipeSlotWidget` 点击跳转 | 缺 **快捷键 R/U + 悬浮内链** |
 | Recipe Category | `RecipeDescriptor` | 需在 Overlay 内嵌只读 Descriptor |
 | 同屏 | 策划 `RecipaediaCraftingOverlayDialog` | 未实现 |
-| + Transfer | 策划 `IRecipePlacementTarget` | 需从「仅 36 格」扩展到 **多资源类型 + 预检** |
-| 流体原料 | `ReactionEquationRecipe` + `ComponentReactor` | 内容模组实现 `ReactorPlacementTarget` |
+| + Transfer | 策划 `IRecipePlacementTarget` | 通用 `PlacementRequirement` + 内容模组 Target 解释 Quantity |
+| 流体原料 | `ReactionEquationRecipe` + 反应釜 Component | 内容模组 `ReactorPlacementTarget`（REX 无 Fluid 字段） |
 | Ghost | 无 | Phase 3 可选 |
 
 ### 5.1 工业反应釜示例
@@ -175,12 +175,26 @@ transferRecipe(container, recipe, recipeSlots, player, maxTransfer, doTransfer)
 
 | 机器 | 配方类型 | Placement 适配 |
 |------|----------|----------------|
-| 工作台/机床 | `OriginalCraftingRecipe` + Transform | `CraftingTablePlacementTarget`（REX 默认） |
-| 反应釜 | `ReactionEquationRecipe` | `ReactorPlacementTarget`（SCIENEW） |
-| 灌装机 | `FillerRecipe` 等 | 物品槽 + 容器槽映射（SCIENEW） |
-| One2One 压板机 | `One2OneRecipe` | 单输入槽（SCIENEW） |
+| 工作台/机床 | `OriginalCraftingRecipe` + Transform | REX `CraftingTablePlacementTarget`（`GridCell`） |
+| 反应釜 | `ReactionEquationRecipe` | 内容模组 `ReactorPlacementTarget`（`ContainerSlot` + 自解释 `Quantity`） |
+| 灌装机 | 灌装类配方 | 内容模组 Target |
+| One2One 压板机 | `One2OneRecipe` | 内容模组 Target（单 `ContainerSlot`） |
 
-反应釜 **+** 的第一版可：**物品槽自动填 + 流体缺口只提示**（不自动拉管道），仍符合 JEI/RS 的常见行为。
+反应釜 **+** 的第一版可：**物品槽自动填 + 罐体缺口仅提示**（不自动拉管道），仍符合 JEI/RS 常见行为。
+
+### 5.2 与 recipaedia-rex-anti-patterns 的对齐（v1.1）
+
+v0.2 策划曾出现 `FluidVolume`、`PlacementKind.FluidTank`、`PlacementSources.ITank`，**违背** mdc §1（把流体语义写进 REX 核心）。
+
+**定稿原则**：
+
+| 层级 | REX 核心 | 内容模组 |
+|------|----------|----------|
+| 需求 struct | `PlacementAddressKind` + `MatchKey` + **`Quantity`（opaque）** | 适配器将方程/流体转为 `ContainerSlot` 列表 |
+| 数量含义 | 不定义 | Target 解释（个数 vs 体积） |
+| 罐体 API | 不出现 `ITank` | `ReactorPlacementTarget` 构造时绑定 Component |
+
+**不用字段级 union 的原因**：`ItemCount`/`FluidVolume` 并列或在 C# 做 explicit union，都会在 API 表面 **命名** 流体分支；单一 `Quantity` + Target 解释与 JEI「Handler 解释 Ingredient」同构。
 
 ---
 
@@ -214,10 +228,10 @@ transferRecipe(container, recipe, recipeSlots, player, maxTransfer, doTransfer)
 > 自动摆放的本质是：**Recipe Requirement → Container Writable Slot** 的显式映射；没有映射就没有 `+` 按钮。
 
 **P2. 多资源类型公理**  
-> 「可摆放原料」不限于物品堆叠；**流体体积、容器占位、（未来）能量** 都是与物品同级的 PlacementRequirement。
+> 「可摆放原料」不限于物品堆叠；**流体、能量等** 也可参与转移，但 REX 核心仅以 **opaque `Quantity` + 容器槽寻址** 承载；**具体语义由 Target 解释**（基元 E1），不在框架 struct 上命名 `Fluid*` 字段。
 
 **P3. 等价物选择公理**  
-> 一个配方需求可对应多种方块/流体实例；转移前必须为每个需求 **选定具体 variant**（优先：已在目标槽的 > 背包数量最多的 > 字典序）。
+> 一个配方需求可对应多种方块实例（及内容模组内的其它等价物）；转移前必须为每个需求 **选定具体 variant**（优先：已在目标槽的 > 背包数量最多的 > 字典序）。
 
 **P4. 预检优先公理**  
 > 执行转移前必须 **dry-run**：报告缺失、冲突、等级/温度不足；**允许部分成功**，禁止 silent fail。
@@ -232,7 +246,7 @@ transferRecipe(container, recipe, recipeSlots, player, maxTransfer, doTransfer)
 > 任意成功放置后，必须触发容器侧 **配方重匹配**（`UpdateCraftingResult` / `FindEquation` / `FindRecipe`），使产物预览与进度条立即更新。
 
 **P8. 权威执行公理**  
-> 若存在联机/服务端权威：UI 发起、**服务端执行** 物品移动，客户端只做预测与提示（与手工拖放同一套 `IInventory`/`ITank` API）。
+> 若存在联机/服务端权威：UI 发起、**服务端执行** 物品移动，客户端只做预测与提示（与手工拖放同一套库存 API；罐体在内容模组 Target 内）。
 
 **P9. 形状变换公理**  
 > 有形合成（3×3/4×4）的放置必须支持 **平移/镜像** 等与匹配侧一致的 Transform，否则「+ 放进去但不出产物」。
@@ -262,7 +276,7 @@ transferRecipe(container, recipe, recipeSlots, player, maxTransfer, doTransfer)
 |------|-------------------|
 | V1–V6 | `RecipaediaCraftingOverlayDialog`、`IRecipaediaOverlayHost` |
 | P1–P4 | `IRecipePlacementTarget` + `PlacementResult`（dry-run / execute） |
-| P2 | `PlacementRequirement.Kind` = ItemSlot / FluidTank / … |
+| P2 | REX：`PlacementAddressKind` + `Quantity`；流体/罐体：内容模组 Target |
 | P9 | `CraftingTablePlacementTarget` + `TransformRecipe` |
 | P7 | Target 实现末尾调用 `UpdateCraftingResult` / `FindEquation` |
 | E1–E2 | `IPlacableRecipe` + 内容模组 `*PlacementTarget` |
@@ -275,7 +289,7 @@ transferRecipe(container, recipe, recipeSlots, player, maxTransfer, doTransfer)
 
 **JEI = 同屏配方浏览器 + 按容器注册的 Transfer Handler；`+` 不是「聪明 AI」，而是「配方需求 → 槽位映射 → 预检 → 部分填充 → 刷新匹配」。**
 
-REX 合成助手只要把接口从「36 格 + `IInventory`」升格为 **「`PlacementRequirement` 列表 + 多资源类型 + dry-run/execute 分离 + 每机器一个 Target」**，工业反应釜与 JEI Complete Control Handler 即为同一类问题。
+REX 合成助手只要把接口从「36 格 + `IInventory`」升格为 **「`PlacementRequirement`（通用寻址 + opaque Quantity）+ dry-run/execute + 每机器一个 Target」**，工业反应釜与 JEI Complete Control Handler 即为同一类问题；**流体不进入 REX struct 字段名**。
 
 ---
 
@@ -292,3 +306,4 @@ REX 合成助手只要把接口从「36 格 + `IInventory`」升格为 **「`Pla
 | 版本 | 日期 | 说明 |
 |------|------|------|
 | v1.0 | 2026-06-16 | 初稿：JEI 解构、REX 对照、基元语句、工业机器扩展依据 |
+| v1.1 | 2026-06-16 | 对齐 anti-patterns：废止 FluidVolume/FluidTank/ITank；P2/P8/§5.2/§7 修订 |
