@@ -18,7 +18,7 @@ namespace RecipaediaEX {
                         : LanguageControl.Get(ManagerSection, 0)
                 );
             }
-            if (CraftingRecipesManager.EnableLevelRestrictions
+            if (RecipaediaEXManager.EnableLevelRestrictions
                 && playerLevel < matched.RequiredPlayerLevel) {
                 return CreateSyntheticHint(
                     string.Format(

@@ -1,13 +1,21 @@
 using System;
 using System.Collections.Generic;
 using Engine;
+using Game;
 using GameEntitySystem;
 using RecipaediaEX.Events;
 using ZLinq;
 
 namespace RecipaediaEX {
-    public static class RecipaediaEXManager
-    {
+    public static class RecipaediaEXManager {
+        /// <summary>
+        /// 配方匹配是否启用等级限制，实际上是转发<see cref="CraftingRecipesManager.EnableLevelRestrictions"/>
+        /// </summary>
+        public static bool EnableLevelRestrictions {
+            get => CraftingRecipesManager.EnableLevelRestrictions;
+            set => CraftingRecipesManager.EnableLevelRestrictions = value;
+        }
+
         public static List<IRecipe> m_recipes = [];
 
         /// <summary>
