@@ -19,6 +19,7 @@ namespace RecipaediaEX.Overlay {
         public LabelWidget m_emptyLabel;
         public RecipaediaCraftingContext m_context;
         IRecipaediaRecipeNavigator m_navigator = null!;
+        IRecipaediaOverlayDescriptorHost m_descriptorHost = null!;
         readonly List<RecipaediaOverlayDescriptorSlot> m_activeSlots = [];
 
         public RecipaediaOverlayRecipePreview() {
@@ -49,6 +50,8 @@ namespace RecipaediaEX.Overlay {
         public void SetContext(RecipaediaCraftingContext context) => m_context = context;
 
         public void SetNavigator(IRecipaediaRecipeNavigator navigator) => m_navigator = navigator;
+
+        public void SetDescriptorHost(IRecipaediaOverlayDescriptorHost host) => m_descriptorHost = host;
 
         public void DisplayRecipes(IReadOnlyList<IRecipe> recipes) {
             ClearDescriptors();
@@ -85,7 +88,7 @@ namespace RecipaediaEX.Overlay {
             for (int i = 0; i < pending.Count; i++) {
                 (Type descriptorType, IRecipe recipe, string nameSuffix) = pending[i];
                 RecipeDescriptor descriptor = RecipeDescriptorRegistry.CreateDescriptor(descriptorType, m_navigator)!;
-                var slot = new RecipaediaOverlayDescriptorSlot(descriptor, scale) {
+                var slot = new RecipaediaOverlayDescriptorSlot(descriptor, recipe, scale, m_descriptorHost) {
                     Margin = new Vector2(4, 4),
                 };
                 slot.Present(recipe, nameSuffix);
@@ -95,6 +98,11 @@ namespace RecipaediaEX.Overlay {
             }
 
             m_scrollPanel.ScrollPosition = 0f;
+            RefreshActionBars();
+        }
+
+        public void RefreshActionBars() {
+            foreach (RecipaediaOverlayDescriptorSlot slot in m_activeSlots) slot.RefreshActionBar();
         }
 
         static float MeasureMaxNaturalWidth(

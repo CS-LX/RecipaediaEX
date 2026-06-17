@@ -128,6 +128,8 @@ transferRecipe(container, recipe, recipeSlots, player, maxTransfer, doTransfer)
 5. 背包不够 → **部分填充** + 返回缺失提示
 6. 客户端 UI 侧发起 → **服务端权威**执行（防 dup）
 
+**REX Overlay 扩展（D21）**：点 `+` **执行**前可将合成格物品退回背包再摆当前配方（`ClearGridBeforePlace`），避免同产物多变体 layout 与「只填空位」（P5）叠加产生混合 pattern。
+
 **点 `+` 后的 UI 语义**（REX 决议 D20）：
 
 | 行为 | JEI | REX Overlay |

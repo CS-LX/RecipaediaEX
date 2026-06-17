@@ -26,6 +26,14 @@ namespace RecipaediaEX.Overlay {
                 return PlacementResult.None(["缺少玩家背包"]);
             }
 
+            if (execute && options.ClearGridBeforePlace) {
+                if (!TryClearGridToInventory(table, sources.PlayerInventory, out string? clearError)) {
+                    return PlacementResult.None([clearError ?? "背包已满，无法清空合成格"]);
+                }
+            }
+
+            bool treatGridAsEmpty = options.ClearGridBeforePlace && !execute;
+
             EnsureTransformedLayouts(recipe);
 
             int gridSize = table.m_craftingGridSize;
@@ -34,7 +42,7 @@ namespace RecipaediaEX.Overlay {
 
             foreach (string[] layout in recipe.TransformedIngredients) {
                 if (!LayoutFitsGrid(layout, gridSize)) continue;
-                if (!TryBuildPlan(table, layout, gridSize, recipe, sources, options, out List<PlacementAction> plan)) continue;
+                if (!TryBuildPlan(table, layout, gridSize, recipe, sources, options, treatGridAsEmpty, out List<PlacementAction> plan)) continue;
                 int score = ScorePlan(plan);
                 if (score <= bestScore) continue;
                 bestScore = score;
@@ -118,6 +126,7 @@ namespace RecipaediaEX.Overlay {
             FormattedRecipe recipe,
             PlacementSources sources,
             PlacementOptions options,
+            bool treatGridAsEmpty,
             out List<PlacementAction> plan
         ) {
             plan = [];
@@ -129,8 +138,8 @@ namespace RecipaediaEX.Overlay {
 
                 if (!TryGridIndexToSlot(gridIndex, gridSize, out int targetSlot)) return false;
 
-                int slotCount = table.GetSlotCount(targetSlot);
-                int slotValue = table.GetSlotValue(targetSlot);
+                int slotCount = treatGridAsEmpty ? 0 : table.GetSlotCount(targetSlot);
+                int slotValue = treatGridAsEmpty ? 0 : table.GetSlotValue(targetSlot);
                 if (slotCount > 0) {
                     if (IngredientMatches(ingredient, slotValue, recipe)) {
                         plan.Add(new PlacementAction { TargetSlot = targetSlot, NeedsTransfer = false });
@@ -234,6 +243,45 @@ namespace RecipaediaEX.Overlay {
             }
             CraftingRecipesManager.DecodeIngredient(ingredient, out string craftingId, out int? _);
             return $"缺少 {craftingId}";
+        }
+
+        static bool TryClearGridToInventory(ComponentCraftingTable table, IInventory playerInventory, out string? error) {
+            error = null;
+            int gridSlots = table.SlotsCount - 2;
+            for (int slot = 0; slot < gridSlots; slot++) {
+                int remaining = table.GetSlotCount(slot);
+                if (remaining <= 0) continue;
+                int value = table.GetSlotValue(slot);
+                while (remaining > 0) {
+                    int moved = TryAddToInventory(playerInventory, value, remaining);
+                    if (moved <= 0) {
+                        error = "背包已满，无法清空合成格";
+                        return false;
+                    }
+                    table.RemoveSlotItems(slot, moved);
+                    remaining -= moved;
+                }
+            }
+            table.UpdateCraftingResult(true);
+            return true;
+        }
+
+        static int TryAddToInventory(IInventory inventory, int value, int count) {
+            int moved = 0;
+            Block block = BlocksManager.Blocks[Terrain.ExtractContents(value)];
+            int maxStack = block.GetMaxStacking(value);
+            for (int i = 0; i < inventory.SlotsCount; i++) {
+                if (inventory.GetSlotCapacity(i, value) == 0) continue;
+                int slotCount = inventory.GetSlotCount(i);
+                if (slotCount > 0 && inventory.GetSlotValue(i) != value) continue;
+                int canAdd = maxStack - slotCount;
+                if (canAdd <= 0) continue;
+                int add = Math.Min(canAdd, count - moved);
+                inventory.AddSlotItems(i, value, add);
+                moved += add;
+                if (moved >= count) break;
+            }
+            return moved;
         }
     }
 }

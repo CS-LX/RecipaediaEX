@@ -7,11 +7,10 @@ using GameEntitySystem;
 using RecipaediaEX.Implementation;
 using RecipaediaEX.Search;
 using RecipaediaEX.UI;
-using ZLinq;
 
 
 namespace RecipaediaEX.Overlay {
-    public class RecipaediaCraftingOverlayDialog : Dialog, IRecipaediaRecipeNavigator {
+    public class RecipaediaCraftingOverlayDialog : Dialog, IRecipaediaRecipeNavigator, IRecipaediaOverlayDescriptorHost {
         public const string LanguageName = "RecipaediaCraftingOverlay";
 
 
@@ -69,8 +68,6 @@ namespace RecipaediaEX.Overlay {
 
         public RecipaediaOverlayRecipePreview m_recipePreview;
 
-        public RecipaediaOverlayPlacementBar m_placementBar;
-
 
         public string m_searchQuery = string.Empty;
 
@@ -112,9 +109,9 @@ namespace RecipaediaEX.Overlay {
             m_blocksList = Children.Find<ListPanelWidget>("BlocksList");
             m_categoryBar = Children.Find<RecipaediaOverlayCategoryBar>("CategoryBar");
             m_recipePreview = Children.Find<RecipaediaOverlayRecipePreview>("RecipePreview");
-            m_placementBar = Children.Find<RecipaediaOverlayPlacementBar>("PlacementBar");
             m_recipePreview.SetContext(context);
             m_recipePreview.SetNavigator(this);
+            m_recipePreview.SetDescriptorHost(this);
 
             RecipaediaCategoryCatalog.EnsureLoaded();
             m_categoryIds.AddRange(RecipaediaCategoryCatalog.CategoryIds);
@@ -156,9 +153,6 @@ namespace RecipaediaEX.Overlay {
             }
             if (m_historyButton.IsClicked) OpenSearchHistoryDialog();
             if (m_searchTypeButton.IsClicked) OpenFilterDialog();
-
-            UpdatePlacementBarState();
-            if (m_placementBar.m_placeButton.IsClicked) ExecutePlacement();
         }
 
         public void ShowRecipes(IRecipaediaRecipeItem item, IReadOnlyList<IRecipe> recipes, int startIndex = 0) {
@@ -354,23 +348,7 @@ namespace RecipaediaEX.Overlay {
         }
 
 
-        void UpdatePlacementBarState() {
-            if (!m_recipeDetailPopup.IsVisible) {
-                m_placementBar.IsVisible = false;
-                return;
-            }
-            m_placementBar.IsVisible = true;
-            if (TryGetPlacementRecipe(out _, out string disabledReason)) {
-                m_placementBar.SetEnabled(true, string.Empty);
-            }
-            else {
-                m_placementBar.SetEnabled(false, disabledReason);
-            }
-        }
-
-
-        bool TryGetPlacementRecipe(out IRecipe recipe, out string disabledReason) {
-            recipe = null!;
+        public bool PassesPlacementGate(IRecipe recipe, out string disabledReason) {
             disabledReason = string.Empty;
             if (m_context.Inventory == null) {
                 disabledReason = LanguageControl.GetContentWidgets(LanguageName, 5);
@@ -392,47 +370,36 @@ namespace RecipaediaEX.Overlay {
                 disabledReason = LanguageControl.GetContentWidgets(LanguageName, 4);
                 return false;
             }
-            var sources = new PlacementSources {
-                PlayerInventory = m_context.Inventory!,
-                ContainerInventory = null,
-            };
-            IRecipe? bestRecipe = null;
-            int bestScore = int.MinValue;
-            foreach (IRecipe candidate in group.Recipes) {
-                if (!PlacableRecipeAdapter.TryAsPlacable(candidate, out _) || !target.CanAccept(candidate)) continue;
-                PlacementResult dryRun = target.TryPlaceRecipe(candidate, sources, PlacementOptions.Default, execute: false);
-                int score = ScorePlacementCandidate(dryRun);
-                if (score <= bestScore) continue;
-                bestScore = score;
-                bestRecipe = candidate;
-            }
-            if (bestRecipe == null) {
+            if (!PlacableRecipeAdapter.TryAsPlacable(recipe, out _) || !target.CanAccept(recipe)) {
                 disabledReason = LanguageControl.GetContentWidgets(LanguageName, 6);
                 return false;
             }
-            recipe = bestRecipe;
             return true;
         }
 
-
-        static int ScorePlacementCandidate(PlacementResult result) {
-            if (result.Success && result.HadTransfers) return 1000;
-            if (result.Success) return 900;
-            if (result.PartialSuccess) return 500 - result.Missing.Count;
-            return -result.Missing.Count;
-        }
-
-
-        void ExecutePlacement() {
-            if (!TryGetPlacementRecipe(out IRecipe recipe, out _)) return;
+        public void PlaceRecipe(IRecipe recipe) {
+            if (!PassesPlacementGate(recipe, out _)) return;
             IRecipePlacementTarget target = m_host.GetPlacementTarget()!;
             var sources = new PlacementSources {
                 PlayerInventory = m_context.Inventory!,
                 ContainerInventory = null,
             };
+            PlacementResult preview = target.TryPlaceRecipe(recipe, sources, PlacementOptions.Default, execute: false);
+            if (preview.Success && !preview.HadTransfers) {
+                ShowPlacementFeedback(PlacementResult.AlreadySatisfied());
+                return;
+            }
+            if (!preview.Success && !preview.PartialSuccess) {
+                ShowPlacementFeedback(preview);
+                return;
+            }
             PlacementResult result = target.TryPlaceRecipe(recipe, sources, PlacementOptions.Default, execute: true);
             ShowPlacementFeedback(result);
         }
+
+        public bool IsRecipeBookmarked(IRecipe recipe) => RecipaediaRecipeBookmarks.IsBookmarked(recipe);
+
+        public bool ToggleRecipeBookmark(IRecipe recipe) => RecipaediaRecipeBookmarks.Toggle(recipe);
 
 
         void ShowPlacementFeedback(PlacementResult result) {

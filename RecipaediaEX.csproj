@@ -72,7 +72,8 @@
 		<Compile Include="Overlay\PlacableRecipeAdapter.cs"/>
 		<Compile Include="Overlay\CraftingGridPlacementPlanner.cs"/>
 		<Compile Include="Overlay\CraftingTablePlacementTarget.cs"/>
-		<Compile Include="Overlay\RecipaediaOverlayPlacementBar.cs"/>
+		<Compile Include="Overlay\IRecipaediaOverlayDescriptorHost.cs"/>
+		<Compile Include="Overlay\RecipaediaOverlayDescriptorActionBar.cs"/>
 		<Compile Include="Overlay\IRecipePlacementTarget.cs"/>
 		<Compile Include="Overlay\RecipeDescriptorRegistry.cs"/>
 		<Compile Include="Overlay\RecipaediaCrafterRecipeGroup.cs"/>
@@ -126,6 +127,7 @@
 		<Compile Include="Search\RecipaediaSearchEngine.cs"/>
 		<Compile Include="Search\RecipaediaSearchFilterState.cs"/>
 		<Compile Include="Search\RecipaediaSearchHistory.cs"/>
+		<Compile Include="Search\RecipaediaRecipeBookmarks.cs"/>
 		<Compile Include="Search\RecipaediaSearchIndex.cs"/>
 		<Compile Include="Search\RecipaediaSearchParser.cs"/>
 		<Compile Include="Search\SearchNode.cs"/>
