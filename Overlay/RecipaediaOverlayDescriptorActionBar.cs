@@ -12,7 +12,7 @@ namespace RecipaediaEX.Overlay {
         const float ButtonGap = 4f;
 
         static readonly Subtexture s_plusIcon = ContentManager.Get<Subtexture>("Textures/Atlas/Plus");
-        static readonly Subtexture s_starIcon = CreateRatingStarIcon();
+        static readonly Subtexture s_starIcon = ContentManager.Get<Subtexture>("Textures/Gui/RatingStar");
 
         readonly IRecipe m_recipe;
         readonly IRecipaediaOverlayDescriptorHost m_host;
@@ -37,11 +37,6 @@ namespace RecipaediaEX.Overlay {
             Children.Add(placeHost);
 
             Refresh();
-        }
-
-        static Subtexture CreateRatingStarIcon() {
-            Texture2D texture = ContentManager.Get<Texture2D>("Textures/Gui/RatingStar");
-            return new Subtexture(texture, Vector2.Zero, new Vector2(0.2f, 1f));
         }
 
         (CanvasWidget Host, RectangleWidget Icon, ClickableWidget Clickable) CreateIconButton(Subtexture icon) {
