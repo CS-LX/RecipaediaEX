@@ -128,6 +128,14 @@ transferRecipe(container, recipe, recipeSlots, player, maxTransfer, doTransfer)
 5. 背包不够 → **部分填充** + 返回缺失提示
 6. 客户端 UI 侧发起 → **服务端权威**执行（防 dup）
 
+**点 `+` 后的 UI 语义**（REX 决议 D20）：
+
+| 行为 | JEI | REX Overlay |
+|------|-----|-------------|
+| 转移后关不关助手 / 配方页 | 工作台 GUI + JEI 条 **不关**；Recipe 页现代版常保持打开 | **不关闭** Overlay 与二级配方弹窗 |
+| 已摆满再点 `+` | `+` 灰显 / 无转移 / tooltip | `AlreadySatisfied` → Tooltip「合成格已符合该配方」 |
+| 反复叠加同一 pattern | ❌ 有形合成不支持 | ❌ 同左；Shift 多组 → Phase 3 |
+
 官方 Wiki 对 Transfer 的分级：[Recipe Transfer Handlers](https://github.com/mezz/JustEnoughItems/wiki/Recipe-Transfer-Handlers)
 
 | 级别 | 适用 |

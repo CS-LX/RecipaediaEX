@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 using Engine;
 using Game;
+using GameEntitySystem;
 using RecipaediaEX.Implementation;
 using RecipaediaEX.Search;
 using RecipaediaEX.UI;
@@ -68,6 +69,8 @@ namespace RecipaediaEX.Overlay {
 
         public RecipaediaOverlayRecipePreview m_recipePreview;
 
+        public RecipaediaOverlayPlacementBar m_placementBar;
+
 
         public string m_searchQuery = string.Empty;
 
@@ -109,6 +112,7 @@ namespace RecipaediaEX.Overlay {
             m_blocksList = Children.Find<ListPanelWidget>("BlocksList");
             m_categoryBar = Children.Find<RecipaediaOverlayCategoryBar>("CategoryBar");
             m_recipePreview = Children.Find<RecipaediaOverlayRecipePreview>("RecipePreview");
+            m_placementBar = Children.Find<RecipaediaOverlayPlacementBar>("PlacementBar");
             m_recipePreview.SetContext(context);
             m_recipePreview.SetNavigator(this);
 
@@ -152,6 +156,9 @@ namespace RecipaediaEX.Overlay {
             }
             if (m_historyButton.IsClicked) OpenSearchHistoryDialog();
             if (m_searchTypeButton.IsClicked) OpenFilterDialog();
+
+            UpdatePlacementBarState();
+            if (m_placementBar.m_placeButton.IsClicked) ExecutePlacement();
         }
 
         public void ShowRecipes(IRecipaediaRecipeItem item, IReadOnlyList<IRecipe> recipes, int startIndex = 0) {
@@ -344,6 +351,130 @@ namespace RecipaediaEX.Overlay {
                 || index >= m_crafterGroups.Count)
                 return;
             m_recipePreview.DisplayRecipes(m_crafterGroups[index].Recipes);
+        }
+
+
+        void UpdatePlacementBarState() {
+            if (!m_recipeDetailPopup.IsVisible) {
+                m_placementBar.IsVisible = false;
+                return;
+            }
+            m_placementBar.IsVisible = true;
+            if (TryGetPlacementRecipe(out _, out string disabledReason)) {
+                m_placementBar.SetEnabled(true, string.Empty);
+            }
+            else {
+                m_placementBar.SetEnabled(false, disabledReason);
+            }
+        }
+
+
+        bool TryGetPlacementRecipe(out IRecipe recipe, out string disabledReason) {
+            recipe = null!;
+            disabledReason = string.Empty;
+            if (m_context.Inventory == null) {
+                disabledReason = LanguageControl.GetContentWidgets(LanguageName, 5);
+                return false;
+            }
+            int tabIndex = m_crafterTabBar.SelectedIndex;
+            if (tabIndex < 0 || tabIndex >= m_crafterGroups.Count) {
+                disabledReason = LanguageControl.GetContentWidgets(LanguageName, 2);
+                return false;
+            }
+            RecipaediaCrafterRecipeGroup group = m_crafterGroups[tabIndex];
+            string hostCrafterId = GetCrafterId(m_context.CrafterBlockValue);
+            if (!string.IsNullOrEmpty(hostCrafterId) && group.CrafterId != hostCrafterId) {
+                disabledReason = LanguageControl.GetContentWidgets(LanguageName, 3);
+                return false;
+            }
+            IRecipePlacementTarget? target = m_host.GetPlacementTarget();
+            if (target == null) {
+                disabledReason = LanguageControl.GetContentWidgets(LanguageName, 4);
+                return false;
+            }
+            var sources = new PlacementSources {
+                PlayerInventory = m_context.Inventory!,
+                ContainerInventory = null,
+            };
+            IRecipe? bestRecipe = null;
+            int bestScore = int.MinValue;
+            foreach (IRecipe candidate in group.Recipes) {
+                if (!PlacableRecipeAdapter.TryAsPlacable(candidate, out _) || !target.CanAccept(candidate)) continue;
+                PlacementResult dryRun = target.TryPlaceRecipe(candidate, sources, PlacementOptions.Default, execute: false);
+                int score = ScorePlacementCandidate(dryRun);
+                if (score <= bestScore) continue;
+                bestScore = score;
+                bestRecipe = candidate;
+            }
+            if (bestRecipe == null) {
+                disabledReason = LanguageControl.GetContentWidgets(LanguageName, 6);
+                return false;
+            }
+            recipe = bestRecipe;
+            return true;
+        }
+
+
+        static int ScorePlacementCandidate(PlacementResult result) {
+            if (result.Success && result.HadTransfers) return 1000;
+            if (result.Success) return 900;
+            if (result.PartialSuccess) return 500 - result.Missing.Count;
+            return -result.Missing.Count;
+        }
+
+
+        void ExecutePlacement() {
+            if (!TryGetPlacementRecipe(out IRecipe recipe, out _)) return;
+            IRecipePlacementTarget target = m_host.GetPlacementTarget()!;
+            var sources = new PlacementSources {
+                PlayerInventory = m_context.Inventory!,
+                ContainerInventory = null,
+            };
+            PlacementResult result = target.TryPlaceRecipe(recipe, sources, PlacementOptions.Default, execute: true);
+            ShowPlacementFeedback(result);
+        }
+
+
+        void ShowPlacementFeedback(PlacementResult result) {
+            ComponentPlayer? player = FindContextPlayer();
+            if (player == null) return;
+
+            if (result.Success && !result.HadTransfers) {
+                player.ComponentGui.DisplaySmallMessage(
+                    LanguageControl.GetContentWidgets(LanguageName, 9),
+                    new Color(180, 220, 180, 255),
+                    false,
+                    false);
+                return;
+            }
+            if (result.Success) {
+                player.ComponentGui.DisplaySmallMessage(
+                    LanguageControl.GetContentWidgets(LanguageName, 7),
+                    Color.White,
+                    false,
+                    false);
+                return;
+            }
+            string message = result.Missing.Count > 0
+                ? string.Join("；", result.Missing)
+                : LanguageControl.GetContentWidgets(LanguageName, 8);
+            player.ComponentGui.DisplaySmallMessage(message, new Color(255, 220, 120, 255), false, false);
+        }
+
+
+        ComponentPlayer? FindContextPlayer() {
+            if (m_context.Project == null || m_context.Inventory == null) return null;
+            foreach (ComponentPlayer player in m_context.Project.FindSubsystem<SubsystemPlayers>(true).ComponentPlayers) {
+                if (ReferenceEquals(player.ComponentMiner.Inventory, m_context.Inventory)) return player;
+            }
+            return null;
+        }
+
+
+        static string GetCrafterId(int blockValue) {
+            if (blockValue == 0) return string.Empty;
+            Block block = BlocksManager.Blocks[Terrain.ExtractContents(blockValue)];
+            return block.GetCraftingId(blockValue);
         }
 
 

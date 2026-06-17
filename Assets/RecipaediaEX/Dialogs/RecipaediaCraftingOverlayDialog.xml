@@ -27,9 +27,10 @@
           <rex:RecipaediaOverlayCrafterTabBar Name="CrafterTabBar" />
         </CanvasWidget>
 
-        <CanvasWidget Size="Infinity, Infinity" ClampToBounds="true" Margin="8, 4, 8, 8">
+        <CanvasWidget Size="Infinity, Infinity" ClampToBounds="true" Margin="8, 4, 8, 0">
           <RectangleWidget OutlineColor="0, 0, 0, 0" FillColor="0, 0, 0, 76" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Size="Infinity, Infinity"/>
-          <rex:RecipaediaOverlayRecipePreview Name="RecipePreview" Margin="8, 8" />
+          <rex:RecipaediaOverlayRecipePreview Name="RecipePreview" Margin="8, 8, 8, 52" />
+          <rex:RecipaediaOverlayPlacementBar Name="PlacementBar" VerticalAlignment="Far" Margin="8, 0, 8, 8" />
         </CanvasWidget>
 
       </StackPanelWidget>

@@ -21,5 +21,10 @@ namespace RecipaediaEX.Overlay {
                 Inventory = player?.ComponentMiner.Inventory,
             };
         }
+
+        public IRecipePlacementTarget? GetPlacementTarget() =>
+            m_componentCraftingTable.IsAddedToProject
+                ? new CraftingTablePlacementTarget(m_componentCraftingTable)
+                : null;
     }
 }

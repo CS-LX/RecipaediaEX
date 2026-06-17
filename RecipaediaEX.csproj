@@ -63,6 +63,16 @@
 		<Compile Include="Events\OpenFullRecipaediaRequestedEvent.cs"/>
 		<Compile Include="Overlay\IRecipaediaRecipeNavigator.cs"/>
 		<Compile Include="Overlay\IRecipaediaOverlayHost.cs"/>
+		<Compile Include="Overlay\IPlacableRecipe.cs"/>
+		<Compile Include="Overlay\PlacementAddressKind.cs"/>
+		<Compile Include="Overlay\PlacementRequirement.cs"/>
+		<Compile Include="Overlay\PlacementResult.cs"/>
+		<Compile Include="Overlay\PlacementOptions.cs"/>
+		<Compile Include="Overlay\PlacementSources.cs"/>
+		<Compile Include="Overlay\PlacableRecipeAdapter.cs"/>
+		<Compile Include="Overlay\CraftingGridPlacementPlanner.cs"/>
+		<Compile Include="Overlay\CraftingTablePlacementTarget.cs"/>
+		<Compile Include="Overlay\RecipaediaOverlayPlacementBar.cs"/>
 		<Compile Include="Overlay\IRecipePlacementTarget.cs"/>
 		<Compile Include="Overlay\RecipeDescriptorRegistry.cs"/>
 		<Compile Include="Overlay\RecipaediaCrafterRecipeGroup.cs"/>
