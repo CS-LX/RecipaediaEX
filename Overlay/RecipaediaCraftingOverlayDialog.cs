@@ -64,6 +64,8 @@ namespace RecipaediaEX.Overlay {
 
         public ListPanelWidget m_blocksList;
 
+        public RecipaediaOverlayCategoryBar m_categoryBar;
+
         public RecipaediaOverlayRecipePreview m_recipePreview;
 
 
@@ -73,11 +75,15 @@ namespace RecipaediaEX.Overlay {
 
         object? m_lastPreviewItem;
 
-        Func<object, Widget>? m_itemWidgetFactory;
-
         List<RecipaediaCrafterRecipeGroup> m_crafterGroups = [];
 
         readonly Stack<OverlayPreviewState> m_previewStack = new();
+
+        readonly List<string> m_categoryIds = [];
+
+        string m_selectedCategory = string.Empty;
+
+        string m_listCategory = string.Empty;
 
 
         public RecipaediaCraftingOverlayDialog(IRecipaediaOverlayHost host, RecipaediaCraftingContext context) {
@@ -101,14 +107,18 @@ namespace RecipaediaEX.Overlay {
             m_searchTypeButton = Children.Find<ClickableWidget>("SearchType");
             m_filterIcon = Children.Find<RectangleWidget>("FilterIcon");
             m_blocksList = Children.Find<ListPanelWidget>("BlocksList");
+            m_categoryBar = Children.Find<RecipaediaOverlayCategoryBar>("CategoryBar");
             m_recipePreview = Children.Find<RecipaediaOverlayRecipePreview>("RecipePreview");
             m_recipePreview.SetContext(context);
             m_recipePreview.SetNavigator(this);
-            var category = new BlocksCategory("All Blocks");
+
+            RecipaediaCategoryCatalog.EnsureLoaded();
+            m_categoryIds.AddRange(RecipaediaCategoryCatalog.CategoryIds);
+            m_selectedCategory = RecipaediaCategoryCatalog.DefaultOverlayCategoryId;
+            m_listCategory = m_selectedCategory;
+
             m_blocksList.Direction = LayoutDirection.Vertical;
             m_blocksList.ItemSize = 64;
-            m_itemWidgetFactory = o => category.ItemWidgetFactory(o as IRecipaediaItem);
-            m_blocksList.ItemWidgetFactory = m_itemWidgetFactory;
             m_blocksList.ItemClicked = OnBlocksListItemClicked;
             RecipeDescriptorRegistry.EnsureScanned();
             IsHitTestVisible = false;
@@ -120,6 +130,15 @@ namespace RecipaediaEX.Overlay {
         public override void Update() {
             UpdateSearchBarVisibility();
             UpdateSearchTypeButtonState();
+
+            UpdateCategoryNavigation();
+            if (m_selectedCategory != m_listCategory) {
+                m_listCategory = m_selectedCategory;
+                ClearSearch();
+                PopulateBlocksList();
+            }
+            RefreshCategoryBarCaption();
+
             if (m_closeButton.IsClicked) {
                 Dismiss();
                 return;
@@ -139,6 +158,30 @@ namespace RecipaediaEX.Overlay {
             if (recipes.Count == 0) return;
             PushCurrentPreviewState();
             ShowPreviewForItem(item);
+        }
+
+
+        void UpdateCategoryNavigation() {
+            if (m_categoryIds.Count == 0) return;
+            int index = m_categoryIds.IndexOf(m_selectedCategory);
+            if (index < 0) {
+                m_selectedCategory = m_categoryIds[0];
+                index = 0;
+            }
+            if (m_categoryBar.m_prevButton.IsClicked && index > 0) m_selectedCategory = m_categoryIds[index - 1];
+            if (m_categoryBar.m_nextButton.IsClicked && index < m_categoryIds.Count - 1) m_selectedCategory = m_categoryIds[index + 1];
+        }
+
+        void RefreshCategoryBarCaption() {
+            if (m_categoryIds.Count == 0) {
+                m_categoryBar.IsVisible = false;
+                return;
+            }
+            m_categoryBar.IsVisible = true;
+            int index = m_categoryIds.IndexOf(m_selectedCategory);
+            if (index < 0) index = 0;
+            IRecipaediaCategory category = RecipaediaCategoryCatalog.GetCategory(m_selectedCategory);
+            m_categoryBar.SetCaption($"{category.DisplayName} ({m_blocksList.Items.Count})", index > 0, index < m_categoryIds.Count - 1);
         }
 
 
@@ -213,14 +256,30 @@ namespace RecipaediaEX.Overlay {
         }
 
 
-        void PopulateBlocksList() {
+        void PopulateBlocksList(bool resetPreview = true) {
             m_blocksList.ScrollPosition = 0f;
             m_blocksList.ClearItems();
-            m_lastPreviewItem = null;
-            HideRecipeDetail();
-            IEnumerable<IRecipaediaItem> items = RecipaediaOverlayRecipeResolver.GetAllBlockItems();
+            if (resetPreview) {
+                m_lastPreviewItem = null;
+                HideRecipeDetail();
+            }
+
+            if (m_categoryIds.Count == 0) return;
+
+            IRecipaediaCategory category = RecipaediaCategoryCatalog.GetCategory(m_selectedCategory);
+            if (category is IAdvancedCategory advanced) {
+                m_blocksList.Direction = advanced.ListDirection;
+                m_blocksList.ItemSize = advanced.ListItemSize;
+            }
+            else {
+                m_blocksList.Direction = LayoutDirection.Vertical;
+                m_blocksList.ItemSize = 64;
+            }
+            m_blocksList.ItemWidgetFactory = o => category.ItemWidgetFactory(o as IRecipaediaItem);
+
+            IEnumerable<IRecipaediaItem> items = category.GetItems();
             if (!string.IsNullOrWhiteSpace(m_searchQuery)) {
-                List<SearchMatchResult> matches = RecipaediaSearchEngine.Filter(items, "All Blocks", m_searchQuery);
+                List<SearchMatchResult> matches = RecipaediaSearchEngine.Filter(items, m_selectedCategory, m_searchQuery);
                 foreach (SearchMatchResult match in matches) m_blocksList.AddItem(match.Item);
             }
             else {
@@ -253,19 +312,28 @@ namespace RecipaediaEX.Overlay {
             UpdateBackButtonVisibility();
         }
 
-        static bool SameRecipeItem(IRecipaediaRecipeItem a, IRecipaediaRecipeItem b) {
-            if (a is BlockItem blockA
-                && b is BlockItem blockB)
-                return blockA.m_blockValue == blockB.m_blockValue;
-            return ReferenceEquals(a, b);
-        }
+        static bool SameRecipeItem(IRecipaediaRecipeItem a, IRecipaediaRecipeItem b) =>
+            RecipaediaCategoryCatalog.SameRecipeItem(a, b);
 
         void SyncBlocksListSelection(IRecipaediaRecipeItem recipeItem) {
             foreach (object item in m_blocksList.Items) {
-                if (item is IRecipaediaRecipeItem listItem
-                    && SameRecipeItem(listItem, recipeItem)) {
+                if (item is IRecipaediaRecipeItem listItem && SameRecipeItem(listItem, recipeItem)) {
                     m_blocksList.SelectedItem = item;
                     return;
+                }
+            }
+
+            if (RecipaediaCategoryCatalog.TryFindCategoryForRecipeItem(recipeItem, out string categoryId, out IRecipaediaRecipeItem listReference)) {
+                if (categoryId != m_selectedCategory) {
+                    m_selectedCategory = categoryId;
+                    m_listCategory = categoryId;
+                    PopulateBlocksList(resetPreview: false);
+                }
+                foreach (object item in m_blocksList.Items) {
+                    if (item is IRecipaediaRecipeItem listItem && SameRecipeItem(listItem, listReference)) {
+                        m_blocksList.SelectedItem = item;
+                        return;
+                    }
                 }
             }
             m_blocksList.SelectedIndex = null;

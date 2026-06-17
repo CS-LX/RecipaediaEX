@@ -73,7 +73,11 @@
           </CanvasWidget>
         </StackPanelWidget>
 
-        <CanvasWidget Size="Infinity, Infinity" ClampToBounds="true" Margin="8, 4, 8, 8">
+        <CanvasWidget Size="Infinity, 28" HorizontalAlignment="Stretch" Margin="8, 0, 8, 2">
+          <rex:RecipaediaOverlayCategoryBar Name="CategoryBar" />
+        </CanvasWidget>
+
+        <CanvasWidget Size="Infinity, Infinity" ClampToBounds="true" Margin="8, 2, 8, 8">
           <RectangleWidget OutlineColor="0, 0, 0, 0" FillColor="0, 0, 0, 102" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Size="Infinity, Infinity"/>
           <ListPanelWidget Name="BlocksList" Direction="Vertical" Margin="4, 4" ItemSize="64" SelectionColor="40, 120, 40, 120"/>
         </CanvasWidget>

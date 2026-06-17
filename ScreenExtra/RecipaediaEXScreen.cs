@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Xml.Linq;
 using Engine;
 using Engine.Serialization;
@@ -12,10 +11,7 @@ namespace RecipaediaEX.UI {
     public class RecipaediaEXScreen : Screen {
         public const string SearchLanguageName = "RecipaediaSearch";
 
-        public List<Assembly> m_scannedAssemblies = [];
-        public Dictionary<Type, IRecipaediaCategoryProvider> m_categoryProviderCache = [];
         public List<string> m_categoriesName = [];
-        public Dictionary<string, IRecipaediaCategory> m_categories = [];
         public string m_selectedCategory;
         public string m_listCategory = string.Empty;
         public Func<object, Widget> m_currentItemWidgetFactory;
@@ -54,8 +50,6 @@ namespace RecipaediaEX.UI {
             m_historyButton = Children.Find<ButtonWidget>("History");
             m_searchButton = Children.Find<ButtonWidget>("Search");
             m_searchTypeButton = Children.Find<ButtonWidget>("SearchType");
-
-            GetProviders();
         }
 
         public override void Enter(object[] parameters) {
@@ -63,8 +57,10 @@ namespace RecipaediaEX.UI {
             if (ScreensManager.PreviousScreen != ScreensManager.FindScreen<Screen>("RecipaediaRecipes") && ScreensManager.PreviousScreen != ScreensManager.FindScreen<Screen>("RecipaediaDescription")) {
                 m_previousScreen = ScreensManager.PreviousScreen;
             }
-            if (!m_categoriesInitialized || m_categories.Count == 0 || m_categoriesName.Count == 0) {
-                GetCategories();
+            if (!m_categoriesInitialized || m_categoriesName.Count == 0) {
+                RecipaediaCategoryCatalog.EnsureLoaded();
+                m_categoriesName.Clear();
+                m_categoriesName.AddRange(RecipaediaCategoryCatalog.CategoryIds);
                 m_categoriesInitialized = true;
             }
             m_selectedCategory = m_categoriesName.Contains(m_selectedCategory) ? m_selectedCategory : m_categoriesName[0];
@@ -82,7 +78,7 @@ namespace RecipaediaEX.UI {
             UpdateSearchBarVisibility();
             UpdateSearchTypeButtonState();
 
-            string arg = m_categories[m_selectedCategory].DisplayName;
+            string arg = RecipaediaCategoryCatalog.GetCategory(m_selectedCategory).DisplayName;
             m_categoryLabel.Text = $"{arg} ({m_blocksList.Items.Count})";
 
             m_prevCategoryButton.IsEnabled = m_selectedCategory != m_categoriesName[0];
@@ -141,7 +137,6 @@ namespace RecipaediaEX.UI {
                     PopulateBlocksList();
                 }
                 else {
-                    m_categories.Clear();
                     m_categoriesName.Clear();
                     m_blocksList.ClearItems();
                     m_listCategory = string.Empty;
@@ -208,41 +203,11 @@ namespace RecipaediaEX.UI {
             );
         }
 
-        public void GetProviders() {
-            foreach (Assembly item in TypeCache.LoadedAssemblies.AsValueEnumerable().Where(a => !TypeCache.IsKnownSystemAssembly(a))) {
-                if (!m_scannedAssemblies.Contains(item)) {
-                    foreach (TypeInfo definedType in item.DefinedTypes) {
-                        Type type = definedType.AsType();
-                        if (typeof(IRecipaediaCategoryProvider).IsAssignableFrom(type) && !type.IsAbstract && !type.IsInterface) {
-                            if (!m_categoryProviderCache.ContainsKey(type)) {
-                                IRecipaediaCategoryProvider instance = (IRecipaediaCategoryProvider)Activator.CreateInstance(type);
-                                m_categoryProviderCache.Add(type, instance);
-                            }
-                        }
-                    }
-                    m_scannedAssemblies.Add(item);
-                }
-            }
-        }
-
-        public void GetCategories() {
-            m_categories.Clear();
-            m_categoriesName.Clear();
-            foreach (IRecipaediaCategoryProvider provider in m_categoryProviderCache.Values) {
-                foreach (IRecipaediaCategory category in provider.GetCategories()) {
-                    m_categories[category.Id] = category;
-                    if (!m_categoriesName.Contains(category.Id)) {
-                        m_categoriesName.Add(category.Id);
-                    }
-                }
-            }
-        }
-
         public void PopulateBlocksList() {
             m_blocksList.ScrollPosition = 0f;
             m_blocksList.ClearItems();
 
-            IRecipaediaCategory selectedCategory = m_categories[m_selectedCategory];
+            IRecipaediaCategory selectedCategory = RecipaediaCategoryCatalog.GetCategory(m_selectedCategory);
             m_blocksList.Direction = selectedCategory is IAdvancedCategory adv ? adv.ListDirection : LayoutDirection.Vertical;
             m_blocksList.ItemSize = selectedCategory is IAdvancedCategory adv2 ? adv2.ListItemSize : 70;
             Widget CurrentFunc(object o) => selectedCategory.ItemWidgetFactory(o as IRecipaediaItem);
