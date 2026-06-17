@@ -81,6 +81,7 @@
 		<Compile Include="Overlay\RecipaediaCraftingTableWidget.cs"/>
 		<Compile Include="Overlay\RecipaediaCraftingOverlayController.cs"/>
 		<Compile Include="Overlay\RecipaediaCraftingOverlayDialog.cs"/>
+		<Compile Include="Overlay\RecipaediaCraftingOverlaySessionState.cs"/>
 		<Compile Include="ScreenExtra\RecipaediaCategoryCatalog.cs"/>
 		<Compile Include="Overlay\RecipaediaOverlayCategoryBar.cs"/>
 		<Compile Include="Overlay\RecipaediaOverlayCrafterTabBar.cs"/>

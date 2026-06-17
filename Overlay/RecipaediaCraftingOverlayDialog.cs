@@ -115,7 +115,13 @@ namespace RecipaediaEX.Overlay {
 
             RecipaediaCategoryCatalog.EnsureLoaded();
             m_categoryIds.AddRange(RecipaediaCategoryCatalog.CategoryIds);
-            m_selectedCategory = RecipaediaCategoryCatalog.DefaultOverlayCategoryId;
+            if (!string.IsNullOrEmpty(RecipaediaCraftingOverlaySessionState.SelectedCategoryId)
+                && m_categoryIds.Contains(RecipaediaCraftingOverlaySessionState.SelectedCategoryId)) {
+                m_selectedCategory = RecipaediaCraftingOverlaySessionState.SelectedCategoryId;
+            }
+            else {
+                m_selectedCategory = RecipaediaCategoryCatalog.DefaultOverlayCategoryId;
+            }
             m_listCategory = m_selectedCategory;
 
             m_blocksList.Direction = LayoutDirection.Vertical;
@@ -124,7 +130,14 @@ namespace RecipaediaEX.Overlay {
             RecipeDescriptorRegistry.EnsureScanned();
             IsHitTestVisible = false;
             m_overlayRoot.IsHitTestVisible = true;
-            PopulateBlocksList();
+            PopulateBlocksList(resetScroll: false);
+            m_blocksList.ScrollPosition = RecipaediaCraftingOverlaySessionState.BlocksListScrollPosition;
+        }
+
+
+        public void CaptureSessionState() {
+            RecipaediaCraftingOverlaySessionState.SelectedCategoryId = m_selectedCategory;
+            RecipaediaCraftingOverlaySessionState.BlocksListScrollPosition = m_blocksList.ScrollPosition;
         }
 
 
@@ -136,7 +149,7 @@ namespace RecipaediaEX.Overlay {
             if (m_selectedCategory != m_listCategory) {
                 m_listCategory = m_selectedCategory;
                 ClearSearch();
-                PopulateBlocksList();
+                PopulateBlocksList(resetScroll: true);
             }
             RefreshCategoryBarCaption();
 
@@ -257,8 +270,8 @@ namespace RecipaediaEX.Overlay {
         }
 
 
-        void PopulateBlocksList(bool resetPreview = true) {
-            m_blocksList.ScrollPosition = 0f;
+        void PopulateBlocksList(bool resetPreview = true, bool resetScroll = true) {
+            if (resetScroll) m_blocksList.ScrollPosition = 0f;
             m_blocksList.ClearItems();
             if (resetPreview) {
                 m_lastPreviewItem = null;
@@ -309,35 +322,7 @@ namespace RecipaediaEX.Overlay {
             else
                 m_recipePreview.DisplayRecipes([]);
             m_recipeDetailPopup.IsVisible = true;
-            SyncBlocksListSelection(recipeItem);
             UpdateBackButtonVisibility();
-        }
-
-        static bool SameRecipeItem(IRecipaediaRecipeItem a, IRecipaediaRecipeItem b) =>
-            RecipaediaCategoryCatalog.SameRecipeItem(a, b);
-
-        void SyncBlocksListSelection(IRecipaediaRecipeItem recipeItem) {
-            foreach (object item in m_blocksList.Items) {
-                if (item is IRecipaediaRecipeItem listItem && SameRecipeItem(listItem, recipeItem)) {
-                    m_blocksList.SelectedItem = item;
-                    return;
-                }
-            }
-
-            if (RecipaediaCategoryCatalog.TryFindCategoryForRecipeItem(recipeItem, out string categoryId, out IRecipaediaRecipeItem listReference)) {
-                if (categoryId != m_selectedCategory) {
-                    m_selectedCategory = categoryId;
-                    m_listCategory = categoryId;
-                    PopulateBlocksList(resetPreview: false);
-                }
-                foreach (object item in m_blocksList.Items) {
-                    if (item is IRecipaediaRecipeItem listItem && SameRecipeItem(listItem, listReference)) {
-                        m_blocksList.SelectedItem = item;
-                        return;
-                    }
-                }
-            }
-            m_blocksList.SelectedIndex = null;
         }
 
         void OnCrafterTabSelected(int index) {
@@ -412,6 +397,7 @@ namespace RecipaediaEX.Overlay {
                     new Color(180, 220, 180, 255),
                     false,
                     false);
+                HideRecipeDetail();
                 return;
             }
             if (result.Success) {
@@ -420,6 +406,7 @@ namespace RecipaediaEX.Overlay {
                     Color.White,
                     false,
                     false);
+                HideRecipeDetail();
                 return;
             }
             string message = result.Missing.Count > 0

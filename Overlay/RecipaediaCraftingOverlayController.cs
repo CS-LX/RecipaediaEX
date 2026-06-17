@@ -25,6 +25,7 @@ namespace RecipaediaEX.Overlay {
 
         public static void Close() {
             if (s_dialog == null) return;
+            s_dialog.CaptureSessionState();
             s_dialog.HideRecipeDetail();
             s_dialog.ParentWidget?.Children.Remove(s_dialog);
             s_dialog = null;

@@ -100,9 +100,18 @@ flowchart TB
 
 打开工作台/化学反应釜 GUI 时：
 
-- JEI **仍在**（模组可注册 **Exclusion Zone** 避让关键槽位）
+- JEI **右侧物品列表仍在**（模组可注册 **Exclusion Zone** 避让关键槽位）
 - 搜索、R/U、书签 **行为不变**
-- 配方视图里出现 **[+]**（若当前容器注册了 Transfer Handler）
+- 点列表条目后弹出 **配方 Category 视图**（合成方式展示层，含 **[+]**）
+
+**两层 UI 勿混淆**（实机 JEI 2026-06 对照）：
+
+| 层 | 点 `+` 之后 | 玩家感知 |
+|----|-------------|----------|
+| **右侧 Ingredient 列表** | **保持** | 可继续翻条目、搜下一个东西 |
+| **配方 Category 视图**（合成方式 / Descriptor） | **自动关闭** | 让出合成格与产物槽，立刻手工取产物或再合成 |
+
+JEI 的「丝滑」来自：**列表不关 + 配方页自动收**，而非「配方页一直开着」。
 
 ### 4.4 自动摆放（+ 按钮）
 
@@ -130,12 +139,15 @@ transferRecipe(container, recipe, recipeSlots, player, maxTransfer, doTransfer)
 
 **REX Overlay 扩展（D21）**：点 `+` **执行**前可将合成格物品退回背包再摆当前配方（`ClearGridBeforePlace`），避免同产物多变体 layout 与「只填空位」（P5）叠加产生混合 pattern。
 
-**点 `+` 后的 UI 语义**（REX 决议 D20）：
+**点 `+` 后的 UI 语义**（REX 决议 D20，2026-06 修订）：
 
-| 行为 | JEI | REX Overlay |
-|------|-----|-------------|
-| 转移后关不关助手 / 配方页 | 工作台 GUI + JEI 条 **不关**；Recipe 页现代版常保持打开 | **不关闭** Overlay 与二级配方弹窗 |
-| 已摆满再点 `+` | `+` 灰显 / 无转移 / tooltip | `AlreadySatisfied` → Tooltip「合成格已符合该配方」 |
+| 行为 | JEI | REX Overlay（2a.2 目标） |
+|------|-----|--------------------------|
+| 转移后关不关 **条目列表** | **不关**（右侧 Ingredient 列表常驻） | **不关**整条助手条带；列表仍可见 |
+| 转移后关不关 **配方展示层** | **成功 / 已满足 → 自动关闭** Category 视图 | **成功 / 已满足 → `HideRecipeDetail`**（**保持**左侧 500px 叠层布局不变） |
+| 助手 **分类 + 列表滚动** | 列表滚动位置在同会话内保持 | toggle 关再开由 **D23** `SessionState` 恢复 |
+| 工作台 Modal | 始终不关 | 始终不关 |
+| 已摆满再点 `+` | 无转移 / tooltip | `AlreadySatisfied` → 提示 key `9`；**建议同样收起详情** |
 | 反复叠加同一 pattern | ❌ 有形合成不支持 | ❌ 同左；Shift 多组 → Phase 3 |
 
 官方 Wiki 对 Transfer 的分级：[Recipe Transfer Handlers](https://github.com/mezz/JustEnoughItems/wiki/Recipe-Transfer-Handlers)
