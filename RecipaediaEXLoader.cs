@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
+using Engine;
 using Game;
 using RecipaediaEX.Overlay;
 using RecipaediaEX.Search;
@@ -47,10 +48,17 @@ namespace RecipaediaEX
 
         public override void OnModalPanelWidgetSet(ComponentGui gui, Widget oldWidget, Widget newWidget) {
             base.OnModalPanelWidgetSet(gui, oldWidget, newWidget);
-            if (newWidget is CraftingTableWidget vanilla && vanilla is not RecipaediaCraftingTableWidget) {
-                gui.ModalPanelWidget = new RecipaediaCraftingTableWidget(
+            if (newWidget is CraftingTableWidget vanilla and not RecipaediaCraftingTableWidget) {
+                // 原位替换，避免再次走 ModalPanelWidget setter 触发第二次入场动画。
+                var replacement = new RecipaediaCraftingTableWidget(
                     gui.m_componentPlayer.ComponentMiner.Inventory,
                     vanilla.m_componentCraftingTable);
+                replacement.HorizontalAlignment = WidgetAlignment.Center;
+                gui.m_modalPanelContainerWidget.Children.Remove(vanilla);
+                gui.m_modalPanelContainerWidget.Children.Insert(0, replacement);
+                if (gui.m_modalPanelAnimationData != null) {
+                    gui.m_modalPanelAnimationData.NewWidget = replacement;
+                }
             }
         }
 

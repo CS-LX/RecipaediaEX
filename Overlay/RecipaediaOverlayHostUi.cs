@@ -1,6 +1,4 @@
 using Game;
-using RecipaediaEX.Overlay;
-using RecipaediaEX.UI;
 
 namespace RecipaediaEX.Overlay {
     public static class RecipaediaOverlayHostUi {
