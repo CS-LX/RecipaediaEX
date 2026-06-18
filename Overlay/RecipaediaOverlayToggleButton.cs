@@ -17,7 +17,7 @@ namespace RecipaediaEX.Overlay {
 
             Children.Add(new RectangleWidget {
                 Size = new Vector2(20, 20),
-                Subtexture = ContentManager.Get<Subtexture>("RecipaediaEX/Textures/MenuSearchLine"),
+                Subtexture = ContentManager.Get<Subtexture>("RecipaediaEX/Textures/CraftingOverlayToggle"),
                 FillColor = new Color(255, 255, 255, 180),
                 OutlineColor = Color.Transparent,
                 HorizontalAlignment = WidgetAlignment.Center,

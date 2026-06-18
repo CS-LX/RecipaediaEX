@@ -177,6 +177,9 @@
 		<None Update="Assets\RecipaediaEX\Textures\MenuSearchLine.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="Assets\RecipaediaEX\Textures\CraftingOverlayToggle.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="Assets\RecipaediaEX\Styles\ButtonStyle_History.xml">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
