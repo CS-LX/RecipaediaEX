@@ -41,28 +41,47 @@
 
 ## [Unreleased]
 
+（暂无）
+
+---
+
+## [2.0.0.0-preview6] — 2026-06-19
+
+**对比基准：** `2.0.0.0-preview5`（提交 [`b71e6a0`](https://github.com/CS-LX/RecipaediaEX/commit/b71e6a0)）→ `2.0.0.0-preview6`（提交 [`2b85f5d`](https://github.com/CS-LX/RecipaediaEX/commit/2b85f5d)，Git 标签 `preview6`）
+
+> 本版为 **合成助手 Pre-release**：在 preview5 事件总线与动态配方之上，交付图鉴搜索、工作台悬浮助手（Phase 1～2b）、搜索性能优化与会话体验打磨（D24/D25）。依赖模组（如工业时代 2）须自行对齐 `modinfo` 依赖并发布配套内容包。
+
 ### 新增
 
 - **合成助手 Phase 1**：`RecipaediaCraftingOverlayDialog`（右侧条带 + JEI 式二级配方弹窗）；`IRecipaediaOverlayHost` / `RecipaediaCraftingContext`；`IRecipaediaRecipeNavigator` + `RecipeDescriptorRegistry`；`Recipaedia` 键 Hook（合成 Modal toggle / EventBus 全屏图鉴）；`OpenFullRecipaediaRequestedEvent`。
-- **图鉴搜索 Phase 1**：`RecipaediaSearchIndex` / `Parser` / `Engine`；`RecipaediaEXScreen` 社区同款搜索行；`RecipaediaSearchFilterDialog`（滚动表单、`TextBoxArea` 衬底、固定底栏按钮）；`Assets/Lang` 语言包（键位于 `ContentWidgets`）。
+- **合成助手 Phase 2a**：`IPlacableRecipe` / `PlacableRecipeAdapter`；`IRecipePlacementTarget` + `CraftingGridPlacementPlanner`；Descriptor 操作条 `+` / `★`；`RecipaediaCraftingOverlaySessionState`（分类、滚动记忆）。
+- **合成助手 Phase 2b**：`CraftingOverlayIngredientBridge`（背包 ↔ 合成格原料桥接）；工业 Host 通过 `GetPlacementTarget()` 接入有形摆放（工作台 / 机床 / 车间 / 反应釜等由内容模组实现）。
+- **图鉴搜索 Phase 1**：`RecipaediaSearchIndex` / `Parser` / `Engine`；`RecipaediaEXScreen` 搜索行；`RecipaediaSearchFilterDialog`；`Assets/Lang` 语言包。
 - **图鉴搜索 Phase 2（核心）**：拼音索引（`NPinyin.Core`）；`or` / `()` 查询 AST；`@recipes>=N` 等比较；搜索历史（`RecipaediaEXSearchHistory.txt` + 历史图标按钮）。
-- **图鉴搜索栏 UI**：搜索 / 历史 / 筛选改为 Bevelled 图标按钮（`ButtonStyle_Search|History|Filter` + 模组纹理）。
+- **图鉴搜索栏 UI**：搜索 / 历史 / 筛选 Bevelled 图标按钮（`ButtonStyle_Search|History|Filter` + 模组纹理）。
+- **搜索性能（P0-PR-01）**：`RecipeSearchMetadata` 惰性配方元数据；纯文本 `MightMatchPlainText` 预筛；`(categoryId, query)` 结果缓存。
+- **会话体验（D24/D25）**：`SessionState.SearchQuery` toggle 恢复；灰显 `+` 悬停显示 `disabledReason`（`RecipaediaOverlayDescriptorActionBar`）。
 
 ### 修复
 
 - 排除词 `-keyword` / Dialog「排除词」双重取反导致结果反转。
-- 外部 PNG 图标在 `RectangleWidget` 上默认 `AlphaBlend` 导致白色抗锯齿光晕；图标样式改用 `BlendState=NonPremultiplied`（对齐宿主 `MainMenuScreen`）。
+- 外部 PNG 图标 `AlphaBlend` 白色光晕；图标样式改用 `BlendState=NonPremultiplied`。
+- Phase 2b 验收期：工作台 / One2One 缺料文案、摆放性能与布局早退。
+- **TD-01**：`FluidItem` 接入 `IRecipaediaDescriptionItem`；删除临时 `IRecipaediaNamedItem`；流体详情 Esc 返回导航。
 
 ### 变更
 
-- ⚠️ **`RecipeDescriptor` 构造签名**：由 `RecipaediaEXRecipesScreen` 改为 `IRecipaediaRecipeNavigator`；依赖模组中所有 `[RecipeDescriptor]` 实现须同步迁移（IE2 已适配）。
-- ⚠️ **移除** `RecipeExtraKeys.MatchedResultFluidValues`。REX 核心仅约定方块产物/原料 Extra；其它产物语义（如流体）由依赖模组自定键名，并通过 `IRecipaediaRecipeItem` / `IRecipaediaSearchContributor` 扩展。
+- ⚠️ **`RecipeDescriptor` 构造签名**：由 `RecipaediaEXRecipesScreen` 改为 `IRecipaediaRecipeNavigator`；依赖模组中所有 `[RecipeDescriptor]` 实现须同步迁移。
+- ⚠️ **移除** `RecipeExtraKeys.MatchedResultFluidValues`。流体等扩展产物语义由依赖模组自定 Extra 键，并通过 `IRecipaediaRecipeItem` / `IRecipaediaSearchContributor` 扩展。
 - 图鉴搜索：移除 `ItemSearchKind.Fluid`、`ResultFluidValues`、`@t:fluid` 及类名推断流体逻辑。
 
-### 适配指南
+### 适配指南（从 preview5 升级）
 
-1. 若模组曾使用 `RecipeExtraKeys.MatchedResultFluidValues`，改为模组内自有常量（如 `MyRecipeExtraKeys.MatchedResultFluidValues`），并在 `FluidItem.Match` 等处引用该常量。
-2. 搜索 `@t:fluid` 改为 `@t:custom` 或由 `IRecipaediaSearchContributor` 注册标签。
+1. **依赖版本** — 在己方 `modinfo.json` 的 `Dependencies` 中将 `com.recipaediaex` 改为 `2.0.0.0-preview6`（或与之兼容的更高 preview/正式版）。
+2. **`RecipeDescriptor`** — 构造函数首参改为 `IRecipaediaRecipeNavigator`（原 `RecipaediaEXRecipesScreen`）。
+3. **流体 Extra** — 若曾使用 `RecipeExtraKeys.MatchedResultFluidValues`，改为模组内自有常量，并在 `IRecipaediaSearchContributor` 等处注册。
+4. **工业机器摆放** — 实现 `IRecipaediaOverlayHost.GetPlacementTarget()` 与 `IPlacableRecipe` 适配；参考主仓 `docs/guides/合成助手-工业机器接入清单.md`（IE2 维护）。
+5. **合成助手订阅（可选）** — `RecipaediaEventBus.OpenFullRecipaediaRequested` 等事件见 [API 文档 · 事件总线](API使用文档.md#25-recipaediaeventbus)。
 
 ---
 

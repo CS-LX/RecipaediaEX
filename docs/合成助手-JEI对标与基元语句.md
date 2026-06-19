@@ -1,7 +1,7 @@
 # 合成助手 — JEI 对标解构与基元语句
 
 > **版本**：v1.2  
-> **状态**：设计参考（与 [工作台悬浮助手策划.md](工作台悬浮助手策划.md) 配套）  
+> **状态**：设计参考（与 [工作台悬浮助手策划.md](工作台悬浮助手策划.md) 配套）；**REX `preview6` 已交付 Phase 1～2b 有形摆放子集**  
 > **范围**：RecipaediaEX 合成助手（Crafting Overlay）的产品与技术对齐依据  
 > **对标产品**：Minecraft [Just Enough Items (JEI)](https://github.com/mezz/JustEnoughItems)
 

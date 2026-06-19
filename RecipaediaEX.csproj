@@ -15,9 +15,9 @@
 		<LangVersion>preview</LangVersion>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-		<Version>2.0.0.0-preview5</Version>
+		<Version>2.0.0.0-preview6</Version>
 		<AssemblyVersion>2.0.0.0</AssemblyVersion>
-		<InformationalVersion>2.0.0.0-preview5</InformationalVersion>
+		<InformationalVersion>2.0.0.0-preview6</InformationalVersion>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
 		<DebugSymbols>true</DebugSymbols>
