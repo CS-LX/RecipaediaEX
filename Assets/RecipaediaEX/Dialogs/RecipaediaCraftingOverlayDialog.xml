@@ -17,7 +17,7 @@
             <LabelWidget Name="RecipeDetailTitle" Text="" Color="255, 255, 255, 255" VerticalAlignment="Center" />
             <CanvasWidget Size="Infinity, 0" />
             <CanvasWidget Size="32, 32">
-              <RectangleWidget Size="20, 20" Subtexture="{Textures/Gui/CloseLine}" FillColor="255, 255, 255, 200" OutlineColor="0, 0, 0, 0" HorizontalAlignment="Center" VerticalAlignment="Center" TextureLinearFilter="true"/>
+              <RectangleWidget Size="20, 20" Subtexture="{RecipaediaEX/Textures/CloseLine}" FillColor="255, 255, 255, 200" OutlineColor="0, 0, 0, 0" HorizontalAlignment="Center" VerticalAlignment="Center" BlendState="NonPremultiplied" TextureLinearFilter="true"/>
               <ClickableWidget Name="RecipeDetailClose" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SoundName="Audio/UI/ButtonClick"/>
             </CanvasWidget>
           </StackPanelWidget>
@@ -46,7 +46,7 @@
             <LabelWidget Text="[RecipaediaCraftingOverlay:0]" Color="255, 255, 255, 255" VerticalAlignment="Center" />
             <CanvasWidget Size="Infinity, 0" />
             <CanvasWidget Size="32, 32">
-              <RectangleWidget Name="CloseIcon" Size="20, 20" Subtexture="{Textures/Gui/CloseLine}" FillColor="255, 255, 255, 200" OutlineColor="0, 0, 0, 0" HorizontalAlignment="Center" VerticalAlignment="Center" TextureLinearFilter="true"/>
+              <RectangleWidget Name="CloseIcon" Size="20, 20" Subtexture="{RecipaediaEX/Textures/CloseLine}" FillColor="255, 255, 255, 200" OutlineColor="0, 0, 0, 0" HorizontalAlignment="Center" VerticalAlignment="Center" BlendState="NonPremultiplied" TextureLinearFilter="true"/>
               <ClickableWidget Name="Close" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SoundName="Audio/UI/ButtonClick"/>
             </CanvasWidget>
           </StackPanelWidget>
