@@ -1,6 +1,7 @@
 using Engine;
 using Engine.Graphics;
 using Game;
+using RecipaediaEX.UI;
 
 namespace RecipaediaEX.Overlay {
     /// <summary>单条配方预览卡片旁的 + / ★ 操作条（Atlas 扁平图标）。</summary>
@@ -10,6 +11,7 @@ namespace RecipaediaEX.Overlay {
         const float IconSize = 20f;
         const float HitSize = 28f;
         const float ButtonGap = 4f;
+        const float TooltipFontScale = 0.58f;
 
         static readonly Subtexture s_plusIcon = ContentManager.Get<Subtexture>("Textures/Atlas/Plus");
         static readonly Subtexture s_starIcon = ContentManager.Get<Subtexture>("Textures/Gui/RatingStar");
@@ -19,8 +21,11 @@ namespace RecipaediaEX.Overlay {
         readonly RectangleWidget m_bookmarkIcon;
         readonly RectangleWidget m_placeIcon;
         readonly ClickableWidget m_bookmarkButton;
-        readonly ClickableWidget m_placeButton;
+        readonly InteractableWidget m_placeButton;
+        readonly LabelWidget m_placeTooltip;
+        readonly CanvasWidget m_placeHost;
         bool m_gateOpen;
+        string m_disabledReason = string.Empty;
 
         public RecipaediaOverlayDescriptorActionBar(IRecipe recipe, IRecipaediaOverlayDescriptorHost host) {
             m_recipe = recipe;
@@ -32,9 +37,9 @@ namespace RecipaediaEX.Overlay {
             bookmarkHost.Margin = new Vector2(0, 0);
             Children.Add(bookmarkHost);
 
-            (CanvasWidget placeHost, m_placeIcon, m_placeButton) = CreateIconButton(s_plusIcon);
-            placeHost.Margin = new Vector2(ButtonGap, 0);
-            Children.Add(placeHost);
+            (m_placeHost, m_placeIcon, m_placeButton, m_placeTooltip) = CreatePlaceButton();
+            m_placeHost.Margin = new Vector2(ButtonGap, 0);
+            Children.Add(m_placeHost);
 
             Refresh();
         }
@@ -63,14 +68,59 @@ namespace RecipaediaEX.Overlay {
             return (host, iconWidget, clickable);
         }
 
+        (CanvasWidget Host, RectangleWidget Icon, InteractableWidget Clickable, LabelWidget Tooltip) CreatePlaceButton() {
+            var host = new CanvasWidget {
+                Size = new Vector2(HitSize, HitSize),
+            };
+            var iconWidget = new RectangleWidget {
+                Size = new Vector2(IconSize, IconSize),
+                Subtexture = s_plusIcon,
+                FillColor = new Color(255, 255, 255, 200),
+                OutlineColor = Color.Transparent,
+                HorizontalAlignment = WidgetAlignment.Center,
+                VerticalAlignment = WidgetAlignment.Center,
+                BlendState = BlendState.NonPremultiplied,
+                TextureLinearFilter = true,
+            };
+            var interactable = new InteractableWidget {
+                HorizontalAlignment = WidgetAlignment.Stretch,
+                VerticalAlignment = WidgetAlignment.Stretch,
+                SoundName = string.Empty,
+            };
+            var tooltip = new LabelWidget {
+                FontScale = TooltipFontScale,
+                Color = new Color(255, 228, 160, 255),
+                HorizontalAlignment = WidgetAlignment.Far,
+                VerticalAlignment = WidgetAlignment.Near,
+                TextAnchor = TextAnchor.HorizontalCenter | TextAnchor.VerticalCenter,
+                IsHitTestVisible = false,
+                IsVisible = false,
+            };
+            host.Children.Add(iconWidget);
+            host.Children.Add(interactable);
+            host.Children.Add(tooltip);
+            return (host, iconWidget, interactable, tooltip);
+        }
+
         public override void MeasureOverride(Vector2 parentAvailableSize) {
             base.MeasureOverride(BarSize);
             DesiredSize = BarSize;
         }
 
+        public override void ArrangeOverride() {
+            base.ArrangeOverride();
+            if (!m_placeTooltip.IsVisible) return;
+            Vector2 tooltipSize = m_placeTooltip.DesiredSize;
+            if (tooltipSize.X <= 0f) return;
+            float x = -tooltipSize.X - 4f;
+            float y = (HitSize - tooltipSize.Y) * 0.5f;
+            m_placeTooltip.Arrange(new Vector2(x, y), tooltipSize);
+        }
+
         public void Refresh() {
             RefreshBookmarkVisual();
             RefreshGateState();
+            RefreshTooltipVisibility();
         }
 
         public override void Update() {
@@ -79,15 +129,27 @@ namespace RecipaediaEX.Overlay {
                 RefreshBookmarkVisual();
             }
             if (m_placeButton.IsClicked && m_gateOpen) m_host.PlaceRecipe(m_recipe);
+            RefreshTooltipVisibility();
         }
 
         void RefreshGateState() {
-            m_gateOpen = m_host.PassesPlacementGate(m_recipe, out _);
-            m_placeButton.IsHitTestVisible = m_gateOpen;
+            m_gateOpen = m_host.PassesPlacementGate(m_recipe, out string disabledReason);
+            m_disabledReason = disabledReason;
             m_placeIcon.FillColor = m_gateOpen
                 ? new Color(140, 230, 140, 255)
                 : new Color(96, 96, 96, 160);
             m_placeButton.ColorTransform = m_gateOpen ? Color.White : new Color(128, 128, 128, 160);
+            m_placeButton.SoundName = m_gateOpen ? "Audio/UI/ButtonClick" : string.Empty;
+            if (!m_gateOpen) m_placeTooltip.Text = m_disabledReason;
+        }
+
+        void RefreshTooltipVisibility() {
+            bool show = !m_gateOpen
+                && m_placeButton.IsMouseHover
+                && !string.IsNullOrEmpty(m_disabledReason);
+            if (m_placeTooltip.IsVisible == show) return;
+            m_placeTooltip.IsVisible = show;
+            if (show) m_placeHost.ParentWidget?.Measure(m_placeHost.ParentWidget.ParentDesiredSize);
         }
 
         void RefreshBookmarkVisual() {
