@@ -11,6 +11,7 @@ using ZLinq;
 namespace RecipaediaEX.Search {
     public static class RecipaediaSearchIndex {
         static readonly Dictionary<IRecipaediaItem, ItemSearchDocument> m_documents = new();
+        static readonly Dictionary<IRecipaediaItem, RecipeSearchMetadata> m_recipeMetadata = new();
         static readonly List<IRecipaediaSearchContributor> m_contributors = [];
         static IDisposable m_resetSubscription;
         static bool m_initialized;
@@ -22,6 +23,8 @@ namespace RecipaediaEX.Search {
             m_resetSubscription?.Dispose();
             m_resetSubscription = RecipaediaEventBus.RecipesReset.Subscribe(_ => {
                 m_documents.Clear();
+                m_recipeMetadata.Clear();
+                RecipaediaSearchEngine.ClearFilterCache();
                 BlocksCategoryProvider.InvalidateCache();
             });
         }
@@ -40,11 +43,52 @@ namespace RecipaediaEX.Search {
         }
 
         public static ItemSearchDocument GetDocument(IRecipaediaItem item, string categoryId) {
+            Initialize();
             if (m_documents.TryGetValue(item, out ItemSearchDocument cached)) return cached;
 
             ItemSearchDocument doc = BuildDocument(item, categoryId);
             m_documents[item] = doc;
             return doc;
+        }
+
+        /// <summary>高级筛选（@in / @crafter 等）才需要；简单文本搜索不触发全库配方扫描。</summary>
+        public static RecipeSearchMetadata GetRecipeMetadata(IRecipaediaItem item) {
+            Initialize();
+            if (item is not IRecipaediaRecipeItem recipeItem) return RecipeSearchMetadata.Empty;
+            if (m_recipeMetadata.TryGetValue(item, out RecipeSearchMetadata cached)) return cached;
+
+            RecipeSearchMetadata metadata = BuildRecipeMetadata(recipeItem);
+            m_recipeMetadata[item] = metadata;
+            return metadata;
+        }
+
+        /// <summary>文本搜索预筛：仅用显示名 / 合成 id / 描述，不构建完整文档。</summary>
+        public static bool MightMatchPlainText(IRecipaediaItem item, string term) {
+            if (string.IsNullOrWhiteSpace(term)) return true;
+            string normalized = Normalize(term);
+            string displayName = Normalize(GetDisplayName(item));
+            if (displayName.Contains(normalized, StringComparison.Ordinal)) return true;
+            string craftingId = GetCraftingId(item);
+            if (!string.IsNullOrEmpty(craftingId)
+                && craftingId.Contains(term, StringComparison.OrdinalIgnoreCase)) {
+                return true;
+            }
+            string description = GetDescription(item);
+            if (!string.IsNullOrEmpty(description)
+                && Normalize(description).Contains(normalized, StringComparison.Ordinal)) {
+                return true;
+            }
+            if (PinyinHelper.IsAsciiLetters(term)) {
+                string display = GetDisplayName(item);
+                string pyFull = PinyinHelper.ToFullPinyin(display);
+                string pyInitials = PinyinHelper.ToInitials(display);
+                string pyTerm = Normalize(term);
+                if ((!string.IsNullOrEmpty(pyFull) && pyFull.Contains(pyTerm, StringComparison.Ordinal))
+                    || (!string.IsNullOrEmpty(pyInitials) && pyInitials.Contains(pyTerm, StringComparison.Ordinal))) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public static IEnumerable<ItemSearchDocument> GetDocuments(IEnumerable<IRecipaediaItem> items, string categoryId) {
@@ -59,35 +103,6 @@ namespace RecipaediaEX.Search {
             ItemSearchKind kind = InferKind(item);
             (string packId, string modName) = ResolveModInfo(item);
             string craftingId = GetCraftingId(item);
-
-            int recipeCountAsResult = 0;
-            int recipeCountAsIngredient = 0;
-            HashSet<int> crafterBlockValues = [];
-            HashSet<string> recipeTypeNames = [];
-            HashSet<int> resultBlockValues = [];
-            HashSet<int> ingredientBlockValues = [];
-
-            if (item is IRecipaediaRecipeItem recipeItem) {
-                foreach (IRecipe recipe in RecipaediaEXManager.Recipes) {
-                    if (recipeItem.Match(recipe)) {
-                        recipeCountAsResult++;
-                        recipeTypeNames.Add(recipe.GetType().Name);
-                        AppendBlockValues(recipe.GetExtraValue(RecipeExtraKeys.MatchedResultBlockValues, Array.Empty<int>()), resultBlockValues);
-                        if (RecipesCrafterManager.Crafters.TryGetValue(recipe, out List<int> crafters)) {
-                            foreach (int crafter in crafters) crafterBlockValues.Add(crafter);
-                        }
-                    }
-                    if (recipeItem.IsIngredient(recipe)) {
-                        recipeCountAsIngredient++;
-                        recipeTypeNames.Add(recipe.GetType().Name);
-                        AppendBlockValues(recipe.GetExtraValue(RecipeExtraKeys.MatchedIngredientBlockValues, Array.Empty<int>()), ingredientBlockValues);
-                        if (RecipesCrafterManager.Crafters.TryGetValue(recipe, out List<int> crafters)) {
-                            foreach (int crafter in crafters) crafterBlockValues.Add(crafter);
-                        }
-                    }
-                }
-            }
-
             int displayOrder = item is BlockItem blockItem ? blockItem.m_order : 0;
             ItemSearchDocument doc = new() {
                 Item = item,
@@ -102,12 +117,6 @@ namespace RecipaediaEX.Search {
                 ModDisplayName = modName,
                 CraftingId = craftingId,
                 DisplayOrder = displayOrder,
-                RecipeCountAsResult = recipeCountAsResult,
-                RecipeCountAsIngredient = recipeCountAsIngredient,
-                CrafterBlockValues = crafterBlockValues,
-                RecipeTypeNames = recipeTypeNames,
-                ResultBlockValues = resultBlockValues,
-                IngredientBlockValues = ingredientBlockValues,
             };
 
             foreach (IRecipaediaSearchContributor contributor in m_contributors) {
@@ -115,6 +124,43 @@ namespace RecipaediaEX.Search {
             }
 
             return doc;
+        }
+
+        static RecipeSearchMetadata BuildRecipeMetadata(IRecipaediaRecipeItem recipeItem) {
+            int recipeCountAsResult = 0;
+            int recipeCountAsIngredient = 0;
+            HashSet<int> crafterBlockValues = [];
+            HashSet<string> recipeTypeNames = [];
+            HashSet<int> resultBlockValues = [];
+            HashSet<int> ingredientBlockValues = [];
+
+            foreach (IRecipe recipe in RecipaediaEXManager.Recipes) {
+                if (recipeItem.Match(recipe)) {
+                    recipeCountAsResult++;
+                    recipeTypeNames.Add(recipe.GetType().Name);
+                    AppendBlockValues(recipe.GetExtraValue(RecipeExtraKeys.MatchedResultBlockValues, Array.Empty<int>()), resultBlockValues);
+                    if (RecipesCrafterManager.Crafters.TryGetValue(recipe, out List<int> crafters)) {
+                        foreach (int crafter in crafters) crafterBlockValues.Add(crafter);
+                    }
+                }
+                if (recipeItem.IsIngredient(recipe)) {
+                    recipeCountAsIngredient++;
+                    recipeTypeNames.Add(recipe.GetType().Name);
+                    AppendBlockValues(recipe.GetExtraValue(RecipeExtraKeys.MatchedIngredientBlockValues, Array.Empty<int>()), ingredientBlockValues);
+                    if (RecipesCrafterManager.Crafters.TryGetValue(recipe, out List<int> crafters)) {
+                        foreach (int crafter in crafters) crafterBlockValues.Add(crafter);
+                    }
+                }
+            }
+
+            return new RecipeSearchMetadata {
+                RecipeCountAsResult = recipeCountAsResult,
+                RecipeCountAsIngredient = recipeCountAsIngredient,
+                CrafterBlockValues = crafterBlockValues,
+                RecipeTypeNames = recipeTypeNames,
+                ResultBlockValues = resultBlockValues,
+                IngredientBlockValues = ingredientBlockValues,
+            };
         }
 
         public static int[] ResolveBlockValuesByName(string name) {

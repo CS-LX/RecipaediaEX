@@ -11,14 +11,42 @@ namespace RecipaediaEX.Search {
     }
 
     public static class RecipaediaSearchEngine {
+        readonly struct FilterCacheKey(string categoryId, string query) : IEquatable<FilterCacheKey> {
+            public readonly string CategoryId = categoryId ?? string.Empty;
+            public readonly string Query = query ?? string.Empty;
+
+            public bool Equals(FilterCacheKey other) =>
+                CategoryId == other.CategoryId && Query == other.Query;
+
+            public override bool Equals(object? obj) => obj is FilterCacheKey other && Equals(other);
+
+            public override int GetHashCode() => HashCode.Combine(CategoryId, Query);
+        }
+
+        static readonly Dictionary<FilterCacheKey, List<SearchMatchResult>> s_filterCache = new();
+
+        public static void ClearFilterCache() => s_filterCache.Clear();
+
         public static List<SearchMatchResult> Filter(IEnumerable<IRecipaediaItem> candidates, string categoryId, string query) {
-            SearchNode root = RecipaediaSearchParser.ParseExpression(query);
-            if (IsEmpty(root)) {
-                return candidates.AsValueEnumerable().Select(item => new SearchMatchResult { Item = item, Score = 0 }).ToList();
+            string normalizedQuery = query?.Trim() ?? string.Empty;
+            FilterCacheKey cacheKey = new(categoryId, normalizedQuery);
+            if (s_filterCache.TryGetValue(cacheKey, out List<SearchMatchResult>? cached)) {
+                return new List<SearchMatchResult>(cached);
             }
 
+            SearchNode root = RecipaediaSearchParser.ParseExpression(normalizedQuery);
+            if (IsEmpty(root)) {
+                List<SearchMatchResult> all = candidates.AsValueEnumerable()
+                    .Select(item => new SearchMatchResult { Item = item, Score = 0 })
+                    .ToList();
+                s_filterCache[cacheKey] = all;
+                return new List<SearchMatchResult>(all);
+            }
+
+            bool plainTextPrefetch = IsPlainTextOnly(root);
             List<SearchMatchResult> results = [];
             foreach (IRecipaediaItem item in candidates) {
+                if (plainTextPrefetch && !MightMatchPlainText(item, root)) continue;
                 ItemSearchDocument doc = RecipaediaSearchIndex.GetDocument(item, categoryId);
                 int score = 0;
                 if (!Matches(doc, root, ref score)) continue;
@@ -34,7 +62,29 @@ namespace RecipaediaEX.Search {
                 if (orderCompare != 0) return orderCompare;
                 return string.Compare(docA.DisplayName, docB.DisplayName, StringComparison.OrdinalIgnoreCase);
             });
-            return results;
+            s_filterCache[cacheKey] = results;
+            return new List<SearchMatchResult>(results);
+        }
+
+        static bool IsPlainTextOnly(SearchNode node) {
+            if (node == null) return true;
+            return node.Kind switch {
+                SearchNodeKind.And => node.Children.TrueForAll(IsPlainTextOnly),
+                SearchNodeKind.Or => false,
+                SearchNodeKind.Text => true,
+                SearchNodeKind.Not => false,
+                SearchNodeKind.Clause => false,
+                _ => false,
+            };
+        }
+
+        static bool MightMatchPlainText(IRecipaediaItem item, SearchNode node) {
+            if (node == null) return true;
+            return node.Kind switch {
+                SearchNodeKind.And => node.Children.TrueForAll(child => MightMatchPlainText(item, child)),
+                SearchNodeKind.Text => RecipaediaSearchIndex.MightMatchPlainText(item, node.Text),
+                _ => true,
+            };
         }
 
         static bool IsEmpty(SearchNode node) {
@@ -90,7 +140,11 @@ namespace RecipaediaEX.Search {
             return true;
         }
 
+        static RecipeSearchMetadata RecipeMeta(ItemSearchDocument doc) =>
+            RecipaediaSearchIndex.GetRecipeMetadata(doc.Item);
+
         static bool MatchesClause(ItemSearchDocument doc, SearchClause clause, ref int score) {
+            RecipeSearchMetadata recipeMeta = RecipeMeta(doc);
             return clause.Kind switch {
                 SearchClauseKind.Text => MatchesText(doc, clause.Value, ref score),
                 SearchClauseKind.NameExact => StringEquals(doc.DisplayName, clause.Value),
@@ -98,13 +152,13 @@ namespace RecipaediaEX.Search {
                 SearchClauseKind.ItemType => MatchesItemType(doc, clause.Value),
                 SearchClauseKind.Pack => MatchesPack(doc, clause.Value),
                 SearchClauseKind.Mod => Contains(doc.ModDisplayName, clause.Value),
-                SearchClauseKind.Crafter => MatchesCrafter(doc, clause.Value),
-                SearchClauseKind.Ingredient => MatchesIngredientEntry(doc, clause.Value),
-                SearchClauseKind.Product => MatchesProductEntry(doc, clause.Value),
-                SearchClauseKind.RecipeType => MatchesRecipeType(doc, clause.Value),
-                SearchClauseKind.HasRecipe => doc.RecipeCountAsResult > 0,
-                SearchClauseKind.CanUse => doc.RecipeCountAsIngredient > 0,
-                SearchClauseKind.RecipeCount => CompareCount(doc.RecipeCountAsResult, clause.CompareOp, clause.CompareValue),
+                SearchClauseKind.Crafter => MatchesCrafter(recipeMeta, clause.Value),
+                SearchClauseKind.Ingredient => MatchesIngredientEntry(doc, recipeMeta, clause.Value),
+                SearchClauseKind.Product => MatchesProductEntry(doc, recipeMeta, clause.Value),
+                SearchClauseKind.RecipeType => MatchesRecipeType(recipeMeta, clause.Value),
+                SearchClauseKind.HasRecipe => recipeMeta.RecipeCountAsResult > 0,
+                SearchClauseKind.CanUse => recipeMeta.RecipeCountAsIngredient > 0,
+                SearchClauseKind.RecipeCount => CompareCount(recipeMeta.RecipeCountAsResult, clause.CompareOp, clause.CompareValue),
                 _ => true,
             };
         }
@@ -182,23 +236,23 @@ namespace RecipaediaEX.Search {
                 || StringEquals(doc.PackId, value);
         }
 
-        static bool MatchesCrafter(ItemSearchDocument doc, string value) {
+        static bool MatchesCrafter(RecipeSearchMetadata recipeMeta, string value) {
             int[] crafters = RecipaediaSearchIndex.ResolveCrafterBlockValuesByName(value);
             if (crafters.Length == 0) return false;
             foreach (int crafter in crafters) {
-                if (doc.CrafterBlockValues.Contains(crafter)) return true;
+                if (recipeMeta.CrafterBlockValues.Contains(crafter)) return true;
             }
             return false;
         }
 
-        static bool MatchesIngredientEntry(ItemSearchDocument doc, string value) {
+        static bool MatchesIngredientEntry(ItemSearchDocument doc, RecipeSearchMetadata recipeMeta, string value) {
             if (!RepresentsNamedItem(doc, value)) return false;
-            return doc.RecipeCountAsIngredient > 0 || doc.IngredientBlockValues.Count > 0;
+            return recipeMeta.RecipeCountAsIngredient > 0 || recipeMeta.IngredientBlockValues.Count > 0;
         }
 
-        static bool MatchesProductEntry(ItemSearchDocument doc, string value) {
+        static bool MatchesProductEntry(ItemSearchDocument doc, RecipeSearchMetadata recipeMeta, string value) {
             if (!RepresentsNamedItem(doc, value)) return false;
-            return doc.RecipeCountAsResult > 0 || doc.ResultBlockValues.Count > 0;
+            return recipeMeta.RecipeCountAsResult > 0 || recipeMeta.ResultBlockValues.Count > 0;
         }
 
         static bool RepresentsNamedItem(ItemSearchDocument doc, string value) {
@@ -215,9 +269,9 @@ namespace RecipaediaEX.Search {
             return false;
         }
 
-        static bool MatchesRecipeType(ItemSearchDocument doc, string value) {
+        static bool MatchesRecipeType(RecipeSearchMetadata recipeMeta, string value) {
             if (string.IsNullOrWhiteSpace(value)) return true;
-            foreach (string typeName in doc.RecipeTypeNames) {
+            foreach (string typeName in recipeMeta.RecipeTypeNames) {
                 if (typeName.Contains(value, StringComparison.OrdinalIgnoreCase)) return true;
             }
             return false;

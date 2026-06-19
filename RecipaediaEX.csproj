@@ -131,6 +131,7 @@
 		<Compile Include="Search\RecipaediaSearchHistory.cs"/>
 		<Compile Include="Search\RecipaediaRecipeBookmarks.cs"/>
 		<Compile Include="Search\RecipaediaSearchIndex.cs"/>
+		<Compile Include="Search\RecipeSearchMetadata.cs"/>
 		<Compile Include="Search\RecipaediaSearchParser.cs"/>
 		<Compile Include="Search\SearchNode.cs"/>
 		<Compile Include="Search\SearchQuery.cs"/>
