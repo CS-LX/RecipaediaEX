@@ -4,6 +4,10 @@ using RecipaediaEX;
 using RecipaediaEX.Implementation;
 
 namespace RecipaediaEX.Overlay {
+    /// <summary>
+    /// 配方 → <see cref="IPlacableRecipe"/> 适配链。REX 内置 <see cref="OriginalCraftingRecipe"/>；
+    /// 工业/化工等由内容模组 <see cref="Register"/>，摆放算法仍在各模组 <see cref="IRecipePlacementTarget"/>。
+    /// </summary>
     public static class PlacableRecipeAdapter {
         static readonly List<Func<IRecipe, IPlacableRecipe?>> s_customFactories = [];
 

@@ -124,6 +124,8 @@ namespace RecipaediaEX.Overlay {
             }
             m_listCategory = m_selectedCategory;
 
+            RestoreSessionSearch();
+
             m_blocksList.Direction = LayoutDirection.Vertical;
             m_blocksList.ItemSize = 64;
             m_blocksList.ItemClicked = OnBlocksListItemClicked;
@@ -138,6 +140,15 @@ namespace RecipaediaEX.Overlay {
         public void CaptureSessionState() {
             RecipaediaCraftingOverlaySessionState.SelectedCategoryId = m_selectedCategory;
             RecipaediaCraftingOverlaySessionState.BlocksListScrollPosition = m_blocksList.ScrollPosition;
+            RecipaediaCraftingOverlaySessionState.SearchQuery = m_searchQuery;
+        }
+
+        void RestoreSessionSearch() {
+            string saved = RecipaediaCraftingOverlaySessionState.SearchQuery;
+            if (string.IsNullOrEmpty(saved)) return;
+            m_searchQuery = saved;
+            m_inputKey.Text = saved;
+            m_filterState = RecipaediaSearchParser.ParseToFilterState(saved);
         }
 
 
@@ -226,6 +237,7 @@ namespace RecipaediaEX.Overlay {
             m_searchQuery = string.Empty;
             m_filterState = new RecipaediaSearchFilterState();
             m_inputKey.Text = string.Empty;
+            RecipaediaCraftingOverlaySessionState.SearchQuery = string.Empty;
             m_lastPreviewItem = null;
             HideRecipeDetail();
         }
