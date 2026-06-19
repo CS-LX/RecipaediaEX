@@ -27,6 +27,22 @@ namespace RecipaediaEX.UI {
         public ListPanelWidget m_blocksList;
         public Screen m_previousScreen;
 
+        /// <summary>从子屏返回图鉴列表时不应覆盖 <see cref="m_previousScreen"/> 的 Screen 注册名。</summary>
+        static readonly HashSet<string> s_childScreenNames = new(StringComparer.Ordinal) {
+            "RecipaediaDescription",
+            "RecipaediaRecipes",
+        };
+
+        public static void RegisterChildScreen(string screenName) => s_childScreenNames.Add(screenName);
+
+        static bool IsChildScreen(Screen? screen) {
+            if (screen == null) return false;
+            foreach (KeyValuePair<string, Screen> entry in ScreensManager.m_screens) {
+                if (entry.Value == screen && s_childScreenNames.Contains(entry.Key)) return true;
+            }
+            return false;
+        }
+
         public TextBoxWidget m_inputKey;
         public LabelWidget m_placeHolder;
         public LinkWidget m_clearSearchLink;
@@ -54,7 +70,7 @@ namespace RecipaediaEX.UI {
 
         public override void Enter(object[] parameters) {
             base.Enter(parameters);
-            if (ScreensManager.PreviousScreen != ScreensManager.FindScreen<Screen>("RecipaediaRecipes") && ScreensManager.PreviousScreen != ScreensManager.FindScreen<Screen>("RecipaediaDescription")) {
+            if (!IsChildScreen(ScreensManager.PreviousScreen)) {
                 m_previousScreen = ScreensManager.PreviousScreen;
             }
             if (!m_categoriesInitialized || m_categoriesName.Count == 0) {
