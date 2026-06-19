@@ -1,13 +1,25 @@
+using System;
 using System.Collections.Generic;
 using RecipaediaEX;
 using RecipaediaEX.Implementation;
 
 namespace RecipaediaEX.Overlay {
     public static class PlacableRecipeAdapter {
+        static readonly List<Func<IRecipe, IPlacableRecipe?>> s_customFactories = [];
+
+        /// <summary>内容模组注册工业等非 OriginalCrafting 配方适配器。</summary>
+        public static void Register(Func<IRecipe, IPlacableRecipe?> factory) => s_customFactories.Add(factory);
+
         public static bool TryAsPlacable(IRecipe recipe, out IPlacableRecipe placable) {
             if (recipe is IPlacableRecipe existing) {
                 placable = existing;
                 return true;
+            }
+            foreach (Func<IRecipe, IPlacableRecipe?> factory in s_customFactories) {
+                if (factory(recipe) is IPlacableRecipe custom) {
+                    placable = custom;
+                    return true;
+                }
             }
             if (recipe is OriginalCraftingRecipe craftingRecipe) {
                 placable = new OriginalCraftingPlacableRecipe(craftingRecipe);

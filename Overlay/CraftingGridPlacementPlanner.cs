@@ -47,6 +47,10 @@ namespace RecipaediaEX.Overlay {
                 if (score <= bestScore) continue;
                 bestScore = score;
                 bestPlan = plan;
+                if (!plan.Exists(static action => action.NeedsTransfer)
+                    && plan.Exists(static action => action.MissingLabel != null)) {
+                    break;
+                }
             }
 
             if (bestPlan == null) {
@@ -54,14 +58,18 @@ namespace RecipaediaEX.Overlay {
             }
 
             if (!bestPlan.Exists(static action => action.NeedsTransfer)) {
+                if (bestPlan.Exists(static action => action.MissingLabel != null)) {
+                    return ToResult(bestPlan);
+                }
                 return PlacementResult.AlreadySatisfied();
             }
 
             if (execute) {
                 foreach (PlacementAction action in bestPlan) {
                     if (!action.NeedsTransfer) continue;
-                    sources.PlayerInventory.RemoveSlotItems(action.SourceSlot, 1);
-                    table.AddSlotItems(action.TargetSlot, action.BlockValue, 1);
+                    int removed = sources.PlayerInventory.RemoveSlotItems(action.SourceSlot, 1);
+                    if (removed <= 0) continue;
+                    table.AddSlotItems(action.TargetSlot, action.BlockValue, removed);
                 }
                 table.UpdateCraftingResult(true);
             }
@@ -186,11 +194,10 @@ namespace RecipaediaEX.Overlay {
 
         static bool IngredientMatches(string requiredIngredient, int blockValue, FormattedRecipe recipe) {
             if (blockValue == 0) return false;
-            string actual = ToCraftingIngredient(blockValue);
-            try {
-                if (CraftingRecipesManager.CompareIngredients(requiredIngredient, actual)) return true;
+            foreach (int accepted in CraftingOverlayIngredientBridge.ExpandBlockValues(requiredIngredient)) {
+                if (accepted == blockValue) return true;
             }
-            catch (InvalidOperationException) { }
+            string actual = CraftingOverlayIngredientBridge.ToCraftingId(blockValue);
             return recipe.CompareIngredient(requiredIngredient, actual, throwOnNotSpecified: false);
         }
 
@@ -227,23 +234,24 @@ namespace RecipaediaEX.Overlay {
             return sourceSlot >= 0;
         }
 
-        static string ToCraftingIngredient(int blockValue) {
-            int content = Terrain.ExtractContents(blockValue);
-            int data = Terrain.ExtractData(blockValue);
-            Block block = BlocksManager.Blocks[content];
-            return block.GetCraftingId(blockValue) + ":" + data.ToString(CultureInfo.InvariantCulture);
+        static string FormatMissing(string ingredient, FormattedRecipe recipe) {
+            if (s_missingLabelCache.TryGetValue(ingredient, out string? cached)) return cached;
+
+            string label;
+            if (CraftingOverlayIngredientBridge.TryDecodeDisplayBlockValue(ingredient, out int blockValue)) {
+                Block block = BlocksManager.Blocks[Terrain.ExtractContents(blockValue)];
+                label = $"缺少 {block.GetDisplayName(null, blockValue)}";
+            }
+            else {
+                CraftingRecipesManager.DecodeIngredient(ingredient, out string craftingId, out int? _);
+                label = string.IsNullOrEmpty(craftingId) ? "缺少原料" : $"缺少 {craftingId}";
+            }
+
+            s_missingLabelCache[ingredient] = label;
+            return label;
         }
 
-        static string FormatMissing(string ingredient, FormattedRecipe recipe) {
-            int[] values = FormattedRecipe.ExpandIngredientToBlockValues(ingredient);
-            if (values.Length > 0) {
-                int value = values[0];
-                Block block = BlocksManager.Blocks[Terrain.ExtractContents(value)];
-                return $"缺少 {block.GetDisplayName(null, value)}";
-            }
-            CraftingRecipesManager.DecodeIngredient(ingredient, out string craftingId, out int? _);
-            return $"缺少 {craftingId}";
-        }
+        static readonly Dictionary<string, string> s_missingLabelCache = new();
 
         static bool TryClearGridToInventory(ComponentCraftingTable table, IInventory playerInventory, out string? error) {
             error = null;

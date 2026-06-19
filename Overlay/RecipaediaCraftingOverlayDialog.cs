@@ -453,6 +453,7 @@ namespace RecipaediaEX.Overlay {
 
         static string GetRecipeItemTitle(IRecipaediaRecipeItem recipeItem) {
             if (recipeItem is IRecipaediaDescriptionItem descriptionItem) return descriptionItem.Name ?? string.Empty;
+            if (recipeItem is IRecipaediaNamedItem namedItem) return namedItem.Name ?? string.Empty;
             if (recipeItem is BlockItem blockItem) return blockItem.m_block.GetDisplayName(null, blockItem.m_blockValue);
             return recipeItem.ToString() ?? string.Empty;
         }

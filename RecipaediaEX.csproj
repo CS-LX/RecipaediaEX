@@ -70,6 +70,7 @@
 		<Compile Include="Overlay\PlacementOptions.cs"/>
 		<Compile Include="Overlay\PlacementSources.cs"/>
 		<Compile Include="Overlay\PlacableRecipeAdapter.cs"/>
+		<Compile Include="Overlay\CraftingOverlayIngredientBridge.cs"/>
 		<Compile Include="Overlay\CraftingGridPlacementPlanner.cs"/>
 		<Compile Include="Overlay\CraftingTablePlacementTarget.cs"/>
 		<Compile Include="Overlay\IRecipaediaOverlayDescriptorHost.cs"/>
@@ -116,6 +117,7 @@
 		<Compile Include="ScreenExtra\IRecipaediaCategory.cs"/>
 		<Compile Include="ScreenExtra\IRecipaediaCategoryProvider.cs"/>
 		<Compile Include="ScreenExtra\IRecipaediaDescriptionItem.cs"/>
+		<Compile Include="ScreenExtra\IRecipaediaNamedItem.cs"/>
 		<Compile Include="ScreenExtra\IRecipaediaItem.cs"/>
 		<Compile Include="ScreenExtra\IRecipaediaRecipeItem.cs"/>
 		<Compile Include="ScreenExtra\Items\BlockItem.cs"/>
