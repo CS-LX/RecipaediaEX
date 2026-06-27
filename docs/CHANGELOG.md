@@ -47,11 +47,11 @@
 
 ## [2.0.0.0-preview8] — 2026-06-25
 
-**对比基准：** `2.0.0.0-preview7` → `2.0.0.0-preview8`
+**对比基准：** `2.0.0.0-preview7`（提交 [`8abafba`](https://github.com/CS-LX/RecipaediaEX/commit/8abafba)）→ `2.0.0.0-preview8`（提交 [`f0258e7`](https://github.com/CS-LX/RecipaediaEX/commit/f0258e7)，Git 标签 `preview8`）
 
 ### 新增
 
-- **合成助手 Phase 4b（W5）**：有搜索词时 Overlay **全库 Filter**（`GetOverlayGlobalSearchCandidates`：All Blocks + 非方块分类条目）；Category ◀▶ 仅影响无 query 浏览；搜索模式下分类条显示「全库搜索」且禁用 ◀▶（D27 / F6）。
+- **合成助手 Phase 4b（W5）**：有搜索词时 Overlay **全库 Filter**（`RecipaediaCategoryCatalog.GetOverlayGlobalSearchCandidates`：All Blocks + 非方块分类条目）；Category ◀▶ 仅影响无 query 浏览；搜索模式下分类条显示「全库搜索」且禁用 ◀▶（D27 / F6）。
 
 ### 变更
 
@@ -67,7 +67,9 @@
 
 ## [2.0.0.0-preview7] — 2026-06-25
 
-**对比基准：** `2.0.0.0-preview6` → `2.0.0.0-preview7`
+**对比基准：** `2.0.0.0-preview6`（提交 [`2b85f5d`](https://github.com/CS-LX/RecipaediaEX/commit/2b85f5d)）→ `2.0.0.0-preview7`（提交 [`8abafba`](https://github.com/CS-LX/RecipaediaEX/commit/8abafba)，Git 标签 `preview7`）
+
+> 反馈期首轮：**W1 / W4 / W4.5**（Hide 不 Destroy、Modal 生命周期、默认 All + debounce 输入即搜）。工业时代 2 在 `4720a50d` 对齐依赖并接入 `DismissForModalWidget`。
 
 ### 新增
 
@@ -77,6 +79,7 @@
 ### 变更
 
 - **合成助手 Phase 2a.3（W1）**：toggle 关闭改为 **`Hide()`**（保留 Dialog 实例与会话态）；Host 销毁仍 **`Dismiss()`** Remove Widget。
+- ⚠️ **移除** `RecipaediaCraftingOverlayController.Close()` — 请改用 `Hide()`（toggle）或 `Dismiss()` / `DismissForModalWidget()`（Host 关闭）。
 - `DefaultOverlayCategoryId` 改为返回 **All Blocks**（废止 Phase 1.6「默认首个非 All」）。
 
 ### 适配指南（从 preview6 升级）
