@@ -8,7 +8,9 @@
     },
     "RecipaediaCraftingOverlay": {
       "0": "Crafting Assistant",
-      "1": "No recipes match this workstation"
+      "1": "No recipes match this workstation",
+      "12": "Global search",
+      "13": "Search all entries…"
     },
     "RecipaediaSearchFilterDialog": {
       "0": "Advanced Filter",

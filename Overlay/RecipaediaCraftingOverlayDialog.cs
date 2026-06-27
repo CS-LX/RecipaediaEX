@@ -88,6 +88,8 @@ namespace RecipaediaEX.Overlay {
 
         const float SearchDebounceSeconds = 0.25f;
 
+        const string GlobalSearchCategoryId = "All Blocks";
+
         string m_debounceInputSnapshot = string.Empty;
 
         float m_searchDebounceRemaining;
@@ -179,8 +181,7 @@ namespace RecipaediaEX.Overlay {
             UpdateCategoryNavigation();
             if (m_selectedCategory != m_listCategory) {
                 m_listCategory = m_selectedCategory;
-                ClearSearch();
-                PopulateBlocksList(resetScroll: true);
+                if (IsBrowseMode) PopulateBlocksList(resetScroll: true);
             }
             RefreshCategoryBarCaption();
 
@@ -244,14 +245,22 @@ namespace RecipaediaEX.Overlay {
                 return;
             }
             m_categoryBar.IsVisible = true;
+            if (!IsBrowseMode) {
+                string searchLabel = LanguageControl.GetContentWidgets(LanguageName, 12);
+                m_categoryBar.SetCaption($"{searchLabel} ({m_blocksList.Items.Count})", false, false);
+                return;
+            }
             int index = m_categoryIds.IndexOf(m_selectedCategory);
             if (index < 0) index = 0;
             IRecipaediaCategory category = RecipaediaCategoryCatalog.GetCategory(m_selectedCategory);
             m_categoryBar.SetCaption($"{category.DisplayName} ({m_blocksList.Items.Count})", index > 0, index < m_categoryIds.Count - 1);
         }
 
+        bool IsBrowseMode => string.IsNullOrWhiteSpace(m_searchQuery);
+
 
         void UpdateSearchBarVisibility() {
+            m_placeHolder.Text = LanguageControl.GetContentWidgets(LanguageName, 13);
             m_placeHolder.IsVisible = string.IsNullOrEmpty(m_inputKey.Text);
             m_clearSearchLink.IsVisible = !string.IsNullOrEmpty(m_inputKey.Text) || m_inputKey.HasFocus;
             m_historyButton.ParentWidget.IsVisible = RecipaediaSearchHistory.Entries.Count > 0;
@@ -338,7 +347,23 @@ namespace RecipaediaEX.Overlay {
 
             if (m_categoryIds.Count == 0) return;
 
-            IRecipaediaCategory category = RecipaediaCategoryCatalog.GetCategory(m_selectedCategory);
+            if (IsBrowseMode) {
+                IRecipaediaCategory browseCategory = RecipaediaCategoryCatalog.GetCategory(m_selectedCategory);
+                ConfigureListPresentation(browseCategory);
+                m_blocksList.ItemWidgetFactory = o => browseCategory.ItemWidgetFactory(o as IRecipaediaItem);
+                foreach (IRecipaediaItem item in browseCategory.GetItems()) m_blocksList.AddItem(item);
+                return;
+            }
+
+            IRecipaediaCategory listCategory = RecipaediaCategoryCatalog.GetCategory(GlobalSearchCategoryId);
+            ConfigureListPresentation(listCategory);
+            m_blocksList.ItemWidgetFactory = o => CreateGlobalSearchItemWidget(o as IRecipaediaItem);
+            IEnumerable<IRecipaediaItem> candidates = RecipaediaCategoryCatalog.GetOverlayGlobalSearchCandidates();
+            List<SearchMatchResult> matches = RecipaediaSearchEngine.Filter(candidates, GlobalSearchCategoryId, m_searchQuery);
+            foreach (SearchMatchResult match in matches) m_blocksList.AddItem(match.Item);
+        }
+
+        void ConfigureListPresentation(IRecipaediaCategory category) {
             if (category is IAdvancedCategory advanced) {
                 m_blocksList.Direction = advanced.ListDirection;
                 m_blocksList.ItemSize = advanced.ListItemSize;
@@ -347,16 +372,15 @@ namespace RecipaediaEX.Overlay {
                 m_blocksList.Direction = LayoutDirection.Vertical;
                 m_blocksList.ItemSize = 64;
             }
-            m_blocksList.ItemWidgetFactory = o => category.ItemWidgetFactory(o as IRecipaediaItem);
+        }
 
-            IEnumerable<IRecipaediaItem> items = category.GetItems();
-            if (!string.IsNullOrWhiteSpace(m_searchQuery)) {
-                List<SearchMatchResult> matches = RecipaediaSearchEngine.Filter(items, m_selectedCategory, m_searchQuery);
-                foreach (SearchMatchResult match in matches) m_blocksList.AddItem(match.Item);
+        Widget CreateGlobalSearchItemWidget(IRecipaediaItem? item) {
+            if (item == null) return null!;
+            if (item is IRecipaediaRecipeItem recipeItem
+                && RecipaediaCategoryCatalog.TryFindCategoryForRecipeItem(recipeItem, out string categoryId, out _)) {
+                return RecipaediaCategoryCatalog.GetCategory(categoryId).ItemWidgetFactory(item);
             }
-            else {
-                foreach (IRecipaediaItem item in items) m_blocksList.AddItem(item);
-            }
+            return RecipaediaCategoryCatalog.GetCategory(GlobalSearchCategoryId).ItemWidgetFactory(item);
         }
 
 

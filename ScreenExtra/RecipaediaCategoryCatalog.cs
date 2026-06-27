@@ -93,5 +93,21 @@ namespace RecipaediaEX.UI {
             if (a is BlockItem blockA && b is BlockItem blockB) return blockA.m_blockValue == blockB.m_blockValue;
             return ReferenceEquals(a, b);
         }
+
+        /// <summary>合成助手有 query 时的全库候选：All Blocks + 其它分类中的非方块条目（如流体）。</summary>
+        public static IEnumerable<IRecipaediaItem> GetOverlayGlobalSearchCandidates() {
+            EnsureLoaded();
+            if (!m_categories.TryGetValue("All Blocks", out IRecipaediaCategory? allBlocks)) return [];
+            List<IRecipaediaItem> results = [];
+            foreach (IRecipaediaItem item in allBlocks.GetItems()) results.Add(item);
+            foreach (string id in m_categoryIds) {
+                if (id == "All Blocks") continue;
+                foreach (IRecipaediaItem item in m_categories[id].GetItems()) {
+                    if (item is BlockItem) continue;
+                    results.Add(item);
+                }
+            }
+            return results;
+        }
     }
 }

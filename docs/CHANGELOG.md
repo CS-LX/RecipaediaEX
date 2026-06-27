@@ -45,6 +45,26 @@
 
 ---
 
+## [2.0.0.0-preview8] — 2026-06-25
+
+**对比基准：** `2.0.0.0-preview7` → `2.0.0.0-preview8`
+
+### 新增
+
+- **合成助手 Phase 4b（W5）**：有搜索词时 Overlay **全库 Filter**（`GetOverlayGlobalSearchCandidates`：All Blocks + 非方块分类条目）；Category ◀▶ 仅影响无 query 浏览；搜索模式下分类条显示「全库搜索」且禁用 ◀▶（D27 / F6）。
+
+### 变更
+
+- 合成助手换分类 **不再清空** 搜索词（Q4b-1：有 query 时换分类不改列表）。
+- Overlay 搜索 placeholder 改为「搜索全库条目…」（`RecipaediaCraftingOverlay:13`）。
+
+### 适配指南（从 preview7 升级）
+
+1. **依赖版本** — `modinfo` 中 `com.recipaediaex` 改为 `2.0.0.0-preview8`。
+2. 全屏图鉴搜索语义 **不变**（D17）；仅合成助手 Overlay 有 query 时全库搜。
+
+---
+
 ## [2.0.0.0-preview7] — 2026-06-25
 
 **对比基准：** `2.0.0.0-preview6` → `2.0.0.0-preview7`
