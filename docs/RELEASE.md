@@ -49,6 +49,8 @@ Release CI 在 GitHub Release 成功后调用 `tools/publish-mod-site.ps1`，向
 |--------|------|
 | `MOD_SITE_TOKEN` | 模组站 Bearer Token（须具备 post 1739 的上传与发版权限） |
 
+填写 **JWT 本体**，不要带 `Bearer ` 前缀（脚本会自动加）。可在浏览器登录模组站后，DevTools → Application → Local Storage 中查找 token，或请网站开发提供 CI 专用 Token。
+
 在 RecipaediaEX 仓库 **Settings → Secrets and variables → Actions** 中添加。
 
 ### 配置

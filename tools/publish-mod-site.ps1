@@ -63,7 +63,11 @@ function Get-ModSiteToken {
     if ([string]::IsNullOrWhiteSpace($token)) {
         Write-Error "[ModSite] MOD_SITE_TOKEN is not set."
     }
-    return $token.Trim()
+    $token = $token.Trim()
+    if ($token -match '^(?i)bearer\s+') {
+        $token = ($token -replace '^(?i)bearer\s+', '').Trim()
+    }
+    return $token
 }
 
 function Invoke-ModSiteJson {
@@ -83,7 +87,25 @@ function Invoke-ModSiteJson {
     if ($null -ne $Body) {
         $params.Body = ($Body | ConvertTo-Json -Depth 8 -Compress)
     }
-    return Invoke-RestMethod @params
+    try {
+        return Invoke-RestMethod @params
+    }
+    catch {
+        $response = $_.Exception.Response
+        if ($null -ne $response) {
+            $stream = $response.GetResponseStream()
+            if ($null -ne $stream) {
+                $reader = New-Object System.IO.StreamReader($stream)
+                $errorBody = $reader.ReadToEnd()
+                $reader.Dispose()
+                if ($response.StatusCode.value__ -eq 401) {
+                    throw "[ModSite] HTTP 401 Unauthorized calling $Url. Check MOD_SITE_TOKEN: use the JWT only (no 'Bearer ' prefix), ensure it is not expired, and that the account can publish on post $($script:ModSitePostIdForErrors)."
+                }
+                throw "[ModSite] HTTP $($response.StatusCode.value__) calling ${Url}: $errorBody"
+            }
+        }
+        throw
+    }
 }
 
 function New-MinuteScopedSaveKey {
@@ -335,6 +357,7 @@ $token = Get-ModSiteToken
 $apiBase = [string]$config.ApiBaseUrl.TrimEnd('/')
 $fileDomain = [string]$config.FileDomain.TrimEnd('/')
 $postId = [int]$config.PostId
+$script:ModSitePostIdForErrors = $postId
 $typeId = [int]$config.ScmodTypeId
 $gameVersionIds = @($config.GameVersionIds | ForEach-Object { [int]$_ })
 
