@@ -142,9 +142,9 @@ RecipaediaEventBus.GetPublisher<MyModEvent>().Publish(new MyModEvent(...));
 | 工作流 | 触发 | 产物 |
 |--------|------|------|
 | `build.yml` | push main、PR | `RecipaediaEX-ci.{sha7}.scmod` |
-| `release.yml` | 推送 tag `v*` | GitHub Release：`RecipaediaEX-{Version}.scmod` |
+| `release.yml` | 推送 tag `v*` | GitHub Release + 模组站 post 1739：`RecipaediaEX-{Version}.scmod` |
 
-发版步骤见 [docs/RELEASE.md](docs/RELEASE.md)。RecipaediaEX 无 SCIENEW 编译期依赖，CI 仅需 checkout 本仓库。
+发版步骤见 [docs/RELEASE.md](docs/RELEASE.md)。Release 还需在 GitHub 配置 Secret **`MOD_SITE_TOKEN`**（模组站 Bearer Token）。RecipaediaEX 无 SCIENEW 编译期依赖，CI 仅需 checkout 本仓库。
 
 ## 说明
 

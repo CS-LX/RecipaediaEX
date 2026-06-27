@@ -219,6 +219,7 @@ RecipaediaEX 发版后，IE2 侧检查项（**不纳入 REX CI 自动化**）：
 | **P2** | `release.yml` + tag 校验 + GitHub Release | 0.5d |
 | **P3** | `RELEASE.md`、README/CHANGELOG 衔接 | 0.25d |
 | **P4（可选）** | sha256、release-please、EBoyTerminal 同模式复用 | 后续 |
+| **P5** | `publish-mod-site.ps1` + `release.yml` 模组站 post 1739 自动发版 | **已实施** |
 
 ---
 

@@ -84,3 +84,19 @@ jobs:
           body_path: release_notes.md
           prerelease: ${{ env.PRERELEASE == 'True' }}
           files: ${{ runner.temp }}/recipaediaex-release/${{ env.SCMOD_NAME }}
+
+      - name: Publish to mod site
+        shell: pwsh
+        env:
+          MOD_SITE_TOKEN: ${{ secrets.MOD_SITE_TOKEN }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:MOD_SITE_TOKEN)) {
+            Write-Error "MOD_SITE_TOKEN secret is not configured. Add a Bearer token with upload/publish permission for post 1739."
+          }
+          $scmod = Join-Path $env:RUNNER_TEMP "recipaediaex-release/$env:SCMOD_NAME"
+          $modinfo = Get-Content modinfo.json -Raw -Encoding UTF8 | ConvertFrom-Json
+          & ./tools/publish-mod-site.ps1 `
+            -ScmodPath $scmod `
+            -Version $env:MOD_VERSION `
+            -ApiVersion ([string]$modinfo.ApiVersion) `
+            -ReleaseNotesPath release_notes.md
