@@ -1,0 +1,60 @@
+name: Publish Mod Site (manual)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Sync version from modinfo.json
+        shell: pwsh
+        run: ./tools/sync-version.ps1
+
+      - name: Restore
+        run: dotnet restore RecipaediaEX.csproj
+
+      - name: Build
+        run: dotnet build RecipaediaEX.csproj -c Release --no-restore -p:RecipaediaEXSkipPack=true -p:RecipaediaEXSkipSyncVersion=true
+
+      - name: Pack release scmod
+        shell: pwsh
+        run: |
+          $modinfo = Get-Content modinfo.json -Raw -Encoding UTF8 | ConvertFrom-Json
+          $version = [string]$modinfo.Version.Trim()
+          $root = $env:GITHUB_WORKSPACE
+          $out = Join-Path $root "bin/Release/net10.0"
+          $artifact = Join-Path $env:RUNNER_TEMP "recipaediaex-release"
+          New-Item -ItemType Directory -Path $artifact -Force | Out-Null
+          & (Join-Path $root "tools/pack.ps1") `
+            -BuildOutputDir $out `
+            -Configuration Release `
+            -ArtifactDir $artifact `
+            -Version $version
+          "MOD_VERSION=$version" >> $env:GITHUB_ENV
+          "SCMOD_NAME=RecipaediaEX-$version.scmod" >> $env:GITHUB_ENV
+
+      - name: Publish to mod site
+        shell: pwsh
+        env:
+          MOD_SITE_TOKEN: ${{ secrets.MOD_SITE_TOKEN }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:MOD_SITE_TOKEN)) {
+            Write-Error "MOD_SITE_TOKEN secret is not configured."
+          }
+          $scmod = Join-Path $env:RUNNER_TEMP "recipaediaex-release/$env:SCMOD_NAME"
+          $modinfo = Get-Content modinfo.json -Raw -Encoding UTF8 | ConvertFrom-Json
+          & ./tools/publish-mod-site.ps1 `
+            -ScmodPath $scmod `
+            -Version $env:MOD_VERSION `
+            -ApiVersion ([string]$modinfo.ApiVersion)
