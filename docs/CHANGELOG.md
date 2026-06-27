@@ -45,6 +45,27 @@
 
 ---
 
+## [2.0.0.0-preview7] — 2026-06-25
+
+**对比基准：** `2.0.0.0-preview6` → `2.0.0.0-preview7`
+
+### 新增
+
+- **合成助手 Phase 4a（W4）**：`RecipaediaCraftingOverlayController.DismissForModalWidget` — Host Modal 关闭/替换时销毁助手；`TryGetOverlayHost` 与角标门控要求 `GetCraftingContext() != null`。
+- **合成助手 Phase 4d（W4.5）**：Overlay 搜索框 **250ms debounce 自动过滤**（Enter / 放大镜仍立即提交并写入历史）；无会话记忆时默认浏览 **All Blocks**（D32）。
+
+### 变更
+
+- **合成助手 Phase 2a.3（W1）**：toggle 关闭改为 **`Hide()`**（保留 Dialog 实例与会话态）；Host 销毁仍 **`Dismiss()`** Remove Widget。
+- `DefaultOverlayCategoryId` 改为返回 **All Blocks**（废止 Phase 1.6「默认首个非 All」）。
+
+### 适配指南（从 preview6 升级）
+
+1. **依赖版本** — `modinfo` 中 `com.recipaediaex` 改为 `2.0.0.0-preview7`。
+2. **Modal 生命周期** — 若内容模组在 `OnModalPanelWidgetSet` 等处手动关闭合成助手，请改调 `RecipaediaCraftingOverlayController.DismissForModalWidget(oldModal)`（或 `Dismiss()`），勿再调用已移除的 `Close()`。
+
+---
+
 ## [2.0.0.0-preview6] — 2026-06-19
 
 **对比基准：** `2.0.0.0-preview5`（提交 [`b71e6a0`](https://github.com/CS-LX/RecipaediaEX/commit/b71e6a0)）→ `2.0.0.0-preview6`（提交 [`2b85f5d`](https://github.com/CS-LX/RecipaediaEX/commit/2b85f5d)，Git 标签 `preview6`）

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using Engine;
+using Engine.Input;
 using Game;
 using GameEntitySystem;
 using RecipaediaEX.Implementation;
@@ -85,6 +86,12 @@ namespace RecipaediaEX.Overlay {
 
         string m_listCategory = string.Empty;
 
+        const float SearchDebounceSeconds = 0.25f;
+
+        string m_debounceInputSnapshot = string.Empty;
+
+        float m_searchDebounceRemaining;
+
 
         public RecipaediaCraftingOverlayDialog(IRecipaediaOverlayHost host, RecipaediaCraftingContext context) {
             m_host = host;
@@ -125,6 +132,7 @@ namespace RecipaediaEX.Overlay {
             m_listCategory = m_selectedCategory;
 
             RestoreSessionSearch();
+            m_debounceInputSnapshot = NormalizeInputText(m_inputKey.Text);
 
             m_blocksList.Direction = LayoutDirection.Vertical;
             m_blocksList.ItemSize = 64;
@@ -136,6 +144,16 @@ namespace RecipaediaEX.Overlay {
             m_blocksList.ScrollPosition = RecipaediaCraftingOverlaySessionState.BlocksListScrollPosition;
         }
 
+
+        public void RefreshHostContext() {
+            RecipaediaCraftingContext? context = m_host.GetCraftingContext();
+            if (context == null) {
+                RecipaediaCraftingOverlayController.Dismiss();
+                return;
+            }
+            m_context = context;
+            m_recipePreview.SetContext(context);
+        }
 
         public void CaptureSessionState() {
             RecipaediaCraftingOverlaySessionState.SelectedCategoryId = m_selectedCategory;
@@ -153,8 +171,10 @@ namespace RecipaediaEX.Overlay {
 
 
         public override void Update() {
+            if (!IsVisible) return;
             UpdateSearchBarVisibility();
             UpdateSearchTypeButtonState();
+            UpdateSearchInputDebounce();
 
             UpdateCategoryNavigation();
             if (m_selectedCategory != m_listCategory) {
@@ -165,12 +185,12 @@ namespace RecipaediaEX.Overlay {
             RefreshCategoryBarCaption();
 
             if (m_closeButton.IsClicked) {
-                Dismiss();
+                RecipaediaCraftingOverlayController.Hide();
                 return;
             }
             if (m_recipeDetailClose.IsClicked) HideRecipeDetail();
             if (m_recipeDetailBack.IsClicked) NavigateBack();
-            if (m_searchButton.IsClicked) ApplySearchFromInput();
+            if (m_searchButton.IsClicked) ApplySearchFromInput(commitHistory: true);
             if (m_clearSearchLink.IsClicked) {
                 ClearSearch();
                 PopulateBlocksList();
@@ -185,6 +205,27 @@ namespace RecipaediaEX.Overlay {
             ShowPreviewForItem(item);
         }
 
+
+        void UpdateSearchInputDebounce() {
+            string current = NormalizeInputText(m_inputKey.Text);
+            if (Keyboard.IsKeyDownOnce(Key.Enter) && m_inputKey.HasFocus) {
+                m_searchDebounceRemaining = 0f;
+                m_debounceInputSnapshot = current;
+                ApplySearchFromInput(commitHistory: true);
+                return;
+            }
+            if (current != m_debounceInputSnapshot) {
+                m_debounceInputSnapshot = current;
+                m_searchDebounceRemaining = SearchDebounceSeconds;
+                return;
+            }
+            if (m_searchDebounceRemaining <= 0f) return;
+            m_searchDebounceRemaining -= Time.FrameDuration;
+            if (m_searchDebounceRemaining > 0f) return;
+            ApplySearchFromInput(commitHistory: false);
+        }
+
+        static string NormalizeInputText(string? text) => text?.Replace("\n", string.Empty) ?? string.Empty;
 
         void UpdateCategoryNavigation() {
             if (m_categoryIds.Count == 0) return;
@@ -210,9 +251,6 @@ namespace RecipaediaEX.Overlay {
         }
 
 
-        void Dismiss() => RecipaediaCraftingOverlayController.Close();
-
-
         void UpdateSearchBarVisibility() {
             m_placeHolder.IsVisible = string.IsNullOrEmpty(m_inputKey.Text);
             m_clearSearchLink.IsVisible = !string.IsNullOrEmpty(m_inputKey.Text) || m_inputKey.HasFocus;
@@ -225,10 +263,12 @@ namespace RecipaediaEX.Overlay {
         }
 
 
-        void ApplySearchFromInput() {
-            m_searchQuery = m_inputKey.Text?.Replace("\n", string.Empty).Trim() ?? string.Empty;
+        void ApplySearchFromInput(bool commitHistory = true) {
+            m_searchQuery = NormalizeInputText(m_inputKey.Text).Trim();
             m_filterState = RecipaediaSearchParser.ParseToFilterState(m_searchQuery);
-            if (!string.IsNullOrEmpty(m_searchQuery)) RecipaediaSearchHistory.Add(m_searchQuery);
+            if (commitHistory && !string.IsNullOrEmpty(m_searchQuery)) RecipaediaSearchHistory.Add(m_searchQuery);
+            m_debounceInputSnapshot = NormalizeInputText(m_inputKey.Text);
+            m_searchDebounceRemaining = 0f;
             PopulateBlocksList();
         }
 
@@ -237,6 +277,8 @@ namespace RecipaediaEX.Overlay {
             m_searchQuery = string.Empty;
             m_filterState = new RecipaediaSearchFilterState();
             m_inputKey.Text = string.Empty;
+            m_debounceInputSnapshot = string.Empty;
+            m_searchDebounceRemaining = 0f;
             RecipaediaCraftingOverlaySessionState.SearchQuery = string.Empty;
             m_lastPreviewItem = null;
             HideRecipeDetail();
@@ -258,6 +300,8 @@ namespace RecipaediaEX.Overlay {
                         m_inputKey.Text = query;
                         m_searchQuery = query;
                         m_filterState = RecipaediaSearchParser.ParseToFilterState(query);
+                        m_debounceInputSnapshot = query;
+                        m_searchDebounceRemaining = 0f;
                         PopulateBlocksList();
                     }
                 )
@@ -274,6 +318,8 @@ namespace RecipaediaEX.Overlay {
                         m_filterState = state;
                         m_searchQuery = RecipaediaSearchParser.BuildQuery(state);
                         m_inputKey.Text = m_searchQuery;
+                        m_debounceInputSnapshot = m_searchQuery;
+                        m_searchDebounceRemaining = 0f;
                         if (!string.IsNullOrEmpty(m_searchQuery)) RecipaediaSearchHistory.Add(m_searchQuery);
                         PopulateBlocksList();
                     }

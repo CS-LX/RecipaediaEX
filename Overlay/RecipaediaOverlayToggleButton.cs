@@ -34,9 +34,9 @@ namespace RecipaediaEX.Overlay {
         }
 
         public override void Update() {
-            if (m_clickable.IsClicked && m_host.GetCraftingContext() != null) {
-                RecipaediaCraftingOverlayController.Toggle(m_host);
-            }
+            IsVisible = m_host.GetCraftingContext() != null;
+            if (!IsVisible) return;
+            if (m_clickable.IsClicked) RecipaediaCraftingOverlayController.Toggle(m_host);
         }
     }
 }

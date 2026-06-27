@@ -27,11 +27,11 @@ namespace RecipaediaEX.UI {
             return m_categories[categoryId];
         }
 
-        /// <summary>合成助手默认分类：跳过 All Blocks，降低首屏条目量。</summary>
+        /// <summary>合成助手默认浏览分类（D32）：无会话记忆时为 All Blocks。</summary>
         public static string DefaultOverlayCategoryId {
             get {
                 EnsureLoaded();
-                if (m_categoryIds.Count > 1) return m_categoryIds[1];
+                if (m_categoryIds.Contains("All Blocks")) return "All Blocks";
                 return m_categoryIds.Count > 0 ? m_categoryIds[0] : "All Blocks";
             }
         }
