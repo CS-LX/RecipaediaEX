@@ -69,7 +69,7 @@
 
 **对比基准：** `2.0.0.0-preview6`（提交 [`2b85f5d`](https://github.com/CS-LX/RecipaediaEX/commit/2b85f5d)）→ `2.0.0.0-preview7`（提交 [`8abafba`](https://github.com/CS-LX/RecipaediaEX/commit/8abafba)，Git 标签 `preview7`）
 
-> 反馈期首轮：**W1 / W4 / W4.5**（Hide 不 Destroy、Modal 生命周期、默认 All + debounce 输入即搜）。工业时代 2 在 `4720a50d` 对齐依赖并接入 `DismissForModalWidget`。
+> 反馈期首轮：**W1 / W4 / W4.5**（Hide 不 Destroy、Modal 生命周期、默认 All + debounce 输入即搜）。
 
 ### 新增
 

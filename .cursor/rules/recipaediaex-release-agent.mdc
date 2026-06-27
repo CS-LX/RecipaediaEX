@@ -1,0 +1,50 @@
+---
+description: RecipaediaEX 发版、标签、CHANGELOG 与 git push — Agent 硬约束
+alwaysApply: true
+---
+
+# RecipaediaEX 发版与文档（Agent 必读）
+
+本文件在 **RecipaediaEX 子仓库**内生效；主仓 Agent 编辑 `Dependencies/RecipaediaEX/**` 时亦须遵守（见主仓 `.cursor/rules/recipaediaex-submodule-session.mdc`）。
+
+## 决策树
+
+```
+用户要求「实现 / 黑盒通过 / 收尾」
+  → 仅代码 + 策划勾选 + REX docs/CHANGELOG.md（若用户要更新日志）
+  → 【禁止】自行 git tag、禁止自行 bump modinfo/csproj Version 发 release
+
+用户明确说「发 release / 打 tag / previewN / 提交并推送 REX」
+  → 才可 tag、bump 版本、release commit、push RecipaediaEX 远程
+
+策划案写「发包建议 preview7 / B4 发包」
+  → 【不是】Agent 执行许可；须向用户二次确认是否发版
+```
+
+## 禁止（未经用户在同一会话明确授权）
+
+| 操作 | 说明 |
+|------|------|
+| `git tag v*` / `git push --tags` | 含 `preview*`、正式版；**仅维护者可下令** |
+| 修改 `modinfo.json` / `RecipaediaEX.csproj` 的 `Version` 做发版 | 与 tag 同级，须用户确认 |
+| `release:` 类 commit 并 push | 用户只说「写更新日志」≠ 发 release |
+| 在主仓 `docs/` 写 IE2 玩家 changelog 代替 REX | 更新日志默认只写 **`docs/CHANGELOG.md`（本仓库）** |
+
+## CHANGELOG 写法
+
+- 路径：**仅** `Dependencies/RecipaediaEX/docs/CHANGELOG.md`（或子仓库内 `docs/CHANGELOG.md`）。
+- 面向：**依赖 REX 的模组开发者**；可写「内容模组须在 modinfo 对齐版本」，**勿写** IE2 主仓 commit hash、勿替 IE2 写发版条目。
+- 用户说「补更新日志 / 写 CHANGELOG」→ **只改 REX CHANGELOG**，不要扩散到工业主仓。
+
+## 提交与推送自检
+
+1. 用户是否说了 **RecipaediaEX** 的 commit/push？未说则 **不 push 子仓库**。
+2. 本次是否含 **tag / Version bump**？若无用户明确「发 previewN / release」→ **不做**。
+3. 是否在主仓写了 `docs/CHANGELOG.md` 或 IE2 发版说明？会话若只做 REX → **禁止**。
+
+## 常见误操作（禁止）
+
+- 黑盒通过后主动 `git tag v2.0.0.0-previewN` 并 push
+- 把策划 §9.PR.5「发包建议」当成已批准发版
+- 用户「补一下更新日志」时在 **工业时代 2 主仓** 新建 `docs/CHANGELOG.md`
+- 为 REX 文档小改在主仓单独 commit「同步子模块指针」（无 SCIENEW 实质改动时指针漂移留工作区即可）
