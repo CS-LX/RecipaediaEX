@@ -1,5 +1,6 @@
 ﻿using System;
 using Game;
+using RecipaediaEX.Events;
 
 namespace RecipaediaEX.Overlay {
     public static class RecipaediaCraftingOverlayController {
@@ -13,22 +14,41 @@ namespace RecipaediaEX.Overlay {
             if (context == null) return;
             if (s_dialog != null && ReferenceEquals(s_host, host)) {
                 if (s_dialog.IsVisible) Hide();
-                else ShowExisting();
+                else if (TryOpen(host, context, isReopening: true)) ShowExisting();
                 return;
             }
-            Dismiss();
+            DismissSilently();
+            if (!TryOpen(host, context, isReopening: false)) return;
             Open(host, context);
         }
 
+        static bool TryOpen(IRecipaediaOverlayHost host, RecipaediaCraftingContext context, bool isReopening) =>
+            RecipaediaInterceptBus.TryProceed(new CraftingOverlayOpeningContext(host, context, isReopening));
+
         public static void Hide() {
             if (s_dialog == null || !s_dialog.IsVisible) return;
+            if (!RecipaediaInterceptBus.TryProceed(new CraftingOverlayClosingContext(s_host, CraftingOverlayCloseReason.Hide))) return;
             s_dialog.CaptureSessionState();
             s_dialog.HideRecipeDetail();
             s_dialog.IsVisible = false;
         }
 
+        /// <summary>销毁助手实例；附属模组可经 <see cref="CraftingOverlayClosing"/> 否决。</summary>
         public static void Dismiss() {
+            Teardown(notifyClosingIntercept: true);
+        }
+
+        /// <summary>Host 切换、Modal 关闭、Context 失效等系统生命周期；不触发关闭拦截。</summary>
+        public static void DismissSilently() {
+            Teardown(notifyClosingIntercept: false);
+        }
+
+        static void Teardown(bool notifyClosingIntercept) {
             if (s_dialog == null) return;
+            if (notifyClosingIntercept
+                && !RecipaediaInterceptBus.TryProceed(new CraftingOverlayClosingContext(s_host, CraftingOverlayCloseReason.Dismiss))) {
+                return;
+            }
             s_dialog.CaptureSessionState();
             s_dialog.HideRecipeDetail();
             s_dialog.ParentWidget?.Children.Remove(s_dialog);
@@ -39,7 +59,7 @@ namespace RecipaediaEX.Overlay {
         /// <summary>Host Modal 关闭或替换时销毁助手（D28）。toggle 关助手请用 <see cref="Hide"/>。</summary>
         public static void DismissForModalWidget(Widget? modalWidget) {
             if (s_dialog == null || s_host == null) return;
-            if (modalWidget == null || IsHostOnModal(s_host, modalWidget)) Dismiss();
+            if (modalWidget == null || IsHostOnModal(s_host, modalWidget)) DismissSilently();
         }
 
         public static bool TryGetOverlayHost(ComponentGui gui, out IRecipaediaOverlayHost host) {

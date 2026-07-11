@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Game;
+using RecipaediaEX.Events;
 using RecipaediaEX.Implementation;
 
 namespace RecipaediaEX.Overlay {
@@ -100,7 +101,30 @@ namespace RecipaediaEX.Overlay {
                 return PlacementResult.AlreadySatisfied();
             }
 
+            CountPlan(bestPlan, out int plannedTransferCount, out int missingIngredientCount);
+            string crafterKind = CrafterKindFor(context);
+            if (!RecipaediaInterceptBus.TryProceed(new RecipePlacementPlanBuildingContext(
+                    context,
+                    recipe,
+                    sources,
+                    options,
+                    crafterKind,
+                    execute,
+                    plannedTransferCount,
+                    missingIngredientCount))) {
+                return ToResult(bestPlan);
+            }
+
             if (execute) {
+                if (!RecipaediaInterceptBus.TryProceed(new RecipePlacementExecutingContext(
+                        context,
+                        recipe,
+                        sources,
+                        options,
+                        crafterKind,
+                        plannedTransferCount))) {
+                    return ToResult(bestPlan);
+                }
                 foreach (PlacementAction action in bestPlan) {
                     if (!action.NeedsTransfer) continue;
                     int removed = sources.PlayerInventory.RemoveSlotItems(action.SourceSlot, 1);
@@ -349,6 +373,24 @@ namespace RecipaediaEX.Overlay {
                 if (moved >= count) break;
             }
             return moved;
+        }
+
+        static string CrafterKindFor(FormattedGridPlacementContext context) =>
+            context.MappingMode == FormattedGridMappingMode.FurnaceInputRow
+                ? CrafterKind.Furnace
+                : CrafterKind.CraftingTable;
+
+        static void CountPlan(List<PlacementAction> plan, out int plannedTransferCount, out int missingIngredientCount) {
+            plannedTransferCount = 0;
+            missingIngredientCount = 0;
+            foreach (PlacementAction action in plan) {
+                if (action.MissingLabel != null) {
+                    missingIngredientCount++;
+                }
+                else if (action.NeedsTransfer) {
+                    plannedTransferCount++;
+                }
+            }
         }
     }
 }

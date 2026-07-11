@@ -25,6 +25,7 @@ namespace RecipaediaEX {
                 return;
             }
 
+            if (!RecipaediaInterceptBus.TryProceed(new OpenFullRecipaediaNavigatingContext(gui))) return;
             RecipaediaEventBus.GetPublisher<OpenFullRecipaediaRequestedEvent>().Publish(default);
         }
     }

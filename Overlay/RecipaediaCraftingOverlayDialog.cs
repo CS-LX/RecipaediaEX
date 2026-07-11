@@ -5,6 +5,7 @@ using Engine;
 using Engine.Input;
 using Game;
 using GameEntitySystem;
+using RecipaediaEX.Events;
 using RecipaediaEX.Implementation;
 using RecipaediaEX.Search;
 using RecipaediaEX.UI;
@@ -150,7 +151,7 @@ namespace RecipaediaEX.Overlay {
         public void RefreshHostContext() {
             RecipaediaCraftingContext? context = m_host.GetCraftingContext();
             if (context == null) {
-                RecipaediaCraftingOverlayController.Dismiss();
+                RecipaediaCraftingOverlayController.DismissSilently();
                 return;
             }
             m_context = context;
@@ -273,7 +274,10 @@ namespace RecipaediaEX.Overlay {
 
 
         void ApplySearchFromInput(bool commitHistory = true) {
-            m_searchQuery = NormalizeInputText(m_inputKey.Text).Trim();
+            string query = NormalizeInputText(m_inputKey.Text).Trim();
+            var applyingContext = new OverlaySearchApplyingContext(m_context, query, commitHistory);
+            if (!RecipaediaInterceptBus.TryProceed(applyingContext)) return;
+            m_searchQuery = applyingContext.SearchQuery;
             m_filterState = RecipaediaSearchParser.ParseToFilterState(m_searchQuery);
             if (commitHistory && !string.IsNullOrEmpty(m_searchQuery)) RecipaediaSearchHistory.Add(m_searchQuery);
             m_debounceInputSnapshot = NormalizeInputText(m_inputKey.Text);
@@ -393,6 +397,7 @@ namespace RecipaediaEX.Overlay {
 
 
         void ShowPreviewForItem(IRecipaediaRecipeItem recipeItem, int? tabIndex = null) {
+            if (!RecipaediaInterceptBus.TryProceed(new OverlayRecipePreviewShowingContext(m_host, m_context, recipeItem))) return;
             m_lastPreviewItem = recipeItem;
             m_recipeDetailTitle.Text = GetRecipeItemTitle(recipeItem);
             List<IRecipe> allRecipes = RecipaediaOverlayRecipeResolver.ResolveAllRecipes(recipeItem, m_context);

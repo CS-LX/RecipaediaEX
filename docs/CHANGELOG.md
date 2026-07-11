@@ -43,6 +43,9 @@
 
 ### 新增
 
+- **`RecipaediaInterceptBus`**：`InterceptChannel<T>` + `IInterceptPublisher` / `IInterceptSubscriber`；订阅方 `return false` 否决操作。
+- **P0 生产拦截**：`CrafterOutputRemoving`、`CrafterOutputProducing`、`FurnaceFuelConsuming`、`RecipePlacementPlanBuilding`、`RecipePlacementExecuting`（已挂接 `ComponentEX*` / `FormattedGridPlacementPlanner`）。
+- **P1 助手拦截**：`CraftingOverlayOpening` / `Closing`、`OpenFullRecipaediaNavigating`、`OverlaySearchApplying`、`OverlayRecipePreviewShowing`；系统生命周期 teardown 走 `DismissSilently()`（不触发 `CraftingOverlayClosing`）。
 - **合成助手 W3（Phase 2c）**：熔炼输入区 `+` — `FormattedGridPlacementPlanner`、`FurnacePlacementTarget`（`OriginalSmeltingRecipe`）；`RecipaediaFurnaceWidget` + Loader 替换原版 `FurnaceWidget`。
 - **合成助手 W2**：每卡 `+` **长按连续放置** — `PlacementLongPressRepeater`（连放 1 秒内累计 40 组，二次缓入由慢至快）；复用 `PlaceRecipe`，连放后续次 `clearGridBeforePlace: false`。
 - 有形合成格 **广度优先**：已匹配格未满容量时每轮 +1（JEI 式多组 pattern，非单格硬塞）。

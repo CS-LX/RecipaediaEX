@@ -89,6 +89,18 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
             int outputBlockValue = 0;
             if (slotIndex == ResultSlotIndex) {
                 outputBlockValue = GetSlotValue(ResultSlotIndex);
+                if (count > 0
+                    && outputBlockValue != 0
+                    && !RecipaediaInterceptBus.TryProceed(new CrafterOutputRemovingContext(
+                        Project,
+                        this,
+                        FindInteractingPlayer(),
+                        m_smeltingRecipe,
+                        outputBlockValue,
+                        count,
+                        CrafterKind.Furnace))) {
+                    return 0;
+                }
             }
             int removed = base.RemoveSlotItems(slotIndex, count);
             if (removed > 0 && slotIndex == ResultSlotIndex && outputBlockValue != 0) {
@@ -168,6 +180,18 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
             OriginalSmeltingRecipe recipe = m_smeltingRecipe;
             int outputBlockValue = recipe.ResultValue;
             int producedCount = recipe.ResultCount;
+            if (outputBlockValue != 0
+                && producedCount > 0
+                && !RecipaediaInterceptBus.TryProceed(new CrafterOutputProducingContext(
+                    Project,
+                    this,
+                    FindInteractingPlayer(),
+                    recipe,
+                    outputBlockValue,
+                    producedCount,
+                    CrafterKind.Furnace))) {
+                return;
+            }
             for (int i = 0; i < m_furnaceSize; i++) {
                 if (m_slots[i].Count > 0) {
                     m_slots[i].Count--;
@@ -245,10 +269,19 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                 }
                 else if (block.GetFuelHeatLevel(slot2.Value) > 0f) {
                     int fuelBlockValue = slot2.Value;
-                    slot2.Count--;
                     float fireDuration = block.GetFuelFireDuration(fuelBlockValue) * FuelTimeEfficiency;
+                    float heatLevel = block.GetFuelHeatLevel(fuelBlockValue);
+                    if (!RecipaediaInterceptBus.TryProceed(new FurnaceFuelConsumingContext(
+                            Project,
+                            this,
+                            fuelBlockValue,
+                            heatLevel,
+                            fireDuration))) {
+                        return false;
+                    }
+                    slot2.Count--;
                     m_fireTimeRemaining = fireDuration;
-                    m_heatLevel = block.GetFuelHeatLevel(fuelBlockValue);
+                    m_heatLevel = heatLevel;
                     RecipaediaEventBus.GetPublisher<FurnaceFuelUsedEvent>().Publish(
                         new FurnaceFuelUsedEvent(Project, this, fuelBlockValue, m_heatLevel, fireDuration));
                     return true;

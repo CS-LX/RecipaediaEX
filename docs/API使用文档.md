@@ -246,6 +246,45 @@ RecipaediaEventBus.GetPublisher<MyPackRecipeRegisteredEvent>()
 
 扩展熔炉/工作台在切换配方时会先经 `FindMatchingRecipe<T>` 发布 `RecipeMatched`，随后在组件内可能再发布 `CraftingRecipeChanged` / `SmeltingRecipeChanged`。若只关心“最终绑定到机器的配方”，优先订阅 Changed 事件；若要在**任意**匹配入口（含自定义组件、图鉴探测）统一拦截，订阅 `RecipeMatched`。
 
+### 2.6 `RecipaediaInterceptBus`
+
+路径：`Events/`（`RecipaediaInterceptBus.cs`、`InterceptChannel.cs`、`IInterceptPublisher.cs`、`IInterceptSubscriber.cs`）
+
+#### 设计
+
+- 与 `RecipaediaEventBus` **互补**：拦截通道在操作**执行前**询问订阅方；`Subscribe(Func<T, bool>)` 返回 `false` 即否决。
+- `TryProceed(context)`：`true` 放行，`false` 被拦截（无订阅者时默认放行）。
+- `priority` 越小越先执行；同优先级按注册顺序（与宿主 `ModsManager.RegisterHook` 一致）。
+- 载荷类型命名：`*Context`（拦截） vs `*Event`（事后通知）。
+
+```csharp
+using RecipaediaEX.Events;
+
+IDisposable gate = RecipaediaInterceptBus.CrafterOutputRemoving.Subscribe(ctx => {
+    if (ShouldBlockTake(ctx)) return false;
+    return true;
+});
+```
+
+#### 内置拦截点一览
+
+| 便捷属性 | 上下文类型 | 触发时机 | 成对通知事件 |
+|----------|------------|----------|--------------|
+| `CrafterOutputRemoving` | `CrafterOutputRemovingContext` | 产物格 `RemoveSlotItems` **之前** | `CrafterOutputRemoved` |
+| `CrafterOutputProducing` | `CrafterOutputProducingContext` | 熔炉 `ConsumeIngredientsAndCreateResult` **写入产物格之前** | `CrafterOutputProduced` |
+| `FurnaceFuelConsuming` | `FurnaceFuelConsumingContext` | 熔炉 `UseFuel` **扣燃料之前** | `FurnaceFuelUsed` |
+| `RecipePlacementPlanBuilding` | `RecipePlacementPlanBuildingContext` | 合成助手 `+` 已算出需搬运方案、执行前（含 `execute: false` 预览） | — |
+| `RecipePlacementExecuting` | `RecipePlacementExecutingContext` | 合成助手 `+` `execute: true`、即将扣背包填格 | — |
+| `CraftingOverlayOpening` | `CraftingOverlayOpeningContext` | 助手 `Toggle` 打开或重新显示 | — |
+| `CraftingOverlayClosing` | `CraftingOverlayClosingContext` | 助手 `Hide`；或显式 `Dismiss()`（**不**含 `DismissSilently` 系统生命周期） | — |
+| `OpenFullRecipaediaNavigating` | `OpenFullRecipaediaNavigatingContext` | 非合成 Host 按 Recipaedia 键、发布全屏图鉴请求**之前** | `OpenFullRecipaediaRequested` |
+| `OverlaySearchApplying` | `OverlaySearchApplyingContext` | 助手搜索框应用查询**之前**（可改 `SearchQuery`） | — |
+| `OverlayRecipePreviewShowing` | `OverlayRecipePreviewShowingContext` | 助手展示配方预览弹层**之前** | — |
+
+`OverlaySearchApplyingContext` 为 **class**（非 readonly struct），附属模组可在拦截链中改写 `SearchQuery` 再交给 REX 解析。
+
+自定义拦截类型与 `RecipaediaEventBus` 相同：任意 `T` + `GetSubscriber<T>()` / `GetPublisher<T>()`，在自有代码唯一出口调用 `TryProceed`。
+
 ---
 
 ## 3. 工作站（Crafter）API

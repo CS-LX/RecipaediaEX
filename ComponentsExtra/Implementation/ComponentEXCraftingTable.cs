@@ -65,7 +65,21 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                         }
                     }
                     count = count / m_matchedRecipe.ResultCount * m_matchedRecipe.ResultCount;
+                    if (count <= 0) {
+                        return 0;
+                    }
                     int outputBlockValue = GetSlotValue(ResultSlotIndex);
+                    ComponentPlayer componentPlayer = FindInteractingPlayer();
+                    if (!RecipaediaInterceptBus.TryProceed(new CrafterOutputRemovingContext(
+                            Project,
+                            this,
+                            componentPlayer,
+                            m_matchedRecipe,
+                            outputBlockValue,
+                            count,
+                            CrafterKind.CraftingTable))) {
+                        return 0;
+                    }
                     num = Base_RemoveSlotItems(slotIndex, count);
                     if (num > 0) {
                         for (int i = 0; i < 36; i++) {
@@ -79,7 +93,6 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
                             m_slots[RemainsSlotIndex].Value = m_matchedRecipe.RemainsValue;
                             m_slots[RemainsSlotIndex].Count += num / m_matchedRecipe.ResultCount * m_matchedRecipe.RemainsCount;
                         }
-                        ComponentPlayer componentPlayer = FindInteractingPlayer();
                         if (componentPlayer is { PlayerStats: not null }) {
                             componentPlayer.PlayerStats.ItemsCrafted += num;
                         }
