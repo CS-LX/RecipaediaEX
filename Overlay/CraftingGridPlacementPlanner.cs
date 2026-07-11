@@ -150,7 +150,20 @@ namespace RecipaediaEX.Overlay {
                 int slotValue = treatGridAsEmpty ? 0 : table.GetSlotValue(targetSlot);
                 if (slotCount > 0) {
                     if (IngredientMatches(ingredient, slotValue, recipe)) {
-                        plan.Add(new PlacementAction { TargetSlot = targetSlot, NeedsTransfer = false });
+                        int capacity = table.GetSlotCapacity(targetSlot, slotValue);
+                        if (slotCount < capacity
+                            && TryFindPlayerSlot(sources.PlayerInventory, ingredient, recipe, reservedCounts, out int stackSourceSlot, out int stackBlockValue)) {
+                            reservedCounts[stackSourceSlot] = reservedCounts.GetValueOrDefault(stackSourceSlot) + 1;
+                            plan.Add(new PlacementAction {
+                                TargetSlot = targetSlot,
+                                SourceSlot = stackSourceSlot,
+                                BlockValue = stackBlockValue,
+                                NeedsTransfer = true,
+                            });
+                        }
+                        else {
+                            plan.Add(new PlacementAction { TargetSlot = targetSlot, NeedsTransfer = false });
+                        }
                         continue;
                     }
                     if (options.FillEmptyOnly) {

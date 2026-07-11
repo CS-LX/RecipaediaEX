@@ -41,7 +41,20 @@
 
 ## [Unreleased]
 
-（暂无）
+### 新增
+
+- **合成助手 W2**：每卡 `+` **长按连续放置** — `PlacementLongPressRepeater`（连放 1 秒内累计 40 组，二次缓入由慢至快）；复用 `PlaceRecipe`，连放后续次 `clearGridBeforePlace: false`。
+- 有形合成格 **广度优先**：已匹配格未满容量时每轮 +1（JEI 式多组 pattern，非单格硬塞）。
+- 绿色 `+` 悬停提示「长按可连续放置」（`RecipaediaCraftingOverlay:14`）。
+
+### 变更
+
+- `IRecipaediaOverlayDescriptorHost.PlaceRecipe` 返回 `bool`；新增 `clearGridBeforePlace`、`showFeedback` 参数（连放调用方使用）。
+
+### 适配指南（依赖 IE2 等 Placement Target 的内容模组）
+
+1. **One2One / 单槽机器**：长按灌满需在 `ContainerSlotPlacementPlanner`（或等价逻辑）中，当槽内已达 `requiredCount` 且未满容量时继续 +1 — IE2 已在 `SCIENEW/Modules/RecipaediaEX/Overlay/ContainerSlotPlacementPlanner.cs` 落地。
+2. 若自定义 `IRecipePlacementTarget`，连放时勿在每次 `TryPlaceRecipe` 清空容器输入槽。
 
 ---
 

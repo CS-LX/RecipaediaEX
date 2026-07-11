@@ -10,7 +10,8 @@
       "0": "Crafting Assistant",
       "1": "No recipes match this workstation",
       "12": "Global search",
-      "13": "Search all entries…"
+      "13": "Search all entries…",
+      "14": "Hold to place repeatedly"
     },
     "RecipaediaSearchFilterDialog": {
       "0": "Advanced Filter",

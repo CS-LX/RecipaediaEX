@@ -444,24 +444,31 @@ namespace RecipaediaEX.Overlay {
             return true;
         }
 
-        public void PlaceRecipe(IRecipe recipe) {
-            if (!PassesPlacementGate(recipe, out _)) return;
+        public bool PlaceRecipe(IRecipe recipe, bool clearGridBeforePlace = true, bool showFeedback = true) {
+            if (!PassesPlacementGate(recipe, out _)) return false;
             IRecipePlacementTarget target = m_host.GetPlacementTarget()!;
             var sources = new PlacementSources {
                 PlayerInventory = m_context.Inventory!,
                 ContainerInventory = null,
             };
-            PlacementResult preview = target.TryPlaceRecipe(recipe, sources, PlacementOptions.Default, execute: false);
+            PlacementOptions options = new() {
+                FillEmptyOnly = PlacementOptions.Default.FillEmptyOnly,
+                AllowPartial = PlacementOptions.Default.AllowPartial,
+                ClearGridBeforePlace = clearGridBeforePlace,
+                MaxSets = false,
+            };
+            PlacementResult preview = target.TryPlaceRecipe(recipe, sources, options, execute: false);
             if (preview.Success && !preview.HadTransfers) {
-                ShowPlacementFeedback(PlacementResult.AlreadySatisfied());
-                return;
+                if (showFeedback) ShowPlacementFeedback(PlacementResult.AlreadySatisfied());
+                return false;
             }
             if (!preview.Success && !preview.PartialSuccess) {
-                ShowPlacementFeedback(preview);
-                return;
+                if (showFeedback) ShowPlacementFeedback(preview);
+                return false;
             }
-            PlacementResult result = target.TryPlaceRecipe(recipe, sources, PlacementOptions.Default, execute: true);
-            ShowPlacementFeedback(result);
+            PlacementResult result = target.TryPlaceRecipe(recipe, sources, options, execute: true);
+            if (showFeedback) ShowPlacementFeedback(result);
+            return result.HadTransfers;
         }
 
         public bool IsRecipeBookmarked(IRecipe recipe) => RecipaediaRecipeBookmarks.IsBookmarked(recipe);

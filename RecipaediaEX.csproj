@@ -68,6 +68,7 @@
 		<Compile Include="Overlay\PlacementRequirement.cs"/>
 		<Compile Include="Overlay\PlacementResult.cs"/>
 		<Compile Include="Overlay\PlacementOptions.cs"/>
+		<Compile Include="Overlay\PlacementLongPressRepeater.cs"/>
 		<Compile Include="Overlay\PlacementSources.cs"/>
 		<Compile Include="Overlay\PlacableRecipeAdapter.cs"/>
 		<Compile Include="Overlay\CraftingOverlayIngredientBridge.cs"/>

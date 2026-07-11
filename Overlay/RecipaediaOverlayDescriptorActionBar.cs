@@ -24,7 +24,12 @@ namespace RecipaediaEX.Overlay {
         readonly InteractableWidget m_placeButton;
         readonly LabelWidget m_placeTooltip;
         readonly CanvasWidget m_placeHost;
+        readonly PlacementLongPressRepeater m_placeRepeater = new();
         bool m_gateOpen;
+        bool m_firstRepeatClearGrid = true;
+        bool m_repeatExhausted;
+        bool m_longPressGesture;
+        double m_pressStartTime;
         string m_disabledReason = string.Empty;
 
         public RecipaediaOverlayDescriptorActionBar(IRecipe recipe, IRecipaediaOverlayDescriptorHost host) {
@@ -128,8 +133,42 @@ namespace RecipaediaEX.Overlay {
                 m_host.ToggleRecipeBookmark(m_recipe);
                 RefreshBookmarkVisual();
             }
-            if (m_placeButton.IsClicked && m_gateOpen) m_host.PlaceRecipe(m_recipe);
+            if (m_gateOpen) HandlePlaceInput();
             RefreshTooltipVisibility();
+        }
+
+        void HandlePlaceInput() {
+            if (m_placeButton.IsTapped) {
+                m_pressStartTime = Time.FrameStartTime;
+                m_placeRepeater.OnPressStart();
+                m_firstRepeatClearGrid = true;
+                m_repeatExhausted = false;
+                m_longPressGesture = false;
+            }
+
+            if (m_placeButton.IsPressed && !m_repeatExhausted) {
+                if ((float)(Time.FrameStartTime - m_pressStartTime) >= SettingsManager.MinimumHoldDuration) {
+                    m_longPressGesture = true;
+                }
+                if (!m_placeRepeater.UpdateWhilePressed(SettingsManager.MinimumHoldDuration, TryPlaceRepeatStep)) {
+                    m_repeatExhausted = true;
+                }
+            }
+            else if (m_placeRepeater.RepeatActive) {
+                m_placeRepeater.Reset();
+            }
+
+            if (m_placeButton.IsClicked && !m_longPressGesture) {
+                m_host.PlaceRecipe(m_recipe);
+            }
+        }
+
+        bool TryPlaceRepeatStep() {
+            bool clearGrid = m_firstRepeatClearGrid;
+            m_firstRepeatClearGrid = false;
+            bool placed = m_host.PlaceRecipe(m_recipe, clearGridBeforePlace: clearGrid, showFeedback: false);
+            if (placed) m_longPressGesture = true;
+            return placed;
         }
 
         void RefreshGateState() {
@@ -140,16 +179,31 @@ namespace RecipaediaEX.Overlay {
                 : new Color(96, 96, 96, 160);
             m_placeButton.ColorTransform = m_gateOpen ? Color.White : new Color(128, 128, 128, 160);
             m_placeButton.SoundName = m_gateOpen ? "Audio/UI/ButtonClick" : string.Empty;
-            if (!m_gateOpen) m_placeTooltip.Text = m_disabledReason;
         }
 
         void RefreshTooltipVisibility() {
-            bool show = !m_gateOpen
-                && m_placeButton.IsMouseHover
-                && !string.IsNullOrEmpty(m_disabledReason);
-            if (m_placeTooltip.IsVisible == show) return;
-            m_placeTooltip.IsVisible = show;
-            if (show) m_placeHost.ParentWidget?.Measure(m_placeHost.ParentWidget.ParentDesiredSize);
+            if (!m_placeButton.IsMouseHover) {
+                if (m_placeTooltip.IsVisible) m_placeTooltip.IsVisible = false;
+                return;
+            }
+
+            string text = m_gateOpen
+                ? LanguageControl.GetContentWidgets(RecipaediaCraftingOverlayDialog.LanguageName, 14)
+                : m_disabledReason;
+            if (string.IsNullOrEmpty(text)) {
+                if (m_placeTooltip.IsVisible) m_placeTooltip.IsVisible = false;
+                return;
+            }
+
+            if (m_placeTooltip.Text != text) {
+                m_placeTooltip.Text = text;
+                if (m_placeTooltip.IsVisible) {
+                    m_placeHost.ParentWidget?.Measure(m_placeHost.ParentWidget.ParentDesiredSize);
+                }
+            }
+            if (m_placeTooltip.IsVisible) return;
+            m_placeTooltip.IsVisible = true;
+            m_placeHost.ParentWidget?.Measure(m_placeHost.ParentWidget.ParentDesiredSize);
         }
 
         void RefreshBookmarkVisual() {
