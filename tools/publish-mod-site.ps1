@@ -70,6 +70,37 @@ function Get-ModSiteToken {
     return $token
 }
 
+function Get-HttpErrorDetails {
+    param($Response)
+
+    if ($null -eq $Response) {
+        return @{ StatusCode = 0; Body = $null }
+    }
+    if ($Response -is [System.Net.Http.HttpResponseMessage]) {
+        $body = $Response.Content.ReadAsStringAsync().GetAwaiter().GetResult()
+        return @{ StatusCode = [int]$Response.StatusCode; Body = $body }
+    }
+    $statusCode = 0
+    if ($null -ne $Response.StatusCode) {
+        $statusCode = [int]$Response.StatusCode.value__
+    }
+    $body = $null
+    if ($Response.PSObject.Methods.Name -contains 'GetResponseStream') {
+        $stream = $Response.GetResponseStream()
+        if ($null -ne $stream) {
+            $reader = New-Object System.IO.StreamReader($stream)
+            try {
+                $body = $reader.ReadToEnd()
+            }
+            finally {
+                $reader.Dispose()
+                $stream.Dispose()
+            }
+        }
+    }
+    return @{ StatusCode = $statusCode; Body = $body }
+}
+
 function Invoke-ModSiteJson {
     param(
         [string]$Method,
@@ -91,18 +122,15 @@ function Invoke-ModSiteJson {
         return Invoke-RestMethod @params
     }
     catch {
-        $response = $_.Exception.Response
-        if ($null -ne $response) {
-            $stream = $response.GetResponseStream()
-            if ($null -ne $stream) {
-                $reader = New-Object System.IO.StreamReader($stream)
-                $errorBody = $reader.ReadToEnd()
-                $reader.Dispose()
-                if ($response.StatusCode.value__ -eq 401) {
-                    throw "[ModSite] HTTP 401 Unauthorized calling $Url. Check MOD_SITE_TOKEN: use the JWT only (no 'Bearer ' prefix), ensure it is not expired, and that the account can publish on post $($script:ModSitePostIdForErrors)."
-                }
-                throw "[ModSite] HTTP $($response.StatusCode.value__) calling ${Url}: $errorBody"
-            }
+        $details = Get-HttpErrorDetails -Response $_.Exception.Response
+        $statusCode = $details.StatusCode
+        $errorBody = $details.Body
+        if ($statusCode -eq 401) {
+            throw "[ModSite] HTTP 401 Unauthorized calling $Url. Check MOD_SITE_TOKEN: use the JWT only (no 'Bearer ' prefix), ensure it is not expired, and that the account can publish on post $($script:ModSitePostIdForErrors)."
+        }
+        if ($statusCode -gt 0) {
+            $suffix = if ([string]::IsNullOrWhiteSpace($errorBody)) { $_.Exception.Message } else { $errorBody }
+            throw "[ModSite] HTTP $statusCode calling ${Url}: $suffix"
         }
         throw
     }
