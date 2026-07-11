@@ -46,6 +46,7 @@
 - **`RecipaediaInterceptBus`**：`InterceptChannel<T>` + `IInterceptPublisher` / `IInterceptSubscriber`；订阅方 `return false` 否决操作。
 - **P0 生产拦截**：`CrafterOutputRemoving`、`CrafterOutputProducing`、`FurnaceFuelConsuming`、`RecipePlacementPlanBuilding`、`RecipePlacementExecuting`（已挂接 `ComponentEX*` / `FormattedGridPlacementPlanner`）。
 - **P1 助手拦截**：`CraftingOverlayOpening` / `Closing`、`OpenFullRecipaediaNavigating`、`OverlaySearchApplying`、`OverlayRecipePreviewShowing`；系统生命周期 teardown 走 `DismissSilently()`（不触发 `CraftingOverlayClosing`）。
+- **文档**：`API使用文档.md` 重组 §2.5 事件/拦截总线、上下文字段表、`DismissSilently` 边界、§10 合成助手 API、拦截 FAQ 与示例。
 - **合成助手 W3（Phase 2c）**：熔炼输入区 `+` — `FormattedGridPlacementPlanner`、`FurnacePlacementTarget`（`OriginalSmeltingRecipe`）；`RecipaediaFurnaceWidget` + Loader 替换原版 `FurnaceWidget`。
 - **合成助手 W2**：每卡 `+` **长按连续放置** — `PlacementLongPressRepeater`（连放 1 秒内累计 40 组，二次缓入由慢至快）；复用 `PlaceRecipe`，连放后续次 `clearGridBeforePlace: false`。
 - 有形合成格 **广度优先**：已匹配格未满容量时每轮 +1（JEI 式多组 pattern，非单格硬塞）。
@@ -145,7 +146,7 @@
 2. **`RecipeDescriptor`** — 构造函数首参改为 `IRecipaediaRecipeNavigator`（原 `RecipaediaEXRecipesScreen`）。
 3. **流体 Extra** — 若曾使用 `RecipeExtraKeys.MatchedResultFluidValues`，改为模组内自有常量，并在 `IRecipaediaSearchContributor` 等处注册。
 4. **工业机器摆放** — 实现 `IRecipaediaOverlayHost.GetPlacementTarget()` 与 `IPlacableRecipe` 适配；参考主仓 `docs/guides/合成助手-工业机器接入清单.md`（IE2 维护）。
-5. **合成助手订阅（可选）** — `RecipaediaEventBus.OpenFullRecipaediaRequested` 等事件见 [API 文档 · 事件总线](API使用文档.md#25-recipaediaeventbus)。
+5. **合成助手订阅（可选）** — 事件与拦截见 [API 文档 · 事件与扩展总线](API使用文档.md#25-事件与扩展总线)；合成助手 Host 见 [§10](API使用文档.md#10-合成助手crafting-overlay)。
 
 ---
 
@@ -159,7 +160,7 @@
 
 - **`RecipaediaEX.Events` 事件总线**（`RecipaediaEventBus`、`EventChannel<T>`、`IPublisher<T>` / `ISubscriber<T>`）
   - 其它模组可 `GetPublisher<T>` / `GetSubscriber<T>` 发布或订阅**自定义事件类型**，无需改 RX 源码。
-  - 内置事件（均提供 `RecipaediaEventBus.*` 便捷订阅属性，详见 [API 文档 · 事件总线](API使用文档.md#25-recipaediaeventbus)）：
+  - 内置事件（均提供 `RecipaediaEventBus.*` 便捷订阅属性，详见 [API 文档 · 事件与扩展总线](API使用文档.md#25-事件与扩展总线)）：
     - `RecipesResetEvent` — 静态配方总表 `ResetRecipes()` 完成
     - `RecipeMatchedEvent` — `FindMatchingRecipe` / 动态链匹配成功
     - `CraftingRecipeChangedEvent` — 扩展工作台预览配方变化

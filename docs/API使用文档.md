@@ -4,6 +4,21 @@
 
 版本间差异与升级步骤见 **[更新日志](CHANGELOG.md)**（面向依赖 RX 的其它模组作者）。
 
+## 目录
+
+| 章节 | 内容 |
+|------|------|
+| [§1 核心概念](#1-核心概念) | 配方、图鉴、**事件总线 / 拦截总线** |
+| [§2 逻辑层 API](#2-逻辑层-api) | `IRecipe`、加载器、匹配、`RecipaediaEXManager` |
+| [§2.5](#25-事件与扩展总线) | **`RecipaediaEventBus` / `RecipaediaInterceptBus`**（扩展主入口） |
+| [§3–5](#3-工作站crafterapi) | Crafter、图鉴 UI、Descriptor |
+| [§6 推荐接入步骤](#6-推荐接入步骤) | 从零接入清单 |
+| [§7 示例骨架](#7-示例骨架) | 配方、加载器、**拦截订阅** |
+| [§8 常见问题](#8-常见问题) | FAQ |
+| [§9 图鉴搜索](#9-图鉴搜索) | 搜索引擎（另见策划） |
+| [§10 合成助手](#10-合成助手crafting-overlay) | `IRecipaediaOverlayHost`、快捷键路由 |
+| [§11 兼容说明](#11-兼容说明) | 遗留入口 |
+
 ## 1. 核心概念
 
 - `IRecipe`：运行时配方对象，负责匹配逻辑与扩展数据。
@@ -14,6 +29,9 @@
 - `ICrafter` + `RecipesCrafterManager`：配方对应工作站（用于 UI 展示）。
 - `IRecipaedia*`：图鉴条目、分类、详情、配方页接口。
 - `RecipeDescriptor`：配方在 `RecipaediaEXRecipesScreen` 的渲染器。
+- **`RecipaediaEventBus`**：事后**通知**（`Publish` / `Subscribe(Action<T>)`），不可否决操作。
+- **`RecipaediaInterceptBus`**：事前**拦截**（`TryProceed` / `Subscribe(Func<T,bool>)`），`return false` 否决。
+- **`IRecipaediaOverlayHost`**：合成 Modal 实现此接口以接入**合成助手**（悬浮图鉴 + `+` 摆放）。
 
 ---
 
@@ -183,16 +201,45 @@ public class MyDynamicLoader : IDynamicRecipeLoader {
 
 实现类放在**已加载的程序集**中即可（与自定义 `IRecipesLoader` 相同）；发布后确认日志中出现你的 `DynamicRecipeLoader` 全名。
 
-### 2.5 `RecipaediaEventBus`
+### 2.5 事件与扩展总线
+
+RecipaediaEX 提供两条平行的扩展通道，命名约定区分语义：
+
+| | `RecipaediaEventBus` | `RecipaediaInterceptBus` |
+|---|---|---|
+| **时机** | 操作**已发生**或**即将完成** | 操作**执行前** |
+| **订阅签名** | `Subscribe(Action<T>)` | `Subscribe(Func<T, bool>)` |
+| **返回值** | 无 | `true` 放行，`false` **否决** |
+| **无订阅者** | 不发布则无回调 | `TryProceed` 默认 **放行** |
+| **载荷命名** | `*Event` | `*Context` |
+| **典型用途** | 统计、解锁、联动 UI | 权限门禁、替换搜索词、阻止取出 |
+
+两条总线均支持**自定义类型** `T`（无需在 RX 注册），通过 `GetPublisher<T>()` / `GetSubscriber<T>()` 使用。
+
+#### 订阅生命周期
+
+- `Subscribe` 均返回 `IDisposable`，**Dispose 即退订**（建议在模组卸载或世界退出时释放）。
+- 拦截链按 `priority` **升序**执行（越小越先）；同优先级按注册顺序。
+- 单个订阅者抛异常不会阻断其它订阅者（异常写入 `Log.Error`）；拦截链中异常视为该订阅者**放行**（`true`）。
+
+#### 通知与拦截成对关系
+
+部分生产流程同时提供「事前拦截 + 事后通知」，便于附属模组在拦截阶段做门禁、在事件阶段做解锁：
+
+| 拦截（`RecipaediaInterceptBus`） | 通知（`RecipaediaEventBus`） |
+|---|---|
+| `CrafterOutputRemoving` | `CrafterOutputRemoved` |
+| `CrafterOutputProducing` | `CrafterOutputProduced` |
+| `FurnaceFuelConsuming` | `FurnaceFuelUsed` |
+| `OpenFullRecipaediaNavigating` | `OpenFullRecipaediaRequested`（无便捷属性，见下） |
+
+其余拦截点（合成助手、`+` 摆放）目前仅有拦截或仅有 UI 侧逻辑，无对称 Event。
+
+---
+
+#### `RecipaediaEventBus`
 
 路径：`Events/`（`RecipaediaEventBus.cs`、`EventChannel.cs`、`IPublisher.cs`、`ISubscriber.cs`）
-
-#### 设计
-
-- 每个事件类型 `T` 对应一个全局 `EventChannel<T>`（懒创建，线程安全注册表）。
-- `GetPublisher<T>()` / `GetSubscriber<T>()`：发布与订阅；也可使用 `RecipaediaEventBus` 上预置的便捷属性（见下表）。
-- `Subscribe(Action<T>)` 返回 `IDisposable`，**Dispose 即退订**（建议在模组卸载或世界退出时释放）。
-- 单个订阅者抛异常不会阻断其它订阅者（异常写入 `Log.Error`）。
 
 ```csharp
 using RecipaediaEX.Events;
@@ -200,34 +247,40 @@ using RecipaediaEX.Events;
 IDisposable sub = RecipaediaEventBus.RecipeMatched.Subscribe(e => {
     if (e.FromDynamicLoader) { /* AdHoc 等 */ }
 });
-// 不再需要时
 sub.Dispose();
 ```
 
-#### 内置事件一览
+**内置事件一览**
 
 | 便捷属性 | 事件类型 | 触发时机 | 主要载荷 |
 |----------|----------|----------|----------|
-| `RecipesReset` | `RecipesResetEvent` | `RecipaediaEXManager.ResetRecipes()` 结束（含初始化末尾、进入存档后方块 ID 稳定时） | `RecipeCount` |
-| `RecipeMatched` | `RecipeMatchedEvent` | `FindMatchingRecipe` 在静态表命中，或 `FindMatchingRecipe<T>` 在动态链命中 | `Actual`、`Matched`、`FromDynamicLoader`、`Project?` |
-| `CraftingRecipeChanged` | `CraftingRecipeChangedEvent` | 扩展工作台重新匹配后**当前预览配方**引用变化 | `Inventory`、`PreviousRecipe`、`NewRecipe` |
-| `SmeltingRecipeChanged` | `SmeltingRecipeChangedEvent` | 扩展熔炉**激活冶炼配方**变化（含变为无配方） | 同上（熔炉配方类型） |
+| `RecipesReset` | `RecipesResetEvent` | `RecipaediaEXManager.ResetRecipes()` 结束 | `RecipeCount` |
+| `RecipeMatched` | `RecipeMatchedEvent` | `FindMatchingRecipe` 静态命中，或 `FindMatchingRecipe<T>` 动态链命中 | `Actual`、`Matched`、`FromDynamicLoader`、`Project?` |
+| `CraftingRecipeChanged` | `CraftingRecipeChangedEvent` | 扩展工作台**当前预览配方**引用变化 | `Inventory`、`PreviousRecipe`、`NewRecipe` |
+| `SmeltingRecipeChanged` | `SmeltingRecipeChangedEvent` | 扩展熔炉**激活冶炼配方**变化 | 同上 |
 | `CrafterOutputProduced` | `CrafterOutputProducedEvent` | 扩展熔炉冶炼完成并**写入产物格** | `OutputBlockValue`、`ProducedCount`、`Recipe`、`CrafterKind` |
 | `CrafterOutputRemoved` | `CrafterOutputRemovedEvent` | Crafter 从**产物格成功取出** | `OutputBlockValue`、`RemovedCount`、`CrafterKind` |
-| `FurnaceFuelUsed` | `FurnaceFuelUsedEvent` | 扩展熔炉成功消耗一格燃料并开始燃烧 | `FuelBlockValue`、`HeatLevel`、`FireDuration` |
+| `FurnaceFuelUsed` | `FurnaceFuelUsedEvent` | 扩展熔炉成功消耗一格燃料 | `FuelBlockValue`、`HeatLevel`、`FireDuration` |
 
-`CrafterKind`（`string`）：发布方机器名称或约定标识。RecipaediaEX 内置常量见 `CrafterKind.CraftingTable` / `CrafterKind.Furnace`；其它模组传入自有名称（如 `"Presser"`）。
+**全屏图鉴请求**（无 `RecipaediaEventBus` 便捷属性）：
 
-#### 产出 vs 取出
+```csharp
+RecipaediaEventBus.GetSubscriber<OpenFullRecipaediaRequestedEvent>()
+    .Subscribe(_ => { /* 打开你的全屏图鉴 Screen */ });
+```
 
-- **`CrafterOutputProduced`**：熔炉逻辑在 `ConsumeIngredientsAndCreateResult` 中把产物写入结果槽时触发；玩家尚未点击取出。
-- **`CrafterOutputRemoved`**：玩家（或自动化）从结果槽 `RemoveSlotItems` 成功时触发。工作台“合成”在取出时才消耗原料并计为取出事件。
+由 `RecipaediaOverlayInput` 在非合成 Host 场景、且 `OpenFullRecipaediaNavigating` 拦截放行后发布。
 
-自定义机器若继承 `ComponentEXCraftingTable` / `ComponentEXFurnace` 并调用 `base` 相关方法，可自动获得上表熔炉/工作台事件；若仅调用 `RecipaediaEXManager.FindMatchingRecipe`，会收到 `RecipeMatched`（及静态表路径下的 `RecipesReset` 等全局事件）。
+**`CrafterKind`**（`string`）：`CrafterKind.CraftingTable` / `CrafterKind.Furnace` 为 RX 内置常量；工业机器等传入自有名称（如 `"Presser"`）。
 
-#### 自定义事件类型
+**产出 vs 取出**
 
-任意模组可约定自己的 `struct` / `class` 作为 `T`，无需在 RX 内注册：
+- `CrafterOutputProduced`：熔炉在 `ConsumeIngredientsAndCreateResult` 写入结果槽时触发；玩家尚未点击取出。
+- `CrafterOutputRemoved`：玩家（或自动化）从结果槽 `RemoveSlotItems` 成功时触发。工作台「合成」在取出时才消耗原料并计为取出事件。
+
+自定义机器若继承 `ComponentEXCraftingTable` / `ComponentEXFurnace` 并调用 `base` 相关方法，可自动获得上表事件；若仅调用 `RecipaediaEXManager.FindMatchingRecipe`，会收到 `RecipeMatched` 等全局事件。
+
+**自定义事件类型**
 
 ```csharp
 public readonly struct MyPackRecipeRegisteredEvent {
@@ -235,55 +288,107 @@ public readonly struct MyPackRecipeRegisteredEvent {
     public IRecipe Recipe { get; }
 }
 
-RecipaediaEventBus.GetSubscriber<MyPackRecipeRegisteredEvent>()
-    .Subscribe(e => { /* ... */ });
-
-RecipaediaEventBus.GetPublisher<MyPackRecipeRegisteredEvent>()
-    .Publish(new MyPackRecipeRegisteredEvent(recipe));
+RecipaediaEventBus.GetSubscriber<MyPackRecipeRegisteredEvent>().Subscribe(e => { });
+RecipaediaEventBus.GetPublisher<MyPackRecipeRegisteredEvent>().Publish(new(e));
 ```
 
-#### 与 `RecipeMatched` 的重复订阅说明
+**与 `RecipeMatched` 的重复订阅**
 
-扩展熔炉/工作台在切换配方时会先经 `FindMatchingRecipe<T>` 发布 `RecipeMatched`，随后在组件内可能再发布 `CraftingRecipeChanged` / `SmeltingRecipeChanged`。若只关心“最终绑定到机器的配方”，优先订阅 Changed 事件；若要在**任意**匹配入口（含自定义组件、图鉴探测）统一拦截，订阅 `RecipeMatched`。
+扩展熔炉/工作台切换配方时会先发布 `RecipeMatched`，随后可能再发 `CraftingRecipeChanged` / `SmeltingRecipeChanged`。只关心「最终绑定到机器的配方」→ 订阅 Changed；要在任意匹配入口统一处理 → 订阅 `RecipeMatched`。
 
-### 2.6 `RecipaediaInterceptBus`
+---
+
+#### `RecipaediaInterceptBus`
 
 路径：`Events/`（`RecipaediaInterceptBus.cs`、`InterceptChannel.cs`、`IInterceptPublisher.cs`、`IInterceptSubscriber.cs`）
-
-#### 设计
-
-- 与 `RecipaediaEventBus` **互补**：拦截通道在操作**执行前**询问订阅方；`Subscribe(Func<T, bool>)` 返回 `false` 即否决。
-- `TryProceed(context)`：`true` 放行，`false` 被拦截（无订阅者时默认放行）。
-- `priority` 越小越先执行；同优先级按注册顺序（与宿主 `ModsManager.RegisterHook` 一致）。
-- 载荷类型命名：`*Context`（拦截） vs `*Event`（事后通知）。
 
 ```csharp
 using RecipaediaEX.Events;
 
-IDisposable gate = RecipaediaInterceptBus.CrafterOutputRemoving.Subscribe(ctx => {
-    if (ShouldBlockTake(ctx)) return false;
-    return true;
-});
+// 订阅（也可用便捷属性 CrafterOutputRemoving 等）
+IDisposable gate = RecipaediaInterceptBus.GetSubscriber<CrafterOutputRemovingContext>()
+    .Subscribe(ctx => !ShouldBlockTake(ctx), priority: 10);
+
+// 发布方在唯一出口调用
+bool allowed = RecipaediaInterceptBus.TryProceed(context);
 ```
 
-#### 内置拦截点一览
+静态快捷方式：`RecipaediaInterceptBus.TryProceed<T>(context)` 等价于对应通道的 `TryProceed`。
 
-| 便捷属性 | 上下文类型 | 触发时机 | 成对通知事件 |
-|----------|------------|----------|--------------|
+**内置拦截点一览**
+
+| 便捷属性 | 上下文类型 | 触发时机 | 成对通知 |
+|----------|------------|----------|----------|
 | `CrafterOutputRemoving` | `CrafterOutputRemovingContext` | 产物格 `RemoveSlotItems` **之前** | `CrafterOutputRemoved` |
-| `CrafterOutputProducing` | `CrafterOutputProducingContext` | 熔炉 `ConsumeIngredientsAndCreateResult` **写入产物格之前** | `CrafterOutputProduced` |
+| `CrafterOutputProducing` | `CrafterOutputProducingContext` | 熔炉写入产物格**之前** | `CrafterOutputProduced` |
 | `FurnaceFuelConsuming` | `FurnaceFuelConsumingContext` | 熔炉 `UseFuel` **扣燃料之前** | `FurnaceFuelUsed` |
-| `RecipePlacementPlanBuilding` | `RecipePlacementPlanBuildingContext` | 合成助手 `+` 已算出需搬运方案、执行前（含 `execute: false` 预览） | — |
-| `RecipePlacementExecuting` | `RecipePlacementExecutingContext` | 合成助手 `+` `execute: true`、即将扣背包填格 | — |
+| `RecipePlacementPlanBuilding` | `RecipePlacementPlanBuildingContext` | 助手 `+` 已算出方案、执行前（含 `execute: false` 预检） | — |
+| `RecipePlacementExecuting` | `RecipePlacementExecutingContext` | 助手 `+` `execute: true`、即将扣背包填格 | — |
 | `CraftingOverlayOpening` | `CraftingOverlayOpeningContext` | 助手 `Toggle` 打开或重新显示 | — |
-| `CraftingOverlayClosing` | `CraftingOverlayClosingContext` | 助手 `Hide`；或显式 `Dismiss()`（**不**含 `DismissSilently` 系统生命周期） | — |
-| `OpenFullRecipaediaNavigating` | `OpenFullRecipaediaNavigatingContext` | 非合成 Host 按 Recipaedia 键、发布全屏图鉴请求**之前** | `OpenFullRecipaediaRequested` |
-| `OverlaySearchApplying` | `OverlaySearchApplyingContext` | 助手搜索框应用查询**之前**（可改 `SearchQuery`） | — |
+| `CraftingOverlayClosing` | `CraftingOverlayClosingContext` | 助手 `Hide` 或显式 `Dismiss()` | — |
+| `OpenFullRecipaediaNavigating` | `OpenFullRecipaediaNavigatingContext` | 非合成 Host 按 Recipaedia 键、发布全屏请求**之前** | `OpenFullRecipaediaRequested` |
+| `OverlaySearchApplying` | `OverlaySearchApplyingContext` | 助手搜索框应用查询**之前** | — |
 | `OverlayRecipePreviewShowing` | `OverlayRecipePreviewShowingContext` | 助手展示配方预览弹层**之前** | — |
 
-`OverlaySearchApplyingContext` 为 **class**（非 readonly struct），附属模组可在拦截链中改写 `SearchQuery` 再交给 REX 解析。
+**上下文字段参考**
 
-自定义拦截类型与 `RecipaediaEventBus` 相同：任意 `T` + `GetSubscriber<T>()` / `GetPublisher<T>()`，在自有代码唯一出口调用 `TryProceed`。
+| 上下文 | 主要字段 | 说明 |
+|--------|----------|------|
+| `CrafterOutputRemovingContext` | `Project`、`Inventory`、`InteractingPlayer?`、`Recipe?`、`OutputBlockValue`、`RequestedCount`、`CrafterKind` | 取出前可读配方与数量 |
+| `CrafterOutputProducingContext` | 同上 + `ProducedCount` | `Recipe` 非 null |
+| `FurnaceFuelConsumingContext` | `Project`、`Inventory`、`FuelBlockValue`、`HeatLevel`、`FireDuration` | 扣燃料前 |
+| `RecipePlacementPlanBuildingContext` | `PlacementContext`、`Recipe`、`Sources`、`Options`、`CrafterKind`、`WillExecute`、`PlannedTransferCount`、`MissingIngredientCount` | `WillExecute` 对应当次 `TryPlace` 的 `execute` 参数 |
+| `RecipePlacementExecutingContext` | `PlacementContext`、`Recipe`、`Sources`、`Options`、`CrafterKind`、`PlannedTransferCount` | 仅 `execute: true` 路径 |
+| `CraftingOverlayOpeningContext` | `Host`、`Context`、`IsReopening` | `IsReopening=true` 为已有实例重新显示 |
+| `CraftingOverlayClosingContext` | `Host?`、`Reason`（`Hide` / `Dismiss`） | 见下方 `DismissSilently` 边界 |
+| `OpenFullRecipaediaNavigatingContext` | `ComponentGui` | 全屏图鉴路由 |
+| `OverlaySearchApplyingContext` | `CraftingContext`、`SearchQuery`（**可写**）、`CommitHistory` | **class**，可在链中改写 `SearchQuery` |
+| `OverlayRecipePreviewShowingContext` | `Host`、`CraftingContext`、`RecipeItem` | 预览弹层打开前 |
+
+**否决后的运行时行为（内置挂接点）**
+
+| 拦截点 | 否决效果 |
+|--------|----------|
+| `CrafterOutputRemoving` | 本次取出失败，产物保留 |
+| `CrafterOutputProducing` | 不写入产物格；熔炉进度停在完成态，**每帧重试**（仅在有订阅且否决时） |
+| `FurnaceFuelConsuming` | 不消耗燃料 |
+| `RecipePlacementPlanBuilding` / `Executing` | `+` 预检/执行中止，UI 显示规划结果或错误 |
+| `CraftingOverlayOpening` | 不打开/不重新显示助手 |
+| `CraftingOverlayClosing` | `Hide` / `Dismiss` 不生效，助手保持原状态 |
+| `OpenFullRecipaediaNavigating` | 不发布 `OpenFullRecipaediaRequested` |
+| `OverlaySearchApplying` | 不刷新列表 |
+| `OverlayRecipePreviewShowing` | 不打开预览弹层 |
+
+**`CraftingOverlayClosing` 与 `DismissSilently`**
+
+用户可见关闭走 `RecipaediaCraftingOverlayController.Hide()`（`Reason=Hide`）或 `Dismiss()`（`Reason=Dismiss`），二者会触发 `CraftingOverlayClosing` 拦截。
+
+以下**系统生命周期**走 `DismissSilently()`，**不**触发 `CraftingOverlayClosing`（避免 Host 切换时重复建 Dialog 或被误否决）：
+
+- `Toggle` 切换到另一 Host 前销毁旧实例
+- `DismissForModalWidget`（Host Modal 关闭）
+- `RefreshHostContext` 时 `GetCraftingContext()` 返回 null
+
+附属模组若需区分玩家主动关闭与系统 teardown，可检查 `CraftingOverlayClosingContext.Reason`，并知晓 `DismissSilently` 路径不会收到 Closing 回调。
+
+**自定义拦截类型**
+
+与 EventBus 相同：约定 `T` + `GetSubscriber<T>()`，在自有代码**唯一出口**调用 `TryProceed`（或 `GetPublisher<T>().TryProceed`）。
+
+**典型接入：科技树「先解锁再取出」**
+
+```csharp
+// 拦截：未解锁则禁止取出
+RecipaediaInterceptBus.CrafterOutputRemoving.Subscribe(ctx => {
+    if (!TechTree.IsUnlocked(ctx.OutputBlockValue)) return false;
+    return true;
+});
+
+// 通知：首次成功取出后解锁（与拦截互补）
+RecipaediaEventBus.CrafterOutputRemoved.Subscribe(e => {
+    TechTree.UnlockOnFirstTake(e.OutputBlockValue);
+});
+```
 
 ---
 
@@ -373,7 +478,9 @@ bool IsCrafter(int blockValue, IRecipe recipe);
 5. 为配方类型实现 `RecipeDescriptor` 并加特性。
 6. （可选）给工作站方块实现 `ICrafter`。
 7. （可选）若需运行时 AdHoc 等逻辑，实现 `IDynamicRecipeLoader`；`actual` 匹配时写入 `Project`。
-8. （可选）在 `RecipaediaEventBus` 订阅内置事件，或发布/订阅自定义事件类型（见 [§2.5](#25-recipaediaeventbus)）。
+8. （可选）在 `RecipaediaEventBus` 订阅内置事件，或发布/订阅自定义事件类型（见 [§2.5](#25-事件与扩展总线)）。
+9. （可选）在 `RecipaediaInterceptBus` 订阅内置拦截点，实现门禁、搜索注入等（见 [§2.5](#25-事件与扩展总线)）；注意 `Dispose` 退订。
+10. （可选）合成 Modal 实现 `IRecipaediaOverlayHost` 以接入合成助手（见 [§10](#10-合成助手crafting-overlay)）。
 
 ---
 
@@ -412,6 +519,34 @@ public class MyRecipesLoader : IRecipesLoader {
 }
 ```
 
+### 7.3 拦截订阅
+
+```csharp
+using RecipaediaEX.Events;
+
+public sealed class MyModInterceptSubscriptions : IDisposable {
+    readonly List<IDisposable> m_subs = [];
+
+    public void Register() {
+        m_subs.Add(RecipaediaInterceptBus.CrafterOutputRemoving.Subscribe(ctx =>
+            MyGate.CanTake(ctx.OutputBlockValue, ctx.CrafterKind)));
+
+        m_subs.Add(RecipaediaInterceptBus.OverlaySearchApplying.Subscribe(ctx => {
+            if (string.IsNullOrWhiteSpace(ctx.SearchQuery))
+                ctx.SearchQuery = MyDefaults.ForHost(ctx.CraftingContext);
+            return true;
+        }, priority: -100));
+    }
+
+    public void Dispose() {
+        foreach (IDisposable sub in m_subs) sub.Dispose();
+        m_subs.Clear();
+    }
+}
+```
+
+在 `ModLoader` 卸载或世界退出时调用 `Dispose()`，避免悬挂订阅。
+
 ---
 
 ## 8. 常见问题
@@ -431,6 +566,21 @@ public class MyRecipesLoader : IRecipesLoader {
 - **Q: 熔炉冶炼完成和玩家取出产物，应该订阅哪个事件？**  
   A: 写入产物格用 `CrafterOutputProduced`；玩家从产物格拿走用 `CrafterOutputRemoved`。工作台合成仅在取出时触发 `CrafterOutputRemoved`。
 
+- **Q: 想在取出前阻止玩家拿产物，该用 Event 还是 Intercept？**  
+  A: 用 `RecipaediaInterceptBus.CrafterOutputRemoving`；`CrafterOutputRemoved` 仅在取出**成功后**触发，无法否决。
+
+- **Q: 没有订阅任何拦截点时，游戏行为会变吗？**  
+  A: 不会。`TryProceed` 在无订阅者时返回 `true`，与引入拦截框架前一致。
+
+- **Q: 拦截链里 `return true` 和 `return false` 分别表示什么？**  
+  A: `true` 本订阅方放行；`false` **否决**整个操作。所有订阅方均须返回 `true` 才最终放行。
+
+- **Q: `CraftingOverlayClosing` 为什么有时收不到？**  
+  A: Host 切换、Modal 关闭等走 `DismissSilently()`，故意不触发 Closing 拦截；仅 `Hide()` / `Dismiss()` 会触发。
+
+- **Q: 如何接管非合成场景下的 Recipaedia 键？**  
+  A: 订阅 `OpenFullRecipaediaRequestedEvent` 打开全屏图鉴；若要在发布前否决，订阅 `OpenFullRecipaediaNavigating`。
+
 ---
 
 ## 9. 图鉴搜索
@@ -441,7 +591,123 @@ public class MyRecipesLoader : IRecipesLoader {
 
 ---
 
-## 10. 兼容说明
+## 10. 合成助手（Crafting Overlay）
+
+路径：`Overlay/`。策划与验收清单见 **[工作台悬浮助手策划](工作台悬浮助手策划.md)**。
+
+### 10.1 角色划分
+
+| 类型 | 职责 |
+|------|------|
+| `IRecipaediaOverlayHost` | 合成 Modal Widget 声明：提供上下文、挂载父节点、可选摆放目标 |
+| `RecipaediaCraftingOverlayController` | 单例式助手生命周期（`Toggle` / `Hide` / `Dismiss`） |
+| `RecipaediaCraftingOverlayDialog` | 右侧条带 UI + 配方预览 |
+| `RecipaediaOverlayInput` | Recipaedia 键路由（合成 Host toggle vs 全屏图鉴 EventBus） |
+
+### 10.2 `IRecipaediaOverlayHost`
+
+```csharp
+public interface IRecipaediaOverlayHost {
+    RecipaediaCraftingContext? GetCraftingContext();
+    ContainerWidget OverlayParent { get; }
+    IRecipePlacementTarget? GetPlacementTarget() => null;
+}
+```
+
+- `GetCraftingContext()` 返回 `null` 时：**不显示**助手角标，Recipaedia 键走全屏图鉴路由。
+- `OverlayParent`：通常为合成 Modal 根 Widget，用于把 `RecipaediaCraftingOverlayDialog` 挂到 `GameWidget` 下。
+- `GetPlacementTarget()`：返回非 null 时，助手配方卡上的 `+` 可自动摆放；工作台参考 `CraftingTablePlacementTarget`，熔炉参考 `FurnacePlacementTarget`。
+
+### 10.3 `RecipaediaCraftingContext`
+
+```csharp
+public sealed class RecipaediaCraftingContext {
+    public int CrafterBlockValue { get; init; }   // 默认 Crafter Tab、+ 门控
+    public float PlayerLevel { get; init; } = 1f;
+    public float RequiredHeatLevel { get; init; }
+    public Project? Project { get; init; }
+    public IInventory? Inventory { get; init; }
+}
+```
+
+内容模组在 `GetCraftingContext()` 中按当前机器填充；工业机器接入示例见主仓 `docs/guides/合成助手-工业机器接入清单.md`（IE2 维护）。
+
+### 10.4 `IRecipePlacementTarget`
+
+```csharp
+public interface IRecipePlacementTarget {
+    bool CanAccept(IRecipe recipe);
+    PlacementResult TryPlaceRecipe(IRecipe recipe, PlacementSources sources,
+        PlacementOptions options, bool execute);
+}
+```
+
+- `execute: false`：预检，触发 `RecipePlacementPlanBuilding`。
+- `execute: true`：扣背包填格，触发 `RecipePlacementExecuting`。
+- 工业/化工机器由内容模组实现 Target；`PlacableRecipeAdapter` 用于注册可摆放配方类型。
+
+### 10.5 Recipaedia 键路由
+
+`RecipaediaOverlayInput.HandleRecipaediaKey(ComponentGui gui)`（由 RX Loader Hook 调用）：
+
+```
+按 Recipaedia 键
+ ├─ 顶层 Modal 为 IRecipaediaOverlayHost 且 GetCraftingContext() != null
+ │    → RecipaediaCraftingOverlayController.Toggle(host)
+ └─ 否则
+      → OpenFullRecipaediaNavigating 拦截
+      → 放行则 Publish OpenFullRecipaediaRequestedEvent
+```
+
+已有其它 Dialog 且助手未打开时，键被忽略（与原版「有弹窗不打开图鉴」一致）。
+
+### 10.6 控制器 API 摘要
+
+| 方法 | 说明 |
+|------|------|
+| `Toggle(host)` | 打开 / 隐藏 / 切换 Host |
+| `Hide()` | 隐藏助手，Host Modal 仍在；触发 `CraftingOverlayClosing(Hide)` |
+| `Dismiss()` | 销毁实例；触发 `CraftingOverlayClosing(Dismiss)` |
+| `DismissSilently()` | 系统 teardown，**不**触发 Closing |
+| `DismissForModalWidget(modal)` | Host Modal 关闭时由 RX 调用 |
+| `TryGetOverlayHost(gui, out host)` | 解析当前合成 Host |
+| `IsOpen` | 助手是否可见 |
+
+### 10.7 最小 Host 示例（熔炉）
+
+```csharp
+public class RecipaediaFurnaceWidget : FurnaceWidget, IRecipaediaOverlayHost {
+    public RecipaediaFurnaceWidget(IInventory inventory, ComponentFurnace furnace)
+        : base(inventory, furnace) {
+        RecipaediaOverlayHostUi.EnsureToggleButton(this, this);
+    }
+
+    public ContainerWidget OverlayParent => this;
+
+    public RecipaediaCraftingContext? GetCraftingContext() {
+        if (!m_componentFurnace.IsAddedToProject) return null;
+        ComponentPlayer? player = m_componentFurnace.FindInteractingPlayer();
+        return new RecipaediaCraftingContext {
+            CrafterBlockValue = m_componentFurnace.Entity
+                .FindComponent<ComponentBlockEntity>(false)?.BlockValue ?? 0,
+            PlayerLevel = player?.PlayerData.Level ?? 1f,
+            Project = m_componentFurnace.Project,
+            Inventory = player?.ComponentMiner.Inventory,
+        };
+    }
+
+    public IRecipePlacementTarget? GetPlacementTarget() =>
+        m_componentFurnace.IsAddedToProject
+            ? new FurnacePlacementTarget(m_componentFurnace)
+            : null;
+}
+```
+
+RX 通过 Loader 将原版 `FurnaceWidget` 替换为上述实现；内容模组自定义 Host 时参照同一模式。
+
+---
+
+## 11. 兼容说明
 
 - `RecipeReaderAttribute`、`RecipeFileLoaderAttribute` 在当前主流程中并非硬依赖入口。
 - 建议通过 `IRecipesLoader` 作为主扩展入口，在 Loader 内部自行组织 Reader 分发策略。
