@@ -41,28 +41,46 @@
 
 ## [Unreleased]
 
+（暂无）
+
+---
+
+## [2.0.0.0] — 2026-07-12
+
+**对比基准：** `2.0.0.0-preview8`（提交 [`f0258e7`](https://github.com/CS-LX/RecipaediaEX/commit/f0258e7)，Git 标签 `preview8`）→ `2.0.0.0`（Git 标签 `v2.0.0.0`）
+
+> **2.0 首个正式版。** 自 preview5 起的配方事件总线、图鉴搜索 Phase 1/2、合成助手 Phase 1～2b 与 preview6～8 社区反馈收口（W1/W4/W4.5/W5）均已包含在 preview 链中；本版在 preview8 基础上新增 **W2 长按连放**、**W3 熔炼输入区 `+`** 与 **RecipaediaInterceptBus**。  
+> **已知限制（计划 2.0.x 后续）：** 合成助手 **Phase 4c（W6）材料推荐 / 原料反查** 暂缓，待 JEI 对齐方案评审后再做。
+
 ### 新增
 
-- **`RecipaediaInterceptBus`**：`InterceptChannel<T>` + `IInterceptPublisher` / `IInterceptSubscriber`；订阅方 `return false` 否决操作。
-- **P0 生产拦截**：`CrafterOutputRemoving`、`CrafterOutputProducing`、`FurnaceFuelConsuming`、`RecipePlacementPlanBuilding`、`RecipePlacementExecuting`（已挂接 `ComponentEX*` / `FormattedGridPlacementPlanner`）。
+- **`RecipaediaInterceptBus`**：`InterceptChannel<T>` + `IInterceptPublisher` / `IInterceptSubscriber`；订阅方 `return false` 否决操作。详见 [API 文档 · 拦截总线](API使用文档.md#25-recipaediaeventbus)。
+- **P0 生产拦截**：`CrafterOutputRemoving`、`CrafterOutputProducing`、`FurnaceFuelConsuming`、`RecipePlacementPlanBuilding`、`RecipePlacementExecuting`（已挂接扩展工作台/熔炉与 `FormattedGridPlacementPlanner`）。
 - **P1 助手拦截**：`CraftingOverlayOpening` / `Closing`、`OpenFullRecipaediaNavigating`、`OverlaySearchApplying`、`OverlayRecipePreviewShowing`；系统生命周期 teardown 走 `DismissSilently()`（不触发 `CraftingOverlayClosing`）。
-- **文档**：`API使用文档.md` 重组 §2.5 事件/拦截总线、上下文字段表、`DismissSilently` 边界、§10 合成助手 API、拦截 FAQ 与示例。
-- **合成助手 W3（Phase 2c）**：熔炼输入区 `+` — `FormattedGridPlacementPlanner`、`FurnacePlacementTarget`（`OriginalSmeltingRecipe`）；`RecipaediaFurnaceWidget` + Loader 替换原版 `FurnaceWidget`。
-- **合成助手 W2**：每卡 `+` **长按连续放置** — `PlacementLongPressRepeater`（连放 1 秒内累计 40 组，二次缓入由慢至快）；复用 `PlaceRecipe`，连放后续次 `clearGridBeforePlace: false`。
-- 有形合成格 **广度优先**：已匹配格未满容量时每轮 +1（JEI 式多组 pattern，非单格硬塞）。
+- **合成助手 W3（Phase 2c）**：熔炼输入区 `+` — `FormattedGridPlacementPlanner`、`FurnacePlacementTarget`（`OriginalSmeltingRecipe`）；`RecipaediaFurnaceWidget` + Loader 可替换原版 `FurnaceWidget`。
+- **合成助手 W2**：每卡 `+` **长按连续放置** — `PlacementLongPressRepeater`（连放 1 秒内累计 40 组，二次缓入由慢至快）；有形合成格 **广度优先** 每轮 +1（JEI 式多组 pattern）。
 - 绿色 `+` 悬停提示「长按可连续放置」（`RecipaediaCraftingOverlay:14`）。
+- **文档**：`API使用文档.md` 重组 §2.5 事件/拦截总线、上下文字段表、`DismissSilently` 边界、§10 合成助手 API、拦截 FAQ 与示例。
 
 ### 变更
 
 - `IRecipaediaOverlayDescriptorHost.PlaceRecipe` 返回 `bool`；新增 `clearGridBeforePlace`、`showFeedback` 参数（连放调用方使用）。
-- `CraftingGridPlacementPlanner` 移除；工作台与熔炉统一走 `FormattedGridPlacementPlanner`。
-- `PlacableRecipeAdapter`：`TryAsPlacable` / `FormattedGridPlacableRecipe` 移除，改为 `IsPlacable` 判定（摆放仍由 `IRecipePlacementTarget` 执行）。
+- ⚠️ **`CraftingGridPlacementPlanner` 移除** — 工作台与熔炉统一走 **`FormattedGridPlacementPlanner`**。
+- ⚠️ **`PlacableRecipeAdapter.TryAsPlacable` / `FormattedGridPlacableRecipe` 移除** — 改为 **`IsPlacable(IRecipe)`** 判定可否显示 `+`；实际摆放仍由 **`IRecipePlacementTarget.TryPlaceRecipe`** 执行。
 
-### 适配指南（依赖 IE2 等 Placement Target 的内容模组）
+### 适配指南（从 `2.0.0.0-preview8` 升级）
 
-1. **熔炼炉 Host**：`IRecipaediaOverlayHost` + `new FurnacePlacementTarget(furnace)`；`GetCraftingContext()` 可用 `BuildCrafterContext`。
-2. **One2One / 单槽机器**：长按灌满需在 `ContainerSlotPlacementPlanner`（或等价逻辑）中，当槽内已达 `requiredCount` 且未满容量时继续 +1 — IE2 已在 `SCIENEW/Modules/RecipaediaEX/Overlay/ContainerSlotPlacementPlanner.cs` 落地。
-2. 若自定义 `IRecipePlacementTarget`，连放时勿在每次 `TryPlaceRecipe` 清空容器输入槽。
+1. **依赖版本** — `modinfo` 中 `com.recipaediaex` 改为 **`2.0.0.0`**（或 `>=2.0.0.0`）。
+2. **Placement 规划器** — 删除对 `CraftingGridPlacementPlanner` 的引用；有形合成与熔炼输入区改用 `FormattedGridPlacementPlanner`。
+3. **Placable 判定** — `PlacableRecipeAdapter.TryAsPlacable(...)` 改为 `PlacableRecipeAdapter.IsPlacable(recipe)`；自定义 `IPlacableRecipe` 包装类若仅用于 UI 门控，可移除，保留 `IRecipePlacementTarget` 即可。
+4. **熔炼炉 Host** — 实现 `IRecipaediaOverlayHost`，`GetPlacementTarget()` 返回 `new FurnacePlacementTarget(furnace)`；`GetCraftingContext()` 可用内容模组提供的 `BuildCrafterContext`。
+5. **长按连放** — 自定义 `IRecipePlacementTarget` 时，连放后续次调用 **`clearGridBeforePlace: false`**，勿每次 `TryPlaceRecipe` 清空输入槽；单槽灌满需支持「已达配方数量且未满堆叠上限时继续 +1」。
+6. **拦截总线（可选）** — 在 `ModLoader` 初始化或世界就绪后订阅 `RecipaediaInterceptBus.*`；卸载时 `Dispose` 订阅句柄。
+
+### 适配指南（从任意 preview 直跳 stable）
+
+1. 若仍依赖 **`2.0.0.0-preview5` 之前**：请先阅读本文件 **preview5 → preview6 → preview7 → preview8** 各节的 ⚠️ 变更（`RecipeDescriptor` 构造、`RecipeExtraKeys`、`Close()` 移除等）。
+2. 合成助手 Overlay 协议见 [工作台悬浮助手策划.md](工作台悬浮助手策划.md)；内容模组 Placement 接入见依赖方文档（如工业时代 2 `docs/guides/合成助手-工业机器接入清单.md`）。
 
 ---
 

@@ -9,7 +9,7 @@ RecipaediaEX 是一个面向 Survivalcraft 模组开发的配方与图鉴扩展�
 
 ## 版本与依赖
 
-- 当前项目版本：`2.0.0.0-preview8`（以 `modinfo.json` 为准）
+- 当前项目版本：`2.0.0.0`（以 `modinfo.json` 为准）
 - 目标框架：`net10.0`
 - 主要依赖：
     - `SurvivalcraftAPI.Engine`
