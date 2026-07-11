@@ -60,6 +60,17 @@ namespace RecipaediaEX
                     gui.m_modalPanelAnimationData.NewWidget = replacement;
                 }
             }
+            if (newWidget is FurnaceWidget vanillaFurnace and not RecipaediaFurnaceWidget) {
+                var replacement = new RecipaediaFurnaceWidget(
+                    gui.m_componentPlayer.ComponentMiner.Inventory,
+                    vanillaFurnace.m_componentFurnace);
+                replacement.HorizontalAlignment = WidgetAlignment.Center;
+                gui.m_modalPanelContainerWidget.Children.Remove(vanillaFurnace);
+                gui.m_modalPanelContainerWidget.Children.Insert(0, replacement);
+                if (gui.m_modalPanelAnimationData != null) {
+                    gui.m_modalPanelAnimationData.NewWidget = replacement;
+                }
+            }
         }
 
         public static XElement RequestScreenFile(string screenName) => ContentManager.Get<XElement>($"RecipaediaEX/Screens/{screenName}");

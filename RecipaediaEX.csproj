@@ -72,8 +72,9 @@
 		<Compile Include="Overlay\PlacementSources.cs"/>
 		<Compile Include="Overlay\PlacableRecipeAdapter.cs"/>
 		<Compile Include="Overlay\CraftingOverlayIngredientBridge.cs"/>
-		<Compile Include="Overlay\CraftingGridPlacementPlanner.cs"/>
+		<Compile Include="Overlay\FormattedGridPlacementPlanner.cs"/>
 		<Compile Include="Overlay\CraftingTablePlacementTarget.cs"/>
+		<Compile Include="Overlay\FurnacePlacementTarget.cs"/>
 		<Compile Include="Overlay\IRecipaediaOverlayDescriptorHost.cs"/>
 		<Compile Include="Overlay\RecipaediaOverlayDescriptorActionBar.cs"/>
 		<Compile Include="Overlay\IRecipePlacementTarget.cs"/>
@@ -81,6 +82,7 @@
 		<Compile Include="Overlay\RecipaediaCrafterRecipeGroup.cs"/>
 		<Compile Include="Overlay\RecipaediaCraftingContext.cs"/>
 		<Compile Include="Overlay\RecipaediaCraftingTableWidget.cs"/>
+		<Compile Include="Overlay\RecipaediaFurnaceWidget.cs"/>
 		<Compile Include="Overlay\RecipaediaCraftingOverlayController.cs"/>
 		<Compile Include="Overlay\RecipaediaCraftingOverlayDialog.cs"/>
 		<Compile Include="Overlay\RecipaediaCraftingOverlaySessionState.cs"/>

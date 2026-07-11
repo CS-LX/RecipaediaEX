@@ -437,7 +437,7 @@ namespace RecipaediaEX.Overlay {
                 disabledReason = LanguageControl.GetContentWidgets(LanguageName, 4);
                 return false;
             }
-            if (!PlacableRecipeAdapter.TryAsPlacable(recipe, out _) || !target.CanAccept(recipe)) {
+            if (!PlacableRecipeAdapter.IsPlacable(recipe) || !target.CanAccept(recipe)) {
                 disabledReason = LanguageControl.GetContentWidgets(LanguageName, 6);
                 return false;
             }

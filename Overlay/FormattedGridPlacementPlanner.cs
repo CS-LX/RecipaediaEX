@@ -1,12 +1,46 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Game;
 using RecipaediaEX.Implementation;
 
 namespace RecipaediaEX.Overlay {
-    /// <summary>有形合成格自动摆放：Transform 布局选择、背包取料、部分填充。</summary>
-    static class CraftingGridPlacementPlanner {
+    public enum FormattedGridMappingMode {
+        /// <summary>N×N 有形合成格（工作台 / 机床）。</summary>
+        SquareCrafting,
+        /// <summary>熔炼输入区第一行；<c>gridIndex</c> 平移对齐 <see cref="FormattedRecipe.Match"/>。</summary>
+        FurnaceInputRow,
+    }
+
+    public readonly struct FormattedGridPlacementContext {
+        public IInventory Inventory { get; init; }
+        public FormattedGridMappingMode MappingMode { get; init; }
+        /// <summary>工作台为 <c>m_craftingGridSize</c>；熔炉为 <c>m_furnaceSize</c>。</summary>
+        public int GridSpan { get; init; }
+        public int ClearSlotCount { get; init; }
+        public Action RefreshRecipe { get; init; }
+        public string ClearGridErrorMessage { get; init; }
+
+        public static FormattedGridPlacementContext ForCraftingTable(ComponentCraftingTable table) => new() {
+            Inventory = table,
+            MappingMode = FormattedGridMappingMode.SquareCrafting,
+            GridSpan = table.m_craftingGridSize,
+            ClearSlotCount = table.SlotsCount - 2,
+            RefreshRecipe = () => table.UpdateCraftingResult(true),
+            ClearGridErrorMessage = "背包已满，无法清空合成格",
+        };
+
+        public static FormattedGridPlacementContext ForFurnace(ComponentFurnace furnace) => new() {
+            Inventory = furnace,
+            MappingMode = FormattedGridMappingMode.FurnaceInputRow,
+            GridSpan = furnace.m_furnaceSize,
+            ClearSlotCount = furnace.m_furnaceSize,
+            RefreshRecipe = furnace.UpdateSmeltingRecipe,
+            ClearGridErrorMessage = "背包已满，无法清空熔炉输入格",
+        };
+    }
+
+    /// <summary><see cref="FormattedRecipe"/> 格位自动摆放：Transform 选布局、背包取料、部分填充。</summary>
+    static class FormattedGridPlacementPlanner {
         sealed class PlacementAction {
             public int TargetSlot;
             public int SourceSlot = -1;
@@ -16,7 +50,7 @@ namespace RecipaediaEX.Overlay {
         }
 
         public static PlacementResult TryPlace(
-            ComponentCraftingTable table,
+            FormattedGridPlacementContext context,
             FormattedRecipe recipe,
             PlacementSources sources,
             PlacementOptions options,
@@ -26,9 +60,10 @@ namespace RecipaediaEX.Overlay {
                 return PlacementResult.None(["缺少玩家背包"]);
             }
 
+            IInventory container = context.Inventory;
             if (execute && options.ClearGridBeforePlace) {
-                if (!TryClearGridToInventory(table, sources.PlayerInventory, out string? clearError)) {
-                    return PlacementResult.None([clearError ?? "背包已满，无法清空合成格"]);
+                if (!TryClearInputSlotsToInventory(context, sources.PlayerInventory, out string? clearError)) {
+                    return PlacementResult.None([clearError ?? context.ClearGridErrorMessage]);
                 }
             }
 
@@ -36,13 +71,12 @@ namespace RecipaediaEX.Overlay {
 
             EnsureTransformedLayouts(recipe);
 
-            int gridSize = table.m_craftingGridSize;
             List<PlacementAction>? bestPlan = null;
             int bestScore = int.MinValue;
 
             foreach (string[] layout in recipe.TransformedIngredients) {
-                if (!LayoutFitsGrid(layout, gridSize)) continue;
-                if (!TryBuildPlan(table, layout, gridSize, recipe, sources, options, treatGridAsEmpty, out List<PlacementAction> plan)) continue;
+                if (!LayoutFitsGrid(layout, context)) continue;
+                if (!TryBuildPlan(container, layout, context, recipe, sources, options, treatGridAsEmpty, out List<PlacementAction> plan)) continue;
                 int score = ScorePlan(plan);
                 if (score <= bestScore) continue;
                 bestScore = score;
@@ -54,7 +88,9 @@ namespace RecipaediaEX.Overlay {
             }
 
             if (bestPlan == null) {
-                return PlacementResult.None(["配方无法放入当前合成格"]);
+                return PlacementResult.None([context.MappingMode == FormattedGridMappingMode.FurnaceInputRow
+                    ? "配方无法放入当前熔炉输入格"
+                    : "配方无法放入当前合成格"]);
             }
 
             if (!bestPlan.Exists(static action => action.NeedsTransfer)) {
@@ -69,9 +105,9 @@ namespace RecipaediaEX.Overlay {
                     if (!action.NeedsTransfer) continue;
                     int removed = sources.PlayerInventory.RemoveSlotItems(action.SourceSlot, 1);
                     if (removed <= 0) continue;
-                    table.AddSlotItems(action.TargetSlot, action.BlockValue, removed);
+                    container.AddSlotItems(action.TargetSlot, action.BlockValue, removed);
                 }
-                table.UpdateCraftingResult(true);
+                context.RefreshRecipe();
             }
 
             return ToResult(bestPlan);
@@ -86,10 +122,10 @@ namespace RecipaediaEX.Overlay {
             recipe.TransformedIngredients.Add(identity);
         }
 
-        static bool LayoutFitsGrid(string[] layout, int gridSize) {
+        static bool LayoutFitsGrid(string[] layout, FormattedGridPlacementContext context) {
             for (int gridIndex = 0; gridIndex < layout.Length; gridIndex++) {
                 if (string.IsNullOrEmpty(layout[gridIndex])) continue;
-                if (!TryGridIndexToSlot(gridIndex, gridSize, out _)) return false;
+                if (!TryGridIndexToSlot(gridIndex, context, out _)) return false;
             }
             return true;
         }
@@ -128,9 +164,9 @@ namespace RecipaediaEX.Overlay {
         }
 
         static bool TryBuildPlan(
-            ComponentCraftingTable table,
+            IInventory container,
             string[] layout,
-            int gridSize,
+            FormattedGridPlacementContext context,
             FormattedRecipe recipe,
             PlacementSources sources,
             PlacementOptions options,
@@ -144,13 +180,13 @@ namespace RecipaediaEX.Overlay {
                 string ingredient = layout[gridIndex];
                 if (string.IsNullOrEmpty(ingredient)) continue;
 
-                if (!TryGridIndexToSlot(gridIndex, gridSize, out int targetSlot)) return false;
+                if (!TryGridIndexToSlot(gridIndex, context, out int targetSlot)) return false;
 
-                int slotCount = treatGridAsEmpty ? 0 : table.GetSlotCount(targetSlot);
-                int slotValue = treatGridAsEmpty ? 0 : table.GetSlotValue(targetSlot);
+                int slotCount = treatGridAsEmpty ? 0 : container.GetSlotCount(targetSlot);
+                int slotValue = treatGridAsEmpty ? 0 : container.GetSlotValue(targetSlot);
                 if (slotCount > 0) {
                     if (IngredientMatches(ingredient, slotValue, recipe)) {
-                        int capacity = table.GetSlotCapacity(targetSlot, slotValue);
+                        int capacity = container.GetSlotCapacity(targetSlot, slotValue);
                         if (slotCount < capacity
                             && TryFindPlayerSlot(sources.PlayerInventory, ingredient, recipe, reservedCounts, out int stackSourceSlot, out int stackBlockValue)) {
                             reservedCounts[stackSourceSlot] = reservedCounts.GetValueOrDefault(stackSourceSlot) + 1;
@@ -194,15 +230,25 @@ namespace RecipaediaEX.Overlay {
             return true;
         }
 
-        static bool TryGridIndexToSlot(int gridIndex, int gridSize, out int slotIndex) {
+        static bool TryGridIndexToSlot(int gridIndex, FormattedGridPlacementContext context, out int slotIndex) {
             int row = gridIndex / 6;
             int col = gridIndex % 6;
-            if (row >= gridSize || col >= gridSize) {
-                slotIndex = -1;
-                return false;
+            switch (context.MappingMode) {
+                case FormattedGridMappingMode.FurnaceInputRow:
+                    if (row != 0 || col >= context.GridSpan) {
+                        slotIndex = -1;
+                        return false;
+                    }
+                    slotIndex = col;
+                    return true;
+                default:
+                    if (row >= context.GridSpan || col >= context.GridSpan) {
+                        slotIndex = -1;
+                        return false;
+                    }
+                    slotIndex = col + row * context.GridSpan;
+                    return true;
             }
-            slotIndex = col + row * gridSize;
-            return true;
         }
 
         static bool IngredientMatches(string requiredIngredient, int blockValue, FormattedRecipe recipe) {
@@ -266,24 +312,24 @@ namespace RecipaediaEX.Overlay {
 
         static readonly Dictionary<string, string> s_missingLabelCache = new();
 
-        static bool TryClearGridToInventory(ComponentCraftingTable table, IInventory playerInventory, out string? error) {
+        static bool TryClearInputSlotsToInventory(FormattedGridPlacementContext context, IInventory playerInventory, out string? error) {
             error = null;
-            int gridSlots = table.SlotsCount - 2;
-            for (int slot = 0; slot < gridSlots; slot++) {
-                int remaining = table.GetSlotCount(slot);
+            IInventory container = context.Inventory;
+            for (int slot = 0; slot < context.ClearSlotCount; slot++) {
+                int remaining = container.GetSlotCount(slot);
                 if (remaining <= 0) continue;
-                int value = table.GetSlotValue(slot);
+                int value = container.GetSlotValue(slot);
                 while (remaining > 0) {
                     int moved = TryAddToInventory(playerInventory, value, remaining);
                     if (moved <= 0) {
-                        error = "背包已满，无法清空合成格";
+                        error = context.ClearGridErrorMessage;
                         return false;
                     }
-                    table.RemoveSlotItems(slot, moved);
+                    container.RemoveSlotItems(slot, moved);
                     remaining -= moved;
                 }
             }
-            table.UpdateCraftingResult(true);
+            context.RefreshRecipe();
             return true;
         }
 
