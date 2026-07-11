@@ -3,5 +3,9 @@
   "FileDomain": "https://file.suancaixianyu.cn",
   "PostId": 1739,
   "ScmodTypeId": 5,
-  "GameVersionIds": [27]
+  "GameVersionIds": [27],
+  "ApiVersionGameVersionIds": {
+    "1.9.2": [27],
+    "1.9.0.2": [27]
+  }
 }

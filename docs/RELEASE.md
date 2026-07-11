@@ -62,7 +62,10 @@ Release CI 在 GitHub Release 成功后调用 `tools/publish-mod-site.ps1`，向
 | `ApiBaseUrl` | `https://m.suancaixianyu.cn/api` | 模组站 API |
 | `PostId` | `1739` | RecipaediaEX 资源帖 ID |
 | `ScmodTypeId` | `5` | `.scmod` 文件类型（必填，否则发版失败） |
-| `GameVersionIds` | `[27]` | 插件 API 版本标签（API1.9.x） |
+| `GameVersionIds` | `[27]` | 未在 `ApiVersionGameVersionIds` 命中时的回退 |
+| `ApiVersionGameVersionIds` | `{ "1.9.2": [27], ... }` | `modinfo.ApiVersion` → 模组站插件 API 标签 id |
+
+`post-version` 字段：`title` / `version` 均为模组 `Version`；`gameVersionIds` 由 `ApiVersion` 查表得到。
 
 ### 本地验证
 

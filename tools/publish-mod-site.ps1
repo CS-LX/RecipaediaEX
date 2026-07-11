@@ -11,9 +11,9 @@
 .PARAMETER ScmodPath
     Path to RecipaediaEX-{Version}.scmod
 .PARAMETER Version
-    modinfo.json Version string (post-version title).
+    modinfo.json Version string (post-version title and version field).
 .PARAMETER ApiVersion
-    modinfo.json ApiVersion string (post-version version field).
+    modinfo.json ApiVersion string; resolved to post-version gameVersionIds via config.
 .PARAMETER ReleaseNotesPath
     Optional fallback release notes (plain text / markdown).
 .PARAMETER ChangelogPath
@@ -315,6 +315,24 @@ function Register-ModSiteUpload {
     return $response.data
 }
 
+function Resolve-GameVersionIds {
+    param(
+        [object]$Config,
+        [string]$ApiVersion
+    )
+
+    if ($Config.ApiVersionGameVersionIds) {
+        $property = $Config.ApiVersionGameVersionIds.PSObject.Properties | Where-Object { $_.Name -eq $ApiVersion } | Select-Object -First 1
+        if ($null -ne $property) {
+            return @($property.Value | ForEach-Object { [int]$_ })
+        }
+    }
+    if ($Config.GameVersionIds) {
+        return @($Config.GameVersionIds | ForEach-Object { [int]$_ })
+    }
+    Write-Error "[ModSite] No gameVersionIds for ApiVersion '$ApiVersion'; set ApiVersionGameVersionIds or GameVersionIds in config."
+}
+
 function Publish-ModSiteVersion {
     param(
         [string]$ApiBaseUrl,
@@ -322,7 +340,7 @@ function Publish-ModSiteVersion {
         [int]$PostId,
         [int[]]$GameVersionIds,
         [string]$Title,
-        [string]$ApiVersionValue,
+        [string]$ModVersion,
         [string]$ContentHtml,
         [int[]]$FileIds
     )
@@ -330,7 +348,7 @@ function Publish-ModSiteVersion {
     $body = @{
         id              = 0
         title           = $Title
-        version         = $ApiVersionValue
+        version         = $ModVersion
         content         = $ContentHtml
         files           = $FileIds
         postId          = $PostId
@@ -354,7 +372,6 @@ $fileDomain = [string]$config.FileDomain.TrimEnd('/')
 $postId = [int]$config.PostId
 $script:ModSitePostIdForErrors = $postId
 $typeId = [int]$config.ScmodTypeId
-$gameVersionIds = @($config.GameVersionIds | ForEach-Object { [int]$_ })
 
 if ([string]::IsNullOrWhiteSpace($ApiVersion)) {
     $modinfoPath = Join-Path $RepoRoot "modinfo.json"
@@ -366,6 +383,7 @@ if ([string]::IsNullOrWhiteSpace($ApiVersion)) {
 if ([string]::IsNullOrWhiteSpace($ApiVersion)) {
     Write-Error "[ModSite] ApiVersion is empty; pass -ApiVersion or ensure modinfo.json exists."
 }
+$gameVersionIds = Resolve-GameVersionIds -Config $config -ApiVersion $ApiVersion
 
 $headers = @{
     Authorization = "Bearer $token"
@@ -376,6 +394,7 @@ Write-Host "[ModSite] ----------------------------------------" -ForegroundColor
 Write-Host "[ModSite] PostId    : $postId" -ForegroundColor Cyan
 Write-Host "[ModSite] Version   : $Version" -ForegroundColor Cyan
 Write-Host "[ModSite] ApiVersion: $ApiVersion" -ForegroundColor Cyan
+Write-Host "[ModSite] GameVerIds: $($gameVersionIds -join ', ')" -ForegroundColor Cyan
 Write-Host "[ModSite] File      : $ScmodPath" -ForegroundColor Cyan
 Write-Host "[ModSite] ----------------------------------------" -ForegroundColor Cyan
 
@@ -407,7 +426,7 @@ $versionRecord = Publish-ModSiteVersion `
     -PostId $postId `
     -GameVersionIds $gameVersionIds `
     -Title $Version `
-    -ApiVersionValue $ApiVersion `
+    -ModVersion $Version `
     -ContentHtml $contentHtml `
     -FileIds @($uploadId)
 
