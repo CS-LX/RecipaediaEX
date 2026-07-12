@@ -26,7 +26,7 @@
 6. 等待 [release.yml](../.github/workflows/release.yml) 完成：
    - GitHub **Releases** 下载 `RecipaediaEX-{Version}.scmod`
    - 模组站资源帖（postId **1739**）自动发布新版本（需已配置 `MOD_SITE_TOKEN`，见下）
-7. （手动）在 IE2 主仓更新 `SCIENEW/modinfo.json` 中 `com.recipaediaex` 依赖版本。
+7. （手动）在 IE2 主仓更新 `SCIENEW/modinfo.json` 中 `com.recipaediaex` 依赖版本（**2.0.0.0** 已于 2026-07-13 对齐）；Overlay Host 接入进度由主仓 [`docs/guides/合成助手-工业机器接入清单.md`](../../../../docs/guides/合成助手-工业机器接入清单.md) 维护。
 
 ## CI 与产物命名
 

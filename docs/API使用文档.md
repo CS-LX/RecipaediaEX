@@ -16,7 +16,7 @@
 | [§7 示例骨架](#7-示例骨架) | 配方、加载器、**拦截订阅** |
 | [§8 常见问题](#8-常见问题) | FAQ |
 | [§9 图鉴搜索](#9-图鉴搜索) | 搜索引擎（另见策划） |
-| [§10 合成助手](#10-合成助手crafting-overlay) | `IRecipaediaOverlayHost`、快捷键路由 |
+| [§10 合成助手](#10-合成助手crafting-overlay) | `IRecipaediaOverlayHost`、快捷键路由、[§10.8 Placable](#108-iplacablerecipe-与-placablereciadapter) |
 | [§11 兼容说明](#11-兼容说明) | 遗留入口 |
 
 ## 1. 核心概念
@@ -704,6 +704,21 @@ public class RecipaediaFurnaceWidget : FurnaceWidget, IRecipaediaOverlayHost {
 ```
 
 RX 通过 Loader 将原版 `FurnaceWidget` 替换为上述实现；内容模组自定义 Host 时参照同一模式。
+
+### 10.8 `IPlacableRecipe` 与 `PlacableRecipeAdapter`
+
+**职责拆分：**
+
+| 层 | 类型 | 职责 |
+|----|------|------|
+| 门控 | `IPlacableRecipe` / `PlacableRecipeAdapter.IsPlacable` | 配方卡是否显示可点的 **`+`** |
+| 执行 | `IRecipePlacementTarget.TryPlaceRecipe` | 从背包填入 Host 槽位 / 合成格 |
+
+REX 内置：`OriginalCraftingRecipe`、`OriginalSmeltingRecipe` 可直接摆放（走 `FormattedGridPlacementPlanner`）。内容模组专有配方须 **`PlacableRecipeAdapter.Register`** 注册工厂，或在配方类上 **直接实现 `IPlacableRecipe`**（`IsPlacable` 会识别）。
+
+**推荐（内容模组）：** 配方数据类（`IRecipe`）与 Placable 包装类分离——`Recipes` 模块不引用 `RecipaediaEX.Overlay`；启动时注册工厂。IE2 示例见 `IndustrialPlacableRecipeAdapters`（`One2One` / `WireComposing` / `ReactionEquation`）。
+
+**双槽示例（绞线机，IE2）：** `WireComposingPlacableRecipe` 声明两格 `PlacementRequirement`；`WireComposerPlacementTarget` 对 slot 0 与线材槽分别调用 `ContainerSlotPlacementPlanner`。完整 Host 清单见主仓 [`合成助手-工业机器接入清单.md`](../../../../docs/guides/合成助手-工业机器接入清单.md)（IE2 维护，含已接入 / 待接入表）。
 
 ---
 
