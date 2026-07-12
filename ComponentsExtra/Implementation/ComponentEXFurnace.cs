@@ -299,7 +299,7 @@ namespace RecipaediaEX.ComponentsExtra.Implementation {
         }
 
         /// <summary>
-        /// 根据当前燃烧状态更新原版熔炉火焰粒子（与方块内容 ID 无关的工业炉可在子类中覆写为空或自定义）。
+        /// 根据当前燃烧状态更新原版熔炉火焰粒子（扩展熔炉可在子类中覆写为空或自定义）。
         /// </summary>
         protected virtual void UpdateFurnaceFireParticles(int cellValue) {
             if (m_heatLevel > 0f) {

@@ -3,7 +3,7 @@
 > **版本**：v0.2  
 > **状态**：**P0–P3 已实施**（见 `tools/sync-version.ps1`、`build.yml`、`release.yml`）  
 > **范围**：RecipaediaEX 独立仓库（`CS-LX/RecipaediaEX`）的本地打包、`build.yml` 日常 CI、`release.yml` 阶段性发布。  
-> **参考**：EBoyTerminal `tools/pack.ps1` + `.github/workflows/build.yml`（无 SCIENEW 依赖的简化版）。
+> **参考**：EBoyTerminal `tools/pack.ps1` + `.github/workflows/build.yml`（无 内容模组 依赖的简化版）。
 
 ---
 
@@ -27,7 +27,7 @@
 
 ### 1.3 非目标（本阶段不做）
 
-- 自动修改 IE2 主仓的 `modinfo.json` 依赖版本或子模块指针。
+- 自动修改依赖模组的 `modinfo.json` 依赖版本或子模块指针。
 - AMPK 资源加密（RecipaediaEX 保持明文 Assets）。
 - release-please / conventional commits 全自动发版（可作为 P4 扩展）。
 
@@ -196,17 +196,17 @@ on:
 5. git push origin main
 6. git push origin v2.0.0.0-preview6
 7. 等待 release.yml → GitHub Releases 出现 RecipaediaEX-2.0.0.0-preview6.scmod
-8. （手动）IE2 主仓更新 SCIENEW/modinfo.json 中 com.recipaediaex 依赖版本
+8. （手动）通知依赖模组：在其 `modinfo.json` 中将 `com.recipaediaex` 对齐为新版本
 ```
 
 ---
 
-## 7. 与 IE2 主仓衔接
+## 7. 与依赖模组的衔接
 
-RecipaediaEX 发版后，IE2 侧检查项（**不纳入 REX CI 自动化**）：
+RecipaediaEX 发版后，**依赖模组**侧检查项（**不纳入 REX CI 自动化**）：
 
-1. `SCIENEW/modinfo.json` → `Dependencies.com.recipaediaex` 版本字符串与 REX 一致。
-2. 更新 `Dependencies/RecipaediaEX` 子模块指针（有 IE2 其它实质改动时同一 commit；仅指针漂移按主仓规则处理）。
+1. 其 `modinfo.json` → `Dependencies.com.recipaediaex` 版本字符串与 REX 一致。
+2. 使用 Git 子模块引用 REX 时，更新子模块指针（由各宿主仓库自行维护）。
 
 ---
 
@@ -237,5 +237,5 @@ RecipaediaEX 发版后，IE2 侧检查项（**不纳入 REX CI 自动化**）：
 ## 10. 参考
 
 - 本仓库：`tools/pack.ps1`、`.github/workflows/build.yml`
-- EBoyTerminal：`CS-LX/EBoyTerminal`（含 IE2 checkout 的复杂 CI，REX 不需要）
-- IE2：`SCIENEW/modinfo.json` 中 `com.recipaediaex` 依赖写法
+- EBoyTerminal：`CS-LX/EBoyTerminal`（含 依赖模组 checkout 的复杂 CI，REX 不需要）
+- 依赖模组：`内容模组/modinfo.json` 中 `com.recipaediaex` 依赖写法

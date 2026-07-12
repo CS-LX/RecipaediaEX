@@ -133,7 +133,7 @@ RecipaediaEventBus.GetPublisher<MyModEvent>().Publish(new MyModEvent(...));
 2. 在仓库根目录执行 `dotnet build RecipaediaEX.csproj -c Release`（或 Debug）。
 3. 构建结束后 `tools/pack.ps1` 自动将输出目录打成 **`RecipaediaEX.scmod`**（短名）并复制到 `ModsFolder`。
 
-若 monorepo 内与 IE2 同仓开发，脚本会优先使用 `SCIENEW/tools/7z/7z.exe`；独立克隆时回退为 PowerShell `Compress-Archive`。
+若 monorepo 内与同仓宿主模组联合开发，打包脚本可复用宿主提供的 `7z`；独立 clone 本仓库时回退为 PowerShell `Compress-Archive`。
 
 跳过自动打包：`-p:RecipaediaEXSkipPack=true`。跳过版本同步：`-p:RecipaediaEXSkipSyncVersion=true`。
 
@@ -144,7 +144,7 @@ RecipaediaEventBus.GetPublisher<MyModEvent>().Publish(new MyModEvent(...));
 | `build.yml` | push main、PR | `RecipaediaEX-ci.{sha7}.scmod` |
 | `release.yml` | 推送 tag `v*` | GitHub Release + 模组站 post 1739：`RecipaediaEX-{Version}.scmod` |
 
-发版步骤见 [docs/RELEASE.md](docs/RELEASE.md)。Release 还需在 GitHub 配置 Secret **`MOD_SITE_TOKEN`**（模组站 Bearer Token）。RecipaediaEX 无 SCIENEW 编译期依赖，CI 仅需 checkout 本仓库。
+发版步骤见 [docs/RELEASE.md](docs/RELEASE.md)。Release 还需在 GitHub 配置 Secret **`MOD_SITE_TOKEN`**（模组站 Bearer Token）。RecipaediaEX 无宿主模组编译期依赖，CI 仅需 checkout 本仓库。
 
 ## 说明
 

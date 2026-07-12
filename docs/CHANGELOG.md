@@ -80,7 +80,7 @@
 ### 适配指南（从任意 preview 直跳 stable）
 
 1. 若仍依赖 **`2.0.0.0-preview5` 之前**：请先阅读本文件 **preview5 → preview6 → preview7 → preview8** 各节的 ⚠️ 变更（`RecipeDescriptor` 构造、`RecipeExtraKeys`、`Close()` 移除等）。
-2. 合成助手 Overlay 协议见 [工作台悬浮助手策划.md](工作台悬浮助手策划.md)；内容模组 Placement 接入见依赖方文档（如工业时代 2 `docs/guides/合成助手-工业机器接入清单.md`）。
+2. 合成助手 Overlay 协议见 [工作台悬浮助手策划.md](工作台悬浮助手策划.md)；内容模组 Placement 接入见 §10 与策划 §6（各依赖模组在其仓库维护 Host 清单）。
 
 ---
 
@@ -132,13 +132,13 @@
 
 **对比基准：** `2.0.0.0-preview5`（提交 [`b71e6a0`](https://github.com/CS-LX/RecipaediaEX/commit/b71e6a0)）→ `2.0.0.0-preview6`（提交 [`2b85f5d`](https://github.com/CS-LX/RecipaediaEX/commit/2b85f5d)，Git 标签 `preview6`）
 
-> 本版为 **合成助手 Pre-release**：在 preview5 事件总线与动态配方之上，交付图鉴搜索、工作台悬浮助手（Phase 1～2b）、搜索性能优化与会话体验打磨（D24/D25）。依赖模组（如工业时代 2）须自行对齐 `modinfo` 依赖并发布配套内容包。
+> 本版为 **合成助手 Pre-release**：在 preview5 事件总线与动态配方之上，交付图鉴搜索、工作台悬浮助手（Phase 1～2b）、搜索性能优化与会话体验打磨（D24/D25）。依赖模组须自行对齐 `modinfo` 依赖并发布配套内容包。
 
 ### 新增
 
 - **合成助手 Phase 1**：`RecipaediaCraftingOverlayDialog`（右侧条带 + JEI 式二级配方弹窗）；`IRecipaediaOverlayHost` / `RecipaediaCraftingContext`；`IRecipaediaRecipeNavigator` + `RecipeDescriptorRegistry`；`Recipaedia` 键 Hook（合成 Modal toggle / EventBus 全屏图鉴）；`OpenFullRecipaediaRequestedEvent`。
 - **合成助手 Phase 2a**：`IPlacableRecipe` / `PlacableRecipeAdapter`；`IRecipePlacementTarget` + `CraftingGridPlacementPlanner`；Descriptor 操作条 `+` / `★`；`RecipaediaCraftingOverlaySessionState`（分类、滚动记忆）。
-- **合成助手 Phase 2b**：`CraftingOverlayIngredientBridge`（背包 ↔ 合成格原料桥接）；工业 Host 通过 `GetPlacementTarget()` 接入有形摆放（工作台 / 机床 / 车间 / 反应釜等由内容模组实现）。
+- **合成助手 Phase 2b**：`CraftingOverlayIngredientBridge`（背包 ↔ 合成格原料桥接）；内容模组 Host 通过 `GetPlacementTarget()` 接入 `+` 摆放。
 - **图鉴搜索 Phase 1**：`RecipaediaSearchIndex` / `Parser` / `Engine`；`RecipaediaEXScreen` 搜索行；`RecipaediaSearchFilterDialog`；`Assets/Lang` 语言包。
 - **图鉴搜索 Phase 2（核心）**：拼音索引（`NPinyin.Core`）；`or` / `()` 查询 AST；`@recipes>=N` 等比较；搜索历史（`RecipaediaEXSearchHistory.txt` + 历史图标按钮）。
 - **图鉴搜索栏 UI**：搜索 / 历史 / 筛选 Bevelled 图标按钮（`ButtonStyle_Search|History|Filter` + 模组纹理）。
@@ -163,7 +163,7 @@
 1. **依赖版本** — 在己方 `modinfo.json` 的 `Dependencies` 中将 `com.recipaediaex` 改为 `2.0.0.0-preview6`（或与之兼容的更高 preview/正式版）。
 2. **`RecipeDescriptor`** — 构造函数首参改为 `IRecipaediaRecipeNavigator`（原 `RecipaediaEXRecipesScreen`）。
 3. **流体 Extra** — 若曾使用 `RecipeExtraKeys.MatchedResultFluidValues`，改为模组内自有常量，并在 `IRecipaediaSearchContributor` 等处注册。
-4. **工业机器摆放** — 实现 `IRecipaediaOverlayHost.GetPlacementTarget()` 与 `IPlacableRecipe` 适配；参考主仓 `docs/guides/合成助手-工业机器接入清单.md`（IE2 维护）。
+4. **专有机器摆放** — 实现 `IRecipaediaOverlayHost.GetPlacementTarget()` 与 `IPlacableRecipe` 适配；步骤见 API §10 与策划 §6。
 5. **合成助手订阅（可选）** — 事件与拦截见 [API 文档 · 事件与扩展总线](API使用文档.md#25-事件与扩展总线)；合成助手 Host 见 [§10](API使用文档.md#10-合成助手crafting-overlay)。
 
 ---

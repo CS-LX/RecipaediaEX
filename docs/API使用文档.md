@@ -271,7 +271,7 @@ RecipaediaEventBus.GetSubscriber<OpenFullRecipaediaRequestedEvent>()
 
 由 `RecipaediaOverlayInput` 在非合成 Host 场景、且 `OpenFullRecipaediaNavigating` 拦截放行后发布。
 
-**`CrafterKind`**（`string`）：`CrafterKind.CraftingTable` / `CrafterKind.Furnace` 为 RX 内置常量；工业机器等传入自有名称（如 `"Presser"`）。
+**`CrafterKind`**（`string`）：`CrafterKind.CraftingTable` / `CrafterKind.Furnace` 为 RX 内置常量；内容模组专有 Crafter 传入自有名称（如 `"MyPress"`）。
 
 **产出 vs 取出**
 
@@ -630,7 +630,7 @@ public sealed class RecipaediaCraftingContext {
 }
 ```
 
-内容模组在 `GetCraftingContext()` 中按当前机器填充；工业机器接入示例见主仓 `docs/guides/合成助手-工业机器接入清单.md`（IE2 维护）。
+内容模组在 `GetCraftingContext()` 中按当前机器填充；Host 与 Placement 接入步骤见 [§10](#10-合成助手crafting-overlay) 与 [工作台悬浮助手策划.md](工作台悬浮助手策划.md) §6。
 
 ### 10.4 `IRecipePlacementTarget`
 
@@ -644,7 +644,7 @@ public interface IRecipePlacementTarget {
 
 - `execute: false`：预检，触发 `RecipePlacementPlanBuilding`。
 - `execute: true`：扣背包填格，触发 `RecipePlacementExecuting`。
-- 工业/化工机器由内容模组实现 Target；`PlacableRecipeAdapter` 用于注册可摆放配方类型。
+- 内容模组专有 / 化工类机器由依赖方实现 `IRecipePlacementTarget`；`PlacableRecipeAdapter` 用于注册可摆放配方类型。
 
 ### 10.5 Recipaedia 键路由
 
@@ -716,9 +716,9 @@ RX 通过 Loader 将原版 `FurnaceWidget` 替换为上述实现；内容模组�
 
 REX 内置：`OriginalCraftingRecipe`、`OriginalSmeltingRecipe` 可直接摆放（走 `FormattedGridPlacementPlanner`）。内容模组专有配方须 **`PlacableRecipeAdapter.Register`** 注册工厂，或在配方类上 **直接实现 `IPlacableRecipe`**（`IsPlacable` 会识别）。
 
-**推荐（内容模组）：** 配方数据类（`IRecipe`）与 Placable 包装类分离——`Recipes` 模块不引用 `RecipaediaEX.Overlay`；启动时注册工厂。IE2 示例见 `IndustrialPlacableRecipeAdapters`（`One2One` / `WireComposing` / `ReactionEquation`）。
+**推荐（内容模组）：** 配方数据类（`IRecipe`）与 Placable 包装类分离——`Recipes` 模块不引用 `RecipaediaEX.Overlay`；在 `ModLoader` 启动时 `PlacableRecipeAdapter.Register` 注册工厂。
 
-**双槽示例（绞线机，IE2）：** `WireComposingPlacableRecipe` 声明两格 `PlacementRequirement`；`WireComposerPlacementTarget` 对 slot 0 与线材槽分别调用 `ContainerSlotPlacementPlanner`。完整 Host 清单见主仓 [`合成助手-工业机器接入清单.md`](../../../../docs/guides/合成助手-工业机器接入清单.md)（IE2 维护，含已接入 / 待接入表）。
+**双槽示例（模式）：** 自定义 `IPlacableRecipe` 声明多格 `PlacementRequirement`；对应 `IRecipePlacementTarget` 对各槽分别调用 `ContainerSlotPlacementPlanner`（或自研 Planner）。Host 接入进度由各依赖模组在其仓库自行维护。
 
 ---
 

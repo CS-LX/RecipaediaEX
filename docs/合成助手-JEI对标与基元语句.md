@@ -23,7 +23,7 @@
 
 | 能力 | 实现 | 是否「合成助手」 |
 |------|------|----------------|
-| 合成失败文字提示 | `CrafterHints` + `DisplaySmallMessage`（IE2 设置「合成提示」） | ❌ 仅提示「为什么不能合成」，不提供查配方与摆放 |
+| 合成失败文字提示 | `CrafterHints` + `DisplaySmallMessage`（依赖模组 设置「合成提示」） | ❌ 仅提示「为什么不能合成」，不提供查配方与摆放 |
 | 全屏图鉴 + 搜索 | `RecipaediaEXScreen` + `RecipaediaSearchEngine` | ❌ 需 `SwitchScreen`，打断合成 Modal |
 | **合成助手** | 策划 `RecipaediaCraftingOverlayDialog` + `IRecipaediaOverlayHost` + `IRecipePlacementTarget` | ✅ 同屏查配方 + **+** 自动摆放 |
 
@@ -191,7 +191,7 @@ transferRecipe(container, recipe, recipeSlots, player, maxTransfer, doTransfer)
 | 流体原料 | `ReactionEquationRecipe` + 反应釜 Component | 内容模组 `ReactorPlacementTarget`（REX 无 Fluid 字段） |
 | Ghost | 无 | Phase 3 可选 |
 
-### 5.1 工业反应釜示例
+### 5.1 化工方程类 Host 示例
 
 反应釜 `FindEquation()` 的输入是 **3 个物品槽 + 3 个流体罐** 的组合，不是 36 格形状合成——对应 JEI 的 **Complete Control Handler**，不能复用 `CraftingTablePlacementTarget`。
 
@@ -200,7 +200,7 @@ transferRecipe(container, recipe, recipeSlots, player, maxTransfer, doTransfer)
 | 工作台/机床 | `OriginalCraftingRecipe` + Transform | REX `CraftingTablePlacementTarget`（`GridCell`） |
 | 反应釜 | `ReactionEquationRecipe` | 内容模组 `ReactorPlacementTarget`（`ContainerSlot` + 自解释 `Quantity`） |
 | 灌装机 | 灌装类配方 | 内容模组 Target |
-| One2One 压板机 | `One2OneRecipe` | 内容模组 Target（单 `ContainerSlot`） |
+| One2One 单槽 Crafter | `One2OneRecipe` | 内容模组 Target（单 `ContainerSlot`） |
 
 反应釜 **+** 的第一版可：**物品槽自动填 + 罐体缺口仅提示**（不自动拉管道），仍符合 JEI/RS 常见行为。
 
@@ -280,7 +280,7 @@ v0.2 策划曾出现 `FluidVolume`、`PlacementKind.FluidTank`、`PlacementSourc
 ### 6.3 扩展与架构
 
 **E1. 插件注册公理**  
-> 每种机器 GUI 通过 **自注册** 的 PlacementTarget 接入；框架核心 **不写** 工业/流体/化工专有逻辑。
+> 每种机器 GUI 通过 **自注册** 的 PlacementTarget 接入；框架核心 **不写** 内容模组/流体/化工专有逻辑。
 
 **E2. 可放置配方接口公理**  
 > 不能自动 `+` 的配方类型，不是「不支持助手」，而是 **未实现 `IPlacableRecipe`**；UI 仍应能预览，只是禁用 `+` 并说明原因。
@@ -313,7 +313,7 @@ v0.2 策划曾出现 `FluidVolume`、`PlacementKind.FluidTank`、`PlacementSourc
 
 **JEI = 同屏配方浏览器 + 按容器注册的 Transfer Handler；`+` 不是「聪明 AI」，而是「配方需求 → 槽位映射 → 预检 → 部分填充 → 刷新匹配」。**
 
-REX 合成助手只要把接口从「36 格 + `IInventory`」升格为 **「`PlacementRequirement`（通用寻址 + opaque Quantity）+ dry-run/execute + 每机器一个 Target」**，工业反应釜与 JEI Complete Control Handler 即为同一类问题；**流体不进入 REX struct 字段名**。
+REX 合成助手只要把接口从「36 格 + `IInventory`」升格为 **「`PlacementRequirement`（通用寻址 + opaque Quantity）+ dry-run/execute + 每机器一个 Target」**，化工方程类 Host 与 JEI Complete Control Handler 即为同一类问题；**流体不进入 REX struct 字段名**。
 
 ---
 
@@ -329,6 +329,6 @@ REX 合成助手只要把接口从「36 格 + `IInventory`」升格为 **「`Pla
 
 | 版本 | 日期 | 说明 |
 |------|------|------|
-| v1.0 | 2026-06-16 | 初稿：JEI 解构、REX 对照、基元语句、工业机器扩展依据 |
+| v1.0 | 2026-06-16 | 初稿：JEI 解构、REX 对照、基元语句、内容模组专有机器扩展依据 |
 | v1.1 | 2026-06-16 | 对齐 anti-patterns：废止 FluidVolume/FluidTank/ITank；P2/P8/§5.2/§7 修订 |
 | v1.2 | 2026-06-16 | 对齐策划 v0.4：V4/V5 搜索与预览拆分、E3 EventBus、Navigator 映射 |
