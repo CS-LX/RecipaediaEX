@@ -120,6 +120,7 @@ RecipaediaEventBus.GetPublisher<MyModEvent>().Publish(new MyModEvent(...));
 - [图鉴搜索功能策划](docs/图鉴搜索功能策划.md)
 - [合成助手策划（Crafting Overlay）](docs/工作台悬浮助手策划.md)
 - [合成助手 · JEI 对标与基元语句](docs/合成助手-JEI对标与基元语句.md)
+- [路线图 · ResolveBus 与原料贡献（2.0 之后）](docs/路线图-ResolveBus与原料贡献.md)
 - [打包 → 发布 CI 策划](docs/打包发布CI策划.md)
 - [发版指南](docs/RELEASE.md)
 
