@@ -115,14 +115,16 @@ RecipaediaEventBus.GetPublisher<MyModEvent>().Publish(new MyModEvent(...));
 
 ## 文档导航
 
-- [更新日志（模组开发者）](docs/CHANGELOG.md)
-- [API 使用文档](docs/API使用文档.md)
-- [图鉴搜索功能策划](docs/图鉴搜索功能策划.md)
-- [合成助手策划（Crafting Overlay）](docs/工作台悬浮助手策划.md)
-- [合成助手 · JEI 对标与基元语句](docs/合成助手-JEI对标与基元语句.md)
-- [路线图 · ResolveBus 与原料贡献（2.0 之后）](docs/路线图-ResolveBus与原料贡献.md)
-- [打包 → 发布 CI 策划](docs/打包发布CI策划.md)
-- [发版指南](docs/RELEASE.md)
+完整索引见 [docs/README.md](docs/README.md)。文档按读者分为三层，加一层发布运维资料：
+
+| 读者 | 入口 | 内容 |
+|------|------|------|
+| 玩家 | [用户文档](docs/user/README.md) | 图鉴搜索、合成助手、`+` 自动摆放 |
+| 依赖模组作者 | [API 文档](docs/api/README.md) | 配方、图鉴 UI、事件 / 拦截、合成助手接入 |
+| REX 贡献者 | [内部开发文档](docs/internal/README.md) | 架构、策划、路线图、设计决策 |
+| 维护者 | [发布与运维](docs/release/README.md) | CHANGELOG、发版 SOP、CI / 打包 |
+
+旧版完整 API 汇总仍保留在 [docs/API使用文档.md](docs/API使用文档.md)；历史策划和路线图由内部开发文档统一导航。
 
 ## 构建与打包
 

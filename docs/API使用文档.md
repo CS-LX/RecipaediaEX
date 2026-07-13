@@ -2,6 +2,8 @@
 
 本文档基于当前 `Dependencies/RecipaediaEX` 源码整理，描述稳定可用的接口、扩展点和推荐实践。
 
+> 本文件是旧版完整 API 汇总，继续保留作为兼容入口。新的按主题入口见 [api/README.md](api/README.md)。
+
 版本间差异与升级步骤见 **[更新日志](CHANGELOG.md)**（面向依赖 RX 的其它模组作者）。
 
 ## 目录

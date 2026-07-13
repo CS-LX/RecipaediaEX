@@ -1,5 +1,7 @@
 # 合成助手 — JEI 对标解构与基元语句
 
+> 文档分层后，本文件归属 [内部开发文档](internal/README.md)，作为合成助手设计依据保留。玩家向说明见 [合成助手](user/crafting-overlay.md)，外部接入说明见 [合成助手接入](api/crafting-overlay-integration.md)。
+
 > **版本**：v1.2  
 > **状态**：设计参考（与 [工作台悬浮助手策划.md](工作台悬浮助手策划.md) 配套）；**REX `preview6` 已交付 Phase 1～2b 有形摆放子集**  
 > **范围**：RecipaediaEX 合成助手（Crafting Overlay）的产品与技术对齐依据  

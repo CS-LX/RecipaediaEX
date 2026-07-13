@@ -1,5 +1,7 @@
 # RecipaediaEX 打包 → 发布 CI 策划
 
+> 文档分层后，本文件归属 [发布与运维层](release/README.md)。P0–P3 已实施，因此本文主要作为 CI / 打包决策记录保留。
+
 > **版本**：v0.2  
 > **状态**：**P0–P3 已实施**（见 `tools/sync-version.ps1`、`build.yml`、`release.yml`）  
 > **范围**：RecipaediaEX 独立仓库（`CS-LX/RecipaediaEX`）的本地打包、`build.yml` 日常 CI、`release.yml` 阶段性发布。  

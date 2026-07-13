@@ -1,5 +1,7 @@
 # RecipaediaEX 发版指南
 
+> 文档分层后，本文件归属 [发布与运维层](release/README.md)，继续作为发版 SOP 的实际维护文件。
+
 版本号以 **`modinfo.json` → `Version`** 为唯一真相源；构建前 `tools/sync-version.ps1` 会同步到 `RecipaediaEX.csproj`。
 
 ## 版本格式

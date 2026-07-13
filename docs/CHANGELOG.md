@@ -1,5 +1,7 @@
 # RecipaediaEX 更新日志
 
+> 文档分层后，本文件归属 [发布与运维层](release/README.md)，仍作为版本变化与依赖模组适配指南的单一真相源。
+
 面向**依赖本模组**的 Survivalcraft 模组开发者。版本号以 `modinfo.json` 的 `Version` 为准。
 
 ## 如何阅读
