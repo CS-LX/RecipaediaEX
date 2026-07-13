@@ -33,6 +33,20 @@
 - 玩家偏好和搜索历史不是世界存档数据。
 - 发布版本号以 `modinfo.json` 的 `Version` 为唯一真相源。
 
+## 加载流程
+
+`RecipaediaEXLoader` 在 `OnLoadingFinished` 阶段完成核心初始化：
+
+1. `RecipesLoadManager.Initialize()`：扫描并实例化全部 `IRecipesLoader` 与 `IDynamicRecipeLoader`，按 `Order` 排序。
+2. `RecipaediaEXManager.Initialize()`：调用各 `IRecipesLoader` 的 `Initialize()` / `GetRecipes()`，建立静态配方总表。
+3. `RecipesCrafterManager.Initialize()`：扫描方块上的 `ICrafter`，建立“配方 -> 可用工作站”映射。
+4. 注入图鉴页面：`Recipaedia`、`RecipaediaDescription`、`RecipaediaRecipes`。
+
+加载后还有两条关键刷新路径：
+
+- `CraftingRecipesManagerInitialized` 钩子触发 `RecipaediaEXManager.ResetRecipes()`。
+- `BlocksInitalized` 钩子触发 `RecipesCrafterManager.Initialize()`。
+
 ## 代码锚点
 
 | 主题 | 代码锚点 |
