@@ -334,6 +334,11 @@ namespace RecipaediaEX.Overlay {
             return label;
         }
 
+        /// <summary>
+        /// 进档重分配后须清空缺料文案缓存（其中可能嵌了菜单期绝对 BlockValue 解析结果）。
+        /// </summary>
+        public static void InvalidateCache() => s_missingLabelCache.Clear();
+
         static readonly Dictionary<string, string> s_missingLabelCache = new();
 
         static bool TryClearInputSlotsToInventory(FormattedGridPlacementContext context, IInventory playerInventory, out string? error) {

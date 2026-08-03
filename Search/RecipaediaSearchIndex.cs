@@ -5,6 +5,7 @@ using Engine.Serialization;
 using Game;
 using RecipaediaEX.Events;
 using RecipaediaEX.Implementation;
+using RecipaediaEX.Overlay;
 using RecipaediaEX.UI;
 using ZLinq;
 
@@ -25,7 +26,10 @@ namespace RecipaediaEX.Search {
                 m_documents.Clear();
                 m_recipeMetadata.Clear();
                 RecipaediaSearchEngine.ClearFilterCache();
-                BlocksCategoryProvider.InvalidateCache();
+                // 进档重分配后必须丢掉菜单期冻结的 BlockItem / 绝对 BlockValue，否则 Match 与 Overlay 会挂错配方。
+                RecipaediaCategoryCatalog.Invalidate();
+                CraftingOverlayIngredientBridge.InvalidateCache();
+                FormattedGridPlacementPlanner.InvalidateCache();
             });
         }
 

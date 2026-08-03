@@ -31,6 +31,11 @@ namespace RecipaediaEX.Overlay {
             return result;
         }
 
+        /// <summary>
+        /// 进档重分配动态方块 Index 后须清空，否则 Overlay 仍用菜单期绝对 BlockValue。
+        /// </summary>
+        public static void InvalidateCache() => s_expandCache.Clear();
+
         static readonly Dictionary<string, int[]> s_expandCache = new();
 
         public static bool TryDecodeDisplayBlockValue(string ingredient, out int blockValue) {

@@ -118,18 +118,41 @@ namespace RecipaediaEX.Implementation {
 
         public bool Match(IRecipe recipe) {
             try {
+                // FormattedRecipe：优先用条目方块类型 + data 对齐产物，避免菜单期绝对 BlockValue 与进档重分配后错挂。
+                if (recipe is FormattedRecipe formattedRecipe && formattedRecipe.ResultValue != 0
+                    && MatchesBlockIdentity(formattedRecipe.ResultValue)) {
+                    return true;
+                }
+
                 int[] recipeResultValue = recipe.GetExtraValue(RecipeExtraKeys.MatchedResultBlockValues, Array.Empty<int>());
-                return recipeResultValue.AsValueEnumerable().Contains(m_blockValue);
+                foreach (int resultValue in recipeResultValue) {
+                    if (MatchesBlockIdentity(resultValue)) return true;
+                }
+                return false;
             }
             catch (Exception ex) {
                 Engine.Log.Error("BlockItem.Match error, probably because the problem of IRecipe.GetExtraValue(\"" + RecipeExtraKeys.MatchedResultBlockValues + "\"): " + ex);
                 return false;
             }
         }
+
+        /// <summary>
+        /// 方块值是否对应该图鉴条目：同类型且 data 一致。不单独信任绝对 int 相等（重分配后数字可能撞车）。
+        /// </summary>
+        bool MatchesBlockIdentity(int blockValue) {
+            if (blockValue == 0) return false;
+            int contents = Terrain.ExtractContents(blockValue);
+            if (contents < 0 || contents >= BlocksManager.Blocks.Length) return false;
+            Block block = BlocksManager.Blocks[contents];
+            if (block.GetType() != m_block.GetType()) return false;
+            return Terrain.ExtractData(blockValue) == Terrain.ExtractData(m_blockValue);
+        }
         public bool IsIngredient(IRecipe recipe) {
             try {
                 int[] matchedIngredientBlockValues = recipe.GetExtraValue(RecipeExtraKeys.MatchedIngredientBlockValues, Array.Empty<int>());
-                if (matchedIngredientBlockValues.AsValueEnumerable().Contains(m_blockValue)) return true;
+                foreach (int ingredientValue in matchedIngredientBlockValues) {
+                    if (MatchesBlockIdentity(ingredientValue)) return true;
+                }
 
                 if (recipe is FormattedRecipe formattedRecipe) {
                     int data = Terrain.ExtractData(m_blockValue);
