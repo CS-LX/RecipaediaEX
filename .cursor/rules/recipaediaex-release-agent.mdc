@@ -5,7 +5,7 @@ alwaysApply: true
 
 # RecipaediaEX 发版与文档（Agent 必读）
 
-本文件在 **RecipaediaEX 子仓库**内生效；主仓 Agent 编辑 `Dependencies/RecipaediaEX/**` 时亦须遵守（见主仓 `.cursor/rules/recipaediaex-submodule-session.mdc`）。
+本文件在 **RecipaediaEX 子仓库**内生效；主仓 Agent 编辑 `Dependencies/RecipaediaEX/**` 时亦须遵守主仓根 `AGENTS.md` 的子模块边界。
 
 ## 决策树
 
