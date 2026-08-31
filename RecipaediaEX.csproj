@@ -237,7 +237,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="NPinyin.Core" Version="2.1.3" GeneratePathProperty="true"/>
-		<PackageReference Include="SurvivalcraftAPI.Survivalcraft" Version="1.9.2"/>
+		<PackageReference Include="SurvivalcraftAPI.Survivalcraft" Version="1.9.3.1"/>
 		<PackageReference Include="ZLinq" Version="1.5.6" GeneratePathProperty="true"/>
 	</ItemGroup>
 	<ItemGroup>
@@ -252,12 +252,12 @@
 		<EmbeddedResource Remove="RTest\**"/>
 	</ItemGroup>
 	<!-- 构建前从 modinfo.json 同步版本号 -->
-	<Target Name="SyncVersion" BeforeTargets="Build" Condition="'$(RecipaediaEXSkipSyncVersion)' != 'true'">
+	<Target Name="SyncVersion" BeforeTargets="Build" Condition="'$(Configuration)' != 'Test' and '$(RecipaediaEXSkipSyncVersion)' != 'true'">
 		<Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)tools\sync-version.ps1&quot;"/>
 	</Target>
 	<!-- 打包并部署 .scmod 到游戏 Mods 文件夹 -->
 	<!-- 需在 tools\pack.config.json 中配置本机路径（参考 tools\pack.config.example.json） -->
-	<Target Name="PackMod" AfterTargets="Build" Condition="'$(RecipaediaEXSkipPack)' != 'true'">
+	<Target Name="PackMod" AfterTargets="Build" Condition="'$(Configuration)' != 'Test' and '$(RecipaediaEXSkipPack)' != 'true'">
 		<PropertyGroup>
 			<_TargetDirSafe>$(TargetDir.TrimEnd('\'))</_TargetDirSafe>
 		</PropertyGroup>
