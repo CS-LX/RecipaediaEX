@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Xml.Linq;
 using Engine;
 using Engine.Serialization;
 using Game;
 using RecipaediaEX.Overlay;
-using ZLinq;
 
 namespace RecipaediaEX.UI {
     public class RecipaediaEXRecipesScreen : Screen, IRecipaediaRecipeNavigator
@@ -36,7 +34,7 @@ namespace RecipaediaEX.UI {
 
         public override void Enter(object[] parameters) {
             IRecipaediaRecipeItem recipeItem = (IRecipaediaRecipeItem)parameters[0];
-            m_recipes.AddRange(RecipaediaEXManager.Recipes.AsValueEnumerable().Where(x => recipeItem.Match(x)).OrderBy(x => x.DisplayOrder).ToArray());
+            m_recipes.AddRange(RecipaediaRecipeSorter.GetDisplayRecipes(RecipaediaEXManager.Recipes, recipeItem));
             RecipeDescriptorRegistry.EnsureScanned();
         }
 

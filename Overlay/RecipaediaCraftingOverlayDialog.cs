@@ -401,7 +401,7 @@ namespace RecipaediaEX.Overlay {
             m_lastPreviewItem = recipeItem;
             m_recipeDetailTitle.Text = GetRecipeItemTitle(recipeItem);
             List<IRecipe> allRecipes = RecipaediaOverlayRecipeResolver.ResolveAllRecipes(recipeItem, m_context);
-            m_crafterGroups = RecipaediaOverlayRecipeResolver.BuildCrafterGroups(allRecipes, m_context);
+            m_crafterGroups = RecipaediaOverlayRecipeResolver.BuildCrafterGroups(allRecipes, recipeItem, m_context);
             int selectedIndex = tabIndex ?? RecipaediaOverlayRecipeResolver.SelectDefaultGroupIndex(m_crafterGroups, m_context);
             m_crafterTabBar.SetGroups(m_crafterGroups, selectedIndex, OnCrafterTabSelected);
             if (selectedIndex >= 0)

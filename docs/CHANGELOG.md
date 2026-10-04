@@ -54,6 +54,7 @@
 - **`RecipeExtraKeys.MatchedRemainsBlockValues`**（`int[]`）：新增副产物匹配 Extra 键，供非 `FormattedRecipe` 的自定义配方声明「可作为该配方副产物的方块」；`.cr` 与程序化加载器在配置 `Remains` 时自动写入。
 - **`IRecipaediaRecipeItem.MatchesAsResult(IRecipe)`**：新增默认接口方法，表示「仅主产物方向」的匹配（默认等同 `Match`，对旧实现无破坏）。搜索索引的 `RecipeCountAsResult` / `ResultBlockValues` 改用它，使 `@out:`、`#recipes` 仍只统计主产物，不受副产物展示影响。
 - **`BlockItem`** 新增 `MatchesAsResult` / `MatchesAsRemains`、`ResultRecipesCount` / `RemainsRecipesCount`、`IncludesRemainsRecipes` 公开成员。
+- **配方列表排序**：新增 `RecipaediaRecipeSorter`，统一图鉴配方页、合成助手预览、原料格子 / 合成方块按钮点击后的配方列表顺序——**先主产物(`Result`)配方，再副产物(`Remains`)配方**，同组内按 `IRecipe.DisplayOrder` 升序。`RecipaediaOverlayRecipeResolver.BuildCrafterGroups` 新增 `item` 参数以在按合成场所分组时保持同一排序。
 
 ---
 

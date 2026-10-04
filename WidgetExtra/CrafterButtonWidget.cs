@@ -104,10 +104,10 @@ namespace RecipaediaEX.UI {
         public virtual void OnClicked() {
             IRecipaediaItem recipaediaItem = RecipaediaItems[Index];
             if (recipaediaItem is IRecipaediaRecipeItem recipeItem) {
-                ValueEnumerable<ListWhere<IRecipe>, IRecipe> newItems = RecipaediaEXManager.Recipes.AsValueEnumerable().Where(x => recipeItem.Match(x));
-                if (newItems.Count() > 0) {
+                List<IRecipe> newItems = RecipaediaRecipeSorter.GetDisplayRecipes(RecipaediaEXManager.Recipes, recipeItem);
+                if (newItems.Count > 0) {
                     AudioManager.PlaySound("Audio/UI/ButtonClick", 1, 0, 0);
-                    m_navigator.ShowRecipes(recipeItem, newItems.ToList(), 0);
+                    m_navigator.ShowRecipes(recipeItem, newItems, 0);
                 }
             }
         }

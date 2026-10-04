@@ -21,10 +21,10 @@ namespace RecipaediaEX.Overlay {
             }
 
             TryAddDynamicPreviewRecipes(item, context, recipes);
-            return recipes.AsValueEnumerable().OrderBy(r => r.DisplayOrder).ToList();
+            return RecipaediaRecipeSorter.OrderForDisplay(recipes, item);
         }
 
-        public static List<RecipaediaCrafterRecipeGroup> BuildCrafterGroups(IReadOnlyList<IRecipe> recipes, RecipaediaCraftingContext context) {
+        public static List<RecipaediaCrafterRecipeGroup> BuildCrafterGroups(IReadOnlyList<IRecipe> recipes, IRecipaediaRecipeItem item, RecipaediaCraftingContext context) {
             Dictionary<string, RecipaediaCrafterRecipeGroup> groupsByCrafterId = [];
             foreach (IRecipe recipe in recipes) {
                 foreach (int blockValue in GetCrafterBlockValues(recipe)) {
@@ -43,7 +43,7 @@ namespace RecipaediaEX.Overlay {
 
             List<RecipaediaCrafterRecipeGroup> groups = [.. groupsByCrafterId.Values];
             foreach (RecipaediaCrafterRecipeGroup group in groups) {
-                group.Recipes.Sort((a, b) => a.DisplayOrder.CompareTo(b.DisplayOrder));
+                group.Recipes.Sort((a, b) => RecipaediaRecipeSorter.CompareForDisplay(item, a, b));
             }
 
             string hostCrafterId = context.CrafterBlockValue != 0
