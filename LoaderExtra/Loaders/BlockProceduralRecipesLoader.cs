@@ -24,6 +24,9 @@ namespace RecipaediaEX.Implementation {
                         craftingRecipe = originalRecipe.ToFormattedRecipe<OriginalCraftingRecipe>();
                     }
                     craftingRecipe.SetExtraValue(RecipeExtraKeys.MatchedResultBlockValues, new int[] { craftingRecipe.ResultValue });
+                    if (craftingRecipe.RemainsValue != 0) {
+                        craftingRecipe.SetExtraValue(RecipeExtraKeys.MatchedRemainsBlockValues, new int[] { craftingRecipe.RemainsValue });
+                    }
                     recipes.Add(craftingRecipe);
                 }
             }

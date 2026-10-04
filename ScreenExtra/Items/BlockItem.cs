@@ -10,6 +10,27 @@ namespace RecipaediaEX.Implementation {
         public int m_blockValue;
         public int m_order;
         public Block m_block;
+
+        int? m_resultRecipesCount;
+        int? m_remainsRecipesCount;
+
+        /// <summary>该条目作为主产物(<c>Result</c>)出现的配方数。</summary>
+        public int ResultRecipesCount => m_resultRecipesCount ??= RecipaediaEXManager.Recipes.AsValueEnumerable().Count(MatchesAsResult);
+
+        /// <summary>该条目作为副产物(<c>Remains</c>)出现的配方数。</summary>
+        public int RemainsRecipesCount => m_remainsRecipesCount ??= RecipaediaEXManager.Recipes.AsValueEnumerable().Count(MatchesAsRemains);
+
+        /// <summary>
+        /// 是否把「作为副产物」的配方也纳入该条目的配方展示。
+        /// <para>仅当作为主产物的配方数不多于作为副产物的配方数时为真：</para>
+        /// <list type="bullet">
+        ///     <item><description>救回「只能作为副产物获得」的材料——它们作为主产物的配方数为 0，否则将看不到任何配方；</description></item>
+        ///     <item><description>避免主产物配方充足的条目被大量副产物配方喧宾夺主。</description></item>
+        /// </list>
+        /// </summary>
+        public bool IncludesRemainsRecipes => ResultRecipesCount <= RemainsRecipesCount;
+
+        /// <summary>该条目实际会展示的配方数（含符合条件的副产物配方）。</summary>
         public int RecipesCount => RecipaediaEXManager.Recipes.AsValueEnumerable().Count(Match);
 
         public BlockItem(Block block, int order, int blockValue) {
@@ -117,6 +138,15 @@ namespace RecipaediaEX.Implementation {
 
 
         public bool Match(IRecipe recipe) {
+            if (MatchesAsResult(recipe)) return true;
+            // 只有当该条目「作为副产物」的配方不少于「作为主产物」的配方时，才把副产物配方一并展示。
+            return IncludesRemainsRecipes && MatchesAsRemains(recipe);
+        }
+
+        /// <summary>
+        /// 是否作为该配方的主产物(<c>Result</c>)。不含副产物方向，供 <see cref="Match"/> 与搜索产物语义复用。
+        /// </summary>
+        public bool MatchesAsResult(IRecipe recipe) {
             try {
                 // FormattedRecipe：优先用条目方块类型 + data 对齐产物，避免菜单期绝对 BlockValue 与进档重分配后错挂。
                 if (recipe is FormattedRecipe formattedRecipe && formattedRecipe.ResultValue != 0
@@ -131,7 +161,29 @@ namespace RecipaediaEX.Implementation {
                 return false;
             }
             catch (Exception ex) {
-                Engine.Log.Error("BlockItem.Match error, probably because the problem of IRecipe.GetExtraValue(\"" + RecipeExtraKeys.MatchedResultBlockValues + "\"): " + ex);
+                Engine.Log.Error("BlockItem.MatchesAsResult error, probably because the problem of IRecipe.GetExtraValue(\"" + RecipeExtraKeys.MatchedResultBlockValues + "\"): " + ex);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 是否作为该配方的副产物(<c>Remains</c>)。供「只能作为副产物获得」的材料查配方。
+        /// </summary>
+        public bool MatchesAsRemains(IRecipe recipe) {
+            try {
+                if (recipe is FormattedRecipe formattedRecipe && formattedRecipe.RemainsValue != 0
+                    && MatchesBlockIdentity(formattedRecipe.RemainsValue)) {
+                    return true;
+                }
+
+                int[] recipeRemainsValue = recipe.GetExtraValue(RecipeExtraKeys.MatchedRemainsBlockValues, Array.Empty<int>());
+                foreach (int remainsValue in recipeRemainsValue) {
+                    if (MatchesBlockIdentity(remainsValue)) return true;
+                }
+                return false;
+            }
+            catch (Exception ex) {
+                Engine.Log.Error("BlockItem.MatchesAsRemains error, probably because the problem of IRecipe.GetExtraValue(\"" + RecipeExtraKeys.MatchedRemainsBlockValues + "\"): " + ex);
                 return false;
             }
         }

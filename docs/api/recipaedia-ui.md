@@ -7,7 +7,7 @@
 | 接口 | 用途 |
 |------|------|
 | `IRecipaediaItem` | 出现在图鉴列表中的基础条目 |
-| `IRecipaediaRecipeItem` | 声明条目与配方产物 / 原料的关系 |
+| `IRecipaediaRecipeItem` | 声明条目与配方主产物 / 副产物 / 原料的关系 |
 | `IRecipaediaDescriptionItem` | 提供详情页内容 |
 | `IRecipaediaCategoryProvider` | 提供图鉴分类和条目集合 |
 
@@ -31,9 +31,12 @@ public sealed class MyCategoryProvider : IRecipaediaCategoryProvider {
 
 条目想进入“怎么制作 / 能做什么”的配方页，需要实现 `IRecipaediaRecipeItem` 并配合配方 Extra：
 
-- 配方对象写入 `RecipeExtraKeys.MatchedResultBlockValues`，用于产物匹配。
+- 配方对象写入 `RecipeExtraKeys.MatchedResultBlockValues`，用于主产物匹配。
+- 配方对象写入 `RecipeExtraKeys.MatchedRemainsBlockValues`，用于副产物匹配。
 - 配方对象写入 `RecipeExtraKeys.MatchedIngredientBlockValues`，用于原料用途匹配。
-- 自定义非方块条目的匹配语义由依赖模组自己定义，但应保持产物和原料两个方向都能解释。
+- 自定义非方块条目的匹配语义由依赖模组自己定义，但应保持产物、副产物和原料三个方向都能解释。
+
+`Match` 与 `MatchesAsResult` 的区别：`Match` 是该条目的最终展示判定，可能额外纳入副产物配方（当条目作为主产物的配方数不多于作为副产物的配方数时）；`MatchesAsResult` 始终只认主产物方向。需要「仅统计作为产物」的场合（如搜索索引）应使用 `MatchesAsResult`。
 
 ## Descriptor
 

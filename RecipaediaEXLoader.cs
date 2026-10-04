@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using Engine;
@@ -14,11 +14,16 @@ namespace RecipaediaEX
         public override void __ModInitialize()
         {
             base.__ModInitialize();
+            ModsManager.RegisterHook("GetKeyboardMappings", this);
             ModsManager.RegisterHook("OnLoadingFinished", this);
             ModsManager.RegisterHook("BlocksInitalized", this);
             ModsManager.RegisterHook("CraftingRecipesManagerInitialized", this);
             ModsManager.RegisterHook("GuiUpdate", this);
             ModsManager.RegisterHook("OnModalPanelWidgetSet", this);
+        }
+
+        public override IEnumerable<KeyValuePair<string, object>> GetKeyboardMappings() {
+            yield return new KeyValuePair<string, object>("Recipaedia", Engine.Input.Key.X);
         }
 
         public override void OnLoadingFinished(List<Action> actions)

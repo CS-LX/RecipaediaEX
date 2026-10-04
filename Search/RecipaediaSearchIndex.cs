@@ -139,7 +139,7 @@ namespace RecipaediaEX.Search {
             HashSet<int> ingredientBlockValues = [];
 
             foreach (IRecipe recipe in RecipaediaEXManager.Recipes) {
-                if (recipeItem.Match(recipe)) {
+                if (recipeItem.MatchesAsResult(recipe)) {
                     recipeCountAsResult++;
                     recipeTypeNames.Add(recipe.GetType().Name);
                     AppendBlockValues(recipe.GetExtraValue(RecipeExtraKeys.MatchedResultBlockValues, Array.Empty<int>()), resultBlockValues);
