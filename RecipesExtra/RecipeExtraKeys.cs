@@ -9,6 +9,9 @@ namespace RecipaediaEX {
         /// <summary>图鉴副产物条目 <c>Match</c>（当条目以副产物身份展示时）：可作为该配方副产物 <c>Remains</c> 的方块 <c>blockValue</c> 列表（<c>int[]</c>）。</summary>
         public const string MatchedRemainsBlockValues = "MatchedRemainsBlockValues";
 
+        /// <summary>该配方是否允许以「副产物(<c>Remains</c>)」身份展示给图鉴条目（<c>bool</c>，缺省 <c>false</c>）。<see cref="IRecipe.DisplaysAsRemains"/> 的默认实现读取本键。</summary>
+        public const string DisplaysAsRemains = "DisplaysAsRemains";
+
         /// <summary>图鉴原料条目 <c>IsIngredient</c>：可作为原料的方块 <c>blockValue</c> 列表（<c>int[]</c>）。</summary>
         public const string MatchedIngredientBlockValues = "MatchedIngredientBlockValues";
 

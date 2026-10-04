@@ -33,10 +33,11 @@ public sealed class MyCategoryProvider : IRecipaediaCategoryProvider {
 
 - 配方对象写入 `RecipeExtraKeys.MatchedResultBlockValues`，用于主产物匹配。
 - 配方对象写入 `RecipeExtraKeys.MatchedRemainsBlockValues`，用于副产物匹配。
+- 配方放行副产物展示：默认**不**把配方作为副产物展示；需要放行时，自定义配方重写 `IRecipe.DisplaysAsRemains()`，或写入 `RecipeExtraKeys.DisplaysAsRemains`（`bool`；`.cr` 配方可写 `DisplaysAsRemains="true"`）。
 - 配方对象写入 `RecipeExtraKeys.MatchedIngredientBlockValues`，用于原料用途匹配。
 - 自定义非方块条目的匹配语义由依赖模组自己定义，但应保持产物、副产物和原料三个方向都能解释。
 
-`Match` 与 `MatchesAsResult` 的区别：`Match` 是该条目的最终展示判定，可能额外纳入副产物配方（当条目作为主产物的配方数不多于作为副产物的配方数时）；`MatchesAsResult` 始终只认主产物方向。需要「仅统计作为产物」的场合（如搜索索引）应使用 `MatchesAsResult`。
+`Match` 与 `MatchesAsResult` 的区别：`Match` 是该条目的最终展示判定，在 `MatchesAsResult` 之外，还会纳入「配方已通过 `DisplaysAsRemains()` 放行、且条目作为其副产物」的配方；`MatchesAsResult` 始终只认主产物方向。需要「仅统计作为产物」的场合（如搜索索引）应使用 `MatchesAsResult`。
 
 ## Descriptor
 
