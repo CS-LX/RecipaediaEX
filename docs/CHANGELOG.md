@@ -49,11 +49,36 @@
 
 ## [Unreleased]
 
+（暂无）
+
+---
+
+## [2.0.0.2] — 2026-10-04
+
+**对比基准：** `2.0.0.1`（Git 标签 `v2.0.0.1`）→ `2.0.0.2`（Git 标签 `v2.0.0.2`）
+
 ### 新增
 - **副产物配方查询**：在图鉴 / 合成助手中点击条目的配方查询，若该条目「作为主产物(`Result`)」的配方数**不多于**「作为副产物(`Remains`)」的配方数，会把作为副产物的配方一并展示。用于救回「只能作为副产物获得」的材料（否则配方页为空），同时避免主产物配方充足的条目被副产物配方喧宾夺主。
 - **`RecipeExtraKeys.MatchedRemainsBlockValues`**（`int[]`）：新增副产物匹配 Extra 键，供非 `FormattedRecipe` 的自定义配方声明「可作为该配方副产物的方块」；`.cr` 与程序化加载器在配置 `Remains` 时自动写入。
 - **`IRecipaediaRecipeItem.MatchesAsResult(IRecipe)`**：新增默认接口方法，表示「仅主产物方向」的匹配（默认等同 `Match`，对旧实现无破坏）。搜索索引的 `RecipeCountAsResult` / `ResultBlockValues` 改用它，使 `@out:`、`#recipes` 仍只统计主产物，不受副产物展示影响。
 - **`BlockItem`** 新增 `MatchesAsResult` / `MatchesAsRemains`、`ResultRecipesCount` / `RemainsRecipesCount`、`IncludesRemainsRecipes` 公开成员。
+
+### 变更
+
+- **宿主 API**：构建依赖和 `modinfo.ApiVersion` 从 `1.9.2` 升级到 `1.9.3.1`。
+- **图鉴快捷键**：RecipaediaEX 自行注册 `Recipaedia` 键位，默认 `X`，供图鉴 / 合成助手的现有输入处理使用。
+- **测试构建**：`Test` 配置跳过版本同步、打包及部署。
+
+### 适配指南（从 `2.0.0.1` 升级）
+
+1. 使用宿主 API `1.9.3.1`；依赖本版新增能力的内容模组应将 `com.recipaediaex` 的依赖版本下限对齐到 `2.0.0.2`。
+2. 现有 `IRecipaediaRecipeItem` 实现无需新增方法，默认 `MatchesAsResult` 委托原 `Match`；自定义主 / 副产物语义的条目可分别实现这两个判定。
+3. 非 `FormattedRecipe` 配方若需支持方块副产物查询，应提供 `MatchedRemainsBlockValues`。原版格式配方可直接使用 `RemainsValue`。
+
+### 已知问题
+
+- 与工业时代 2 同装时，旧的自定义图鉴快捷键或禁用设置可能被默认 `X` 遮蔽；升级后可在按键设置中重新绑定或禁用。
+- 原版合成 / 熔炼配方页尚未显示副产物图标与数量；按副产物查询到配方后，页面仍只展示主产物。
 
 ---
 
