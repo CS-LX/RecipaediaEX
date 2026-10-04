@@ -27,7 +27,8 @@
 
 | 键 | 用途 |
 |----|------|
-| `MatchedResultBlockValues` | 图鉴按产物匹配条目 |
+| `MatchedResultBlockValues` | 图鉴按主产物匹配条目 |
+| `MatchedRemainsBlockValues` | 图鉴按副产物匹配条目 |
 | `MatchedIngredientBlockValues` | 图鉴按原料匹配条目 |
 | `Project` | 触发动态配方链 |
 | `ActualIngredients` | 当前槽位快照 |

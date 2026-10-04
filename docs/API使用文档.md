@@ -55,14 +55,15 @@
 
 - 在配方里维护 `ValuesDictionary`。
 - 键名使用 **`RecipeExtraKeys`**（`RecipesExtra/RecipeExtraKeys.cs`），勿手写字符串。
-- 图鉴相关：`MatchedResultBlockValues` / `MatchedIngredientBlockValues`（见下表）。非方块产物语义由依赖模组自定 Extra 键。
+- 图鉴相关：`MatchedResultBlockValues` / `MatchedRemainsBlockValues` / `MatchedIngredientBlockValues`（见下表）。非方块产物语义由依赖模组自定 Extra 键。
 - `FormattedRecipe` 在 `PreTransformIngredients()` 末尾会自动写入 `MatchedIngredientBlockValues`。
 
 #### `RecipeExtraKeys` 约定键一览
 
 | 常量 | 值类型 | 用途 |
 |------|--------|------|
-| `MatchedResultBlockValues` | `int[]` | 图鉴方块产物 `BlockItem.Match` |
+| `MatchedResultBlockValues` | `int[]` | 图鉴方块主产物 `BlockItem.Match` |
+| `MatchedRemainsBlockValues` | `int[]` | 图鉴方块副产物 `BlockItem.Match`（仅当条目以副产物身份展示时） |
 | `MatchedIngredientBlockValues` | `int[]` | 图鉴方块原料 `BlockItem.IsIngredient` |
 | `Project` | `Project` | `FindMatchingRecipe<T>` 触发动态配方链 |
 | `ActualIngredients` | `int?[]` | 槽位方块快照；`IECraftingRecipe` / `IESmeltingRecipe` 等匹配 |

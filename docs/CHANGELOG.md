@@ -49,7 +49,11 @@
 
 ## [Unreleased]
 
-（暂无）
+### 新增
+- **副产物配方查询**：在图鉴 / 合成助手中点击条目的配方查询，若该条目「作为主产物(`Result`)」的配方数**不多于**「作为副产物(`Remains`)」的配方数，会把作为副产物的配方一并展示。用于救回「只能作为副产物获得」的材料（否则配方页为空），同时避免主产物配方充足的条目被副产物配方喧宾夺主。
+- **`RecipeExtraKeys.MatchedRemainsBlockValues`**（`int[]`）：新增副产物匹配 Extra 键，供非 `FormattedRecipe` 的自定义配方声明「可作为该配方副产物的方块」；`.cr` 与程序化加载器在配置 `Remains` 时自动写入。
+- **`IRecipaediaRecipeItem.MatchesAsResult(IRecipe)`**：新增默认接口方法，表示「仅主产物方向」的匹配（默认等同 `Match`，对旧实现无破坏）。搜索索引的 `RecipeCountAsResult` / `ResultBlockValues` 改用它，使 `@out:`、`#recipes` 仍只统计主产物，不受副产物展示影响。
+- **`BlockItem`** 新增 `MatchesAsResult` / `MatchesAsRemains`、`ResultRecipesCount` / `RemainsRecipesCount`、`IncludesRemainsRecipes` 公开成员。
 
 ---
 

@@ -6,6 +6,9 @@ namespace RecipaediaEX {
         /// <summary>图鉴产物条目 <c>Match</c>：可产出该配方的方块 <c>blockValue</c> 列表（<c>int[]</c>）。</summary>
         public const string MatchedResultBlockValues = "MatchedResultBlockValues";
 
+        /// <summary>图鉴副产物条目 <c>Match</c>（当条目以副产物身份展示时）：可作为该配方副产物 <c>Remains</c> 的方块 <c>blockValue</c> 列表（<c>int[]</c>）。</summary>
+        public const string MatchedRemainsBlockValues = "MatchedRemainsBlockValues";
+
         /// <summary>图鉴原料条目 <c>IsIngredient</c>：可作为原料的方块 <c>blockValue</c> 列表（<c>int[]</c>）。</summary>
         public const string MatchedIngredientBlockValues = "MatchedIngredientBlockValues";
 
