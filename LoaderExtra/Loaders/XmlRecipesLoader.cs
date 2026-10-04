@@ -78,6 +78,9 @@ namespace RecipaediaEX.Implementation {
             if (!string.IsNullOrEmpty(attributeValue2)) {
                 craftingRecipe.RemainsValue = CraftingRecipesManager.DecodeResult(attributeValue2);
                 craftingRecipe.RemainsCount = XmlUtils.GetAttributeValue<int>(item, "RemainsCount");
+                if (craftingRecipe.RemainsValue != 0) {
+                    craftingRecipe.SetExtraValue(RecipeExtraKeys.MatchedRemainsBlockValues, new int[] { craftingRecipe.RemainsValue });
+                }
             }
             craftingRecipe.RequiredHeatLevel = requiredHeatLevel;
             craftingRecipe.RequiredPlayerLevel = XmlUtils.GetAttributeValue(item, "RequiredPlayerLevel", 1f);
