@@ -84,6 +84,9 @@ namespace RecipaediaEX.Implementation {
             }
             craftingRecipe.RequiredHeatLevel = requiredHeatLevel;
             craftingRecipe.RequiredPlayerLevel = XmlUtils.GetAttributeValue(item, "RequiredPlayerLevel", 1f);
+            if (XmlUtils.GetAttributeValue<bool>(item, "DisplaysAsRemains", false)) {
+                craftingRecipe.SetExtraValue(RecipeExtraKeys.DisplaysAsRemains, true);
+            }
             craftingRecipe.Description = desc;
             craftingRecipe.Message = XmlUtils.GetAttributeValue<string>(item, "Message", null);
             craftingRecipe.DisplayOrder = XmlUtils.GetAttributeValue<int>(item, "DisplayOrder", 0);

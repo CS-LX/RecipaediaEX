@@ -11,26 +11,7 @@ namespace RecipaediaEX.Implementation {
         public int m_order;
         public Block m_block;
 
-        int? m_resultRecipesCount;
-        int? m_remainsRecipesCount;
-
-        /// <summary>该条目作为主产物(<c>Result</c>)出现的配方数。</summary>
-        public int ResultRecipesCount => m_resultRecipesCount ??= RecipaediaEXManager.Recipes.AsValueEnumerable().Count(MatchesAsResult);
-
-        /// <summary>该条目作为副产物(<c>Remains</c>)出现的配方数。</summary>
-        public int RemainsRecipesCount => m_remainsRecipesCount ??= RecipaediaEXManager.Recipes.AsValueEnumerable().Count(MatchesAsRemains);
-
-        /// <summary>
-        /// 是否把「作为副产物」的配方也纳入该条目的配方展示。
-        /// <para>仅当作为主产物的配方数不多于作为副产物的配方数时为真：</para>
-        /// <list type="bullet">
-        ///     <item><description>救回「只能作为副产物获得」的材料——它们作为主产物的配方数为 0，否则将看不到任何配方；</description></item>
-        ///     <item><description>避免主产物配方充足的条目被大量副产物配方喧宾夺主。</description></item>
-        /// </list>
-        /// </summary>
-        public bool IncludesRemainsRecipes => ResultRecipesCount <= RemainsRecipesCount;
-
-        /// <summary>该条目实际会展示的配方数（含符合条件的副产物配方）。</summary>
+        /// <summary>该条目实际会展示的配方数（含被配方自身放行的副产物配方）。</summary>
         public int RecipesCount => RecipaediaEXManager.Recipes.AsValueEnumerable().Count(Match);
 
         public BlockItem(Block block, int order, int blockValue) {
@@ -137,10 +118,21 @@ namespace RecipaediaEX.Implementation {
         public string DetailsButtonText => LanguageControl.Get("ContentWidgets", nameof(RecipaediaScreen), "1");
 
 
+        /// <summary>
+        /// 该条目是否展示某配方。
+        /// <para>默认只认主产物(<c>Result</c>)方向；副产物(<c>Remains</c>)方向**默认不展示**，
+        /// 必须由配方自身通过 <see cref="IRecipe.DisplaysAsRemains"/> 显式放行（缺省 <c>false</c>）。
+        /// 原版配方一条都不放行，因此只有模组专门标记的副产物配方才会出现，不会喧宾夺主。</para>
+        /// </summary>
         public bool Match(IRecipe recipe) {
             if (MatchesAsResult(recipe)) return true;
-            // 只有当该条目「作为副产物」的配方不少于「作为主产物」的配方时，才把副产物配方一并展示。
-            return IncludesRemainsRecipes && MatchesAsRemains(recipe);
+            try {
+                return recipe.DisplaysAsRemains() && MatchesAsRemains(recipe);
+            }
+            catch (Exception ex) {
+                Engine.Log.Error("BlockItem.Match error, probably because the problem of IRecipe.DisplaysAsRemains(): " + ex);
+                return false;
+            }
         }
 
         /// <summary>
