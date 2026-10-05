@@ -63,7 +63,7 @@
 | 常量 | 值类型 | 用途 |
 |------|--------|------|
 | `MatchedResultBlockValues` | `int[]` | 图鉴方块主产物 `BlockItem.Match` |
-| `MatchedRemainsBlockValues` | `int[]` | 图鉴方块副产物匹配（需配方以 `DisplaysAsRemains` 放行后才参与 `BlockItem.Match`） |
+| `MatchedRemainsBlockValues` | `int[]` | 图鉴方块副产物匹配（**必须**由配方以 `DisplaysAsRemains` 放行后才参与 `BlockItem.Match`，无隐式兜底） |
 | `DisplaysAsRemains` | `bool` | 配方是否允许以副产物身份展示，缺省 `false`；`IRecipe.DisplaysAsRemains()` 默认读取本键 |
 | `MatchedIngredientBlockValues` | `int[]` | 图鉴方块原料 `BlockItem.IsIngredient` |
 | `Project` | `Project` | `FindMatchingRecipe<T>` 触发动态配方链 |

@@ -18,6 +18,7 @@
 
 - `DisplayOrder`：图鉴排序。
 - `MatchPriority`：匹配优先级。
+- `IngredientsCount`：配方非空原料格数（默认 `0`），用于图鉴排序中 `DisplayOrder` 并列时的判定（原料多者在前）。
 - `Match(IRecipe actual)`：判断“实际输入”是否匹配该配方。
 - `GetExtraValue<T>` / `SetExtraValue<T>`：读写扩展数据。
 

@@ -120,8 +120,9 @@ namespace RecipaediaEX.Implementation {
 
         /// <summary>
         /// 该条目是否展示某配方。
-        /// <para>默认只认主产物(<c>Result</c>)方向；副产物(<c>Remains</c>)方向需配方自身通过
-        /// <see cref="IRecipe.DisplaysAsRemains"/> 显式放行（默认不放行），以免喧宾夺主。</para>
+        /// <para>默认只认主产物(<c>Result</c>)方向；副产物(<c>Remains</c>)方向**默认不展示**，
+        /// 必须由配方自身通过 <see cref="IRecipe.DisplaysAsRemains"/> 显式放行（缺省 <c>false</c>）。
+        /// 原版配方一条都不放行，因此只有模组专门标记的副产物配方才会出现，不会喧宾夺主。</para>
         /// </summary>
         public bool Match(IRecipe recipe) {
             if (MatchesAsResult(recipe)) return true;

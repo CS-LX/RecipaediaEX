@@ -50,13 +50,14 @@
 ## [Unreleased]
 
 ### 新增
-- **副产物配方查询（默认关闭，可按配方放行）**：在图鉴 / 合成助手中点击条目的配方查询，**默认只展示该条目作为主产物(`Result`)的配方**；作为副产物(`Remains`)的配方，只有配方自身显式放行时才会一并展示。用于让「只能作为副产物获得」的材料按模组意愿救回（否则配方页为空），默认又不会让主产物配方被副产物配方喧宾夺主。
+- **副产物配方查询（严格默认关闭，仅按配方放行）**：在图鉴 / 合成助手中点击条目的配方查询，**默认只展示该条目作为主产物(`Result`)的配方**；作为副产物(`Remains`)的配方，**只有配方自身显式放行时才展示，没有任何隐式兜底**。原版配方一条都不放行，因此不会出现「一堆返还物配方」的情况。
 - **`IRecipe.DisplaysAsRemains()`**：新增默认接口方法，决定「某配方是否允许以副产物身份展示」，缺省 `false`（默认实现读取 Extra 键 `RecipeExtraKeys.DisplaysAsRemains`）。自定义配方可重写本方法自行判定，也可直接 `SetExtraValue`；`.cr` 配方可在 `<Recipe>` 上写 `DisplaysAsRemains="true"` 开启。
 - **`RecipeExtraKeys.MatchedRemainsBlockValues`**（`int[]`）：新增副产物匹配 Extra 键，供非 `FormattedRecipe` 的自定义配方声明「可作为该配方副产物的方块」；`.cr` 与程序化加载器在配置 `Remains` 时自动写入。
 - **`RecipeExtraKeys.DisplaysAsRemains`**（`bool`）：配方是否允许以副产物身份展示，缺省 `false`。
 - **`IRecipaediaRecipeItem.MatchesAsResult(IRecipe)`**：新增默认接口方法，表示「仅主产物方向」的匹配（默认等同 `Match`，对旧实现无破坏）。搜索索引的 `RecipeCountAsResult` / `ResultBlockValues` 改用它，使 `@out:`、`#recipes` 仍只统计主产物，不受副产物展示影响。
 - **`BlockItem`** 新增 `MatchesAsResult` / `MatchesAsRemains` 公开成员；`Match` 现为 `MatchesAsResult(recipe) || (recipe.DisplaysAsRemains() && MatchesAsRemains(recipe))`。
-- **配方列表排序**：新增 `RecipaediaRecipeSorter`，统一图鉴配方页、合成助手预览、原料格子 / 合成方块按钮点击后的配方列表顺序——**先主产物(`Result`)配方，再副产物(`Remains`)配方**，同组内按 `IRecipe.DisplayOrder` 升序。`RecipaediaOverlayRecipeResolver.BuildCrafterGroups` 新增 `item` 参数以在按合成场所分组时保持同一排序。
+- **配方列表排序**：新增 `RecipaediaRecipeSorter`，统一图鉴配方页、合成助手预览、原料格子 / 合成方块按钮点击后的配方列表顺序——**主产物(`Result`)配方在前、副产物(`Remains`)配方在后**，同组内按 `IRecipe.DisplayOrder` 升序，`DisplayOrder` 并列时**原料多的配方在前**（对齐原版 `CraftingRecipesManager` 的排序规则，如「用铜锭合成桶」排在「把桶倒空」前）；完全并列的配方保持原顺序（稳定排序）。`RecipaediaOverlayRecipeResolver.BuildCrafterGroups` 新增 `item` 参数以在按合成场所分组时保持同一排序。
+- **`IRecipe.IngredientsCount`**：新增默认接口方法，返回配方非空原料格数（缺省 `0`，`FormattedRecipe` 已实现真实计数）。仅用于上述展示排序的并列判定。
 
 ---
 

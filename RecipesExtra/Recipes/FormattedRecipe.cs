@@ -39,6 +39,19 @@ namespace RecipaediaEX.Implementation {
         public int DisplayOrder = 0;
         int IRecipe.DisplayOrder => DisplayOrder;
 
+        /// <summary>
+        /// 该配方所需原料格数（非空原料计数），用于展示排序的并列判定。
+        /// </summary>
+        public virtual int IngredientsCount {
+            get {
+                int count = 0;
+                foreach (string ingredient in Ingredients) {
+                    if (!string.IsNullOrEmpty(ingredient)) count++;
+                }
+                return count;
+            }
+        }
+
         public virtual bool MatchIngredientsOnly(IRecipe actual) {
             if (actual is not FormattedRecipe formattedRecipe) return false;
             return TransformedIngredients.AsValueEnumerable().Any(

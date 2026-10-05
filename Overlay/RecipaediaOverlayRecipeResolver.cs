@@ -43,7 +43,7 @@ namespace RecipaediaEX.Overlay {
 
             List<RecipaediaCrafterRecipeGroup> groups = [.. groupsByCrafterId.Values];
             foreach (RecipaediaCrafterRecipeGroup group in groups) {
-                group.Recipes.Sort((a, b) => RecipaediaRecipeSorter.CompareForDisplay(item, a, b));
+                RecipaediaRecipeSorter.OrderForDisplay(group.Recipes, item);
             }
 
             string hostCrafterId = context.CrafterBlockValue != 0
