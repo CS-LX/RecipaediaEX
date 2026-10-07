@@ -53,7 +53,7 @@
 
 ---
 
-## [2.0.0.2] — 2026-10-04
+## [2.0.0.2] — 2026-10-07
 
 **对比基准：** `2.0.0.1`（Git 标签 `v2.0.0.1`）→ `2.0.0.2`（Git 标签 `v2.0.0.2`）
 
@@ -77,12 +77,13 @@
 
 1. 使用宿主 API `1.9.3.1`；依赖本版新增能力的内容模组应将 `com.recipaediaex` 的依赖版本下限对齐到 `2.0.0.2`。
 2. 现有 `IRecipaediaRecipeItem` 实现无需新增方法，默认 `MatchesAsResult` 委托原 `Match`；自定义主 / 副产物语义的条目可分别实现这两个判定。
-3. 非 `FormattedRecipe` 配方若需支持方块副产物查询，应提供 `MatchedRemainsBlockValues`。原版格式配方可直接使用 `RemainsValue`。
+3. 副产物查询默认关闭；配方需通过 `DisplaysAsRemains()` 返回 `true`，或设置同名 Extra 为 `true` 显式开启。非 `FormattedRecipe` 配方还应提供 `MatchedRemainsBlockValues`；原版格式配方可直接使用 `RemainsValue`。
+4. 直接调用 `RecipaediaOverlayRecipeResolver.BuildCrafterGroups` 的内容模组须新增所查询条目的 `item` 参数，并重新编译。
 
 ### 已知问题
 
 - 与工业时代 2 同装时，旧的自定义图鉴快捷键或禁用设置可能被默认 `X` 遮蔽；升级后可在按键设置中重新绑定或禁用。
-- 原版合成 / 熔炼配方页尚未显示副产物图标与数量；按副产物查询到配方后，页面仍只展示主产物。
+- 原版合成 / 熔炼配方页尚未显示副产物图标与数量；模组显式开启副产物查询后，页面仍只展示主产物。原版配方默认不开放副产物查询。
 
 ---
 
