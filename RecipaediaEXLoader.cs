@@ -43,11 +43,14 @@ namespace RecipaediaEX
         }
 
         public override void BlocksInitalized() {
+            // 方块表刚重建，AdHoc 候选方块缓存必须失效，否则新方块不会参与 AdHoc 配方匹配。
+            Implementation.AdHocRecipeLoader.InvalidateCandidates();
             RecipesCrafterManager.Initialize();
         }
 
         public override void GuiUpdate(ComponentGui componentGui) {
             base.GuiUpdate(componentGui);
+            RecipeMatchPipeline.TickDiagnostics();
             RecipaediaOverlayInput.HandleRecipaediaKey(componentGui);
         }
 
